@@ -27,20 +27,8 @@ static settinge_value_type cmb_value_str_to_enum(cJSON *value_type_item){
 // editor_settings/settings_items.jsonを読み込み、設定画面の項目配列へ追加する。
 // 引数: settings_screen_data=項目配列と件数を保持する設定画面データ。 返り値: 成功時0、ファイル・JSON・必須項目・メモリ確保の失敗時-1。 所有権: nameとexplanationを複製し、追加成功後はsettings_screen_dataが所有する。
 int load_settings_screen_items(settings_screen_data *settings_screen_data){
-    const char *file_name = "editor_settings/settings_items.json";
-    char exe_dir_path[PATH_MAX];
-    const char *path = NULL;
-
-    if(access(file_name,R_OK) == 0){
-        path = file_name;
-    }
-    else if(editor_path_from_exe_dir(exe_dir_path,sizeof(exe_dir_path),file_name) != NULL &&
-            access(exe_dir_path,R_OK) == 0){
-        path = exe_dir_path;
-    }
-    else{
-        return -1;
-    }
+    char path[PATH_MAX];
+    if(editor_path_from_exe_dir(path,sizeof(path),SETTINGS_ITEMS_PATH) == NULL)return -1;
 
     char *buf = read_file_all(path);
     if(buf == NULL)return -1;

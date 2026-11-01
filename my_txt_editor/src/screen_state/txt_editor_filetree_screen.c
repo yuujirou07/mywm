@@ -2,7 +2,7 @@
 #include <ncurses.h>
 #include<stdlib.h>
 #include "editor_types.h"
-#include "error_log.h"
+#include "editor_log.h"
 #include "filetree.h"
 #include "ftj.h"
 #include "txt_editor.h"
@@ -75,14 +75,20 @@ void show_filetree(struct editor_input_context *ctx,struct box ft_box){
     state->file_tree_data.is_show = true;
 
     if(state->settings_data->show_status_bar){
+        //ステータスバーが上または下に設定されている場合ファイルツリーと重なってしまうため、
+        // ステータスバーのボックスデータを重ならない大きさに変更する
+        //(左右にステータスバーを設置する機能は実装していない)
         if(state->settings_data->bar_side_state == top ||
             state->settings_data->bar_side_state == bottom){
             int x = getmaxx(stdscr);
+            //ステータスバーの範囲変更
             struct box tmp_status_bar_box =
                 {(struct pos){ft_box.pos.x + ft_box.w,state->status_bar->pos.y},
                 x - (ft_box.pos.x + ft_box.w),
                 state->status_bar->h};
+            //変更前の枠を消す
             clear_status_bar_outline(state);
+
             set_status_bar_size(ctx,tmp_status_bar_box);
             state->render_flags |= RENDER_STATUS_BAR_LINE;
         }

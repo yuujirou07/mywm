@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <bits/types/idtype_t.h>
+#include <linux/limits.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <ncurses.h>
@@ -18,6 +19,8 @@
 #include <limits.h>
 #include<unistd.h>
 #include<sys/epoll.h>
+
+
 #include "c_settings.h"
 #include "ascii_art_comb.h"
 #include "default_settings.h"
@@ -28,7 +31,7 @@
 #include "public_data/c_settings/c_settings_setting.h"
 #include "txt_editor.h"
 #include "txt_editor_screen.h"
-#include"error_log.h"
+#include"editor_log.h"
 #include"path_util.h"
 #include "txt_editor_icon.h"
 #include"txt_editor_syntax.h"
@@ -47,21 +50,29 @@ int main(int argc, char *argv[])
 
     struct timespec startup_start_time;
     clock_gettime(CLOCK_MONOTONIC, &startup_start_time);
-
     bool startup_timer = 0;
-    set_error_log_file("my_editor_error_log.txt");
+
+
+    //エラーログ履歴ファイルのパス設定(my_txt_editor/直下からの相対パス)
+    //エラーログが作れない場合終了する
+    if(set_error_log_file(EDITOR_LOG_DIR EDITOR_ERROR_LOG_FILE_NAME) < 0){
+        wrp_stderr_puts("can not set error log file");
+        return EXIT_SUCCESS;
+    }
+    if(set_log_file(EDITOR_LOG_DATA) != 0){
+        return EXIT_SUCCESS;
+    }
+
   
 
     bool mylsp = false;
+    //引数解析
     if(argc > startuptime_log_file_argument_num){
-        int result = strcmp(argv[startuptime_log_file_argument_num],"startuptime_log.log");
+        int result = strcmp(argv[startuptime_log_file_argument_num],"sttime");
 
         if(result == 0){
-            int st_up_ag_num = startuptime_log_file_argument_num;
-            int startuptime_log_file_name_size = strlen(argv[st_up_ag_num]);
-            if((int)sizeof(startuptime_log_file_path_name) > startuptime_log_file_name_size){
-                memcpy(startuptime_log_file_path_name,argv[st_up_ag_num],startuptime_log_file_name_size);
-                startuptime_log_file_path_name[startuptime_log_file_name_size] = '\0';
+            if(editor_path_from_exe_dir(startuptime_log_file_path_name,sizeof(startuptime_log_file_path_name),
+                        EDITOR_LOG_DIR "startuptime_log.log") != NULL){
                 startup_timer = 1;
             }
             else{
@@ -86,7 +97,7 @@ int main(int argc, char *argv[])
     input_context.state = &state;
     struct box status_bar;
     MEVENT mouse_event;
-    WINDOW *win;
+    WINDOW *win = NULL;
 
    //カスタム設定のバグになる値を検出する関数の設置
     init_settings_data(&input_context);
@@ -95,8 +106,7 @@ int main(int argc, char *argv[])
     // 危険: initscr()以降の失敗returnでendwin()を呼ばない経路が複数ある。
     // その経路では端末がraw/noecho相当の状態に残る可能性がある。
     win = initscr();
-    if (win == NULL)
-        return 1;
+
 
     cbreak();
     noecho();
@@ -147,11 +157,11 @@ int main(int argc, char *argv[])
 
     input_context.ask_make_file_mode.screen_center_y =  state.scr.scr_size.y / 2;
 
-    input_context.key_mapp_list.key_map_allocate_num  = 16;
-    input_context.key_mapp_list.key_map_num = 0;
-    input_context.key_mapp_list.key_mapp_list =
-        malloc(sizeof(settings_key_mapps) * input_context.key_mapp_list.key_map_allocate_num);
-    if(input_context.key_mapp_list.key_mapp_list == NULL){
+    input_context.input_manager.key_maps.key_map_allocate_num  = 16;
+    input_context.input_manager.key_maps.key_map_num = 0;
+    input_context.input_manager.key_maps.key_mapp_list =
+        malloc(sizeof(key_map_data) * input_context.input_manager.key_maps.key_map_allocate_num);
+    if(input_context.input_manager.key_maps.key_mapp_list == NULL){
         error_log("malloc");
     }
 
@@ -172,10 +182,6 @@ int main(int argc, char *argv[])
     state.edit_input_complete_data.box.w = 
         settings_data.auto_complete_settings_data.auto_complete_window_size.x;
 
-
-
-
-
     
     my_cur_set(&state,true);
     raw();
@@ -183,6 +189,7 @@ int main(int argc, char *argv[])
     mouseinterval(0); // クリックの判定待ちを最小にして、ダブルクリックを待たず即反応させる。
     mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);  
     
+
     // ファイルブラウザ初期ディレクトリの絶対パスを取得する。
     if(getcwd(state.file_browse.path_name, sizeof(state.file_browse.path_name)) == NULL) {
         perror("getcwd");
@@ -285,32 +292,28 @@ int main(int argc, char *argv[])
 
     void *handle = NULL;
     //スタートメニュー表示判定
-
     Start_Menu start_menu = NULL;
     bool open_start_menu = state.settings_data->show_start_menu;
     // スタートメニューは共有ライブラリ(プラグイン)として実行時に読み込む。
     if(state.settings_data->show_start_menu){
-        const char *plugin_name = "so_file/start_menu_plug.so";
-        handle = dlopen(plugin_name, RTLD_NOW);
+        char plugin_path[PATH_MAX];
+        if(editor_path_from_exe_dir(plugin_path, sizeof(plugin_path), START_MENU_SO_PATH) != NULL){
+            handle = dlopen(plugin_path, RTLD_NOW);
+        }
+        //スタートメニューsoファイルが見つからないならエラーを出す
         if(handle == NULL){
-            // カレントディレクトリから見つからないときは実行ファイルの隣を探す
-            char plugin_path[PATH_MAX];
-            if(editor_path_from_exe_dir(plugin_path, sizeof(plugin_path), plugin_name) != NULL){
-                handle = dlopen(plugin_path, RTLD_NOW);
+            editor_error_screen(&state,"can not load start menu data");
+            error_log_write("sry can not open so file :(\n"); 
+        }
+        if(handle != NULL){
+            start_menu = (Start_Menu)dlsym(handle,"draw_start_menu");
+            if(start_menu == NULL){
+                error_log_write("dlsym failed\n");
+                dlclose(handle);
+                end_process(&state);
+                
+                return 1;
             }
-        }
-        if(handle == NULL){
-            error_log_write("sry can not open so file :(\n");
-            end_process(&state);
-            return 1;
-        }
-        start_menu = (Start_Menu)dlsym(handle,"draw_start_menu");
-        if(start_menu == NULL){
-            error_log_write("dlsym failed\n");
-            dlclose(handle);
-            end_process(&state);
-            
-            return 1;
         }
     }
     
@@ -390,25 +393,40 @@ int main(int argc, char *argv[])
     input_context.state->key_bord_data.Key_log_data.key_allocate_num = 0;
     input_context.state->key_bord_data.Key_log_data.key_count  = 0;
     input_context.state->key_bord_data.Key_log_data.key_log  = NULL;
-    KL_open_key_log_file("log_data/key_event.log");
+
+    if(KL_open_key_log_file(KEY_EVENT_LOG_PATH) != 0){
     
-    input_context.dl_data.now_loading_lib_allocate_num = 8;
-    input_context.dl_data.now_loading_lib_num = 0;
-    input_context.dl_data.now_loading_dynamic_lib = 
-        malloc(sizeof(void *) * input_context.dl_data.now_loading_lib_allocate_num);
+    }
+    
+
+    //設定プログラムファイルロード　
+    if(state.settings_data->editor_settings_program.enabled){
+        input_context.dl_data.loading_dynamic_lib = NULL;
+        input_context.dl_data.now_loading_lib_allocate_num = 0;
+        input_context.dl_data.now_loading_lib_num = 0;
+
+        if(state.settings_data->editor_settings_program.root_src_path != NULL){
+            //dlファイルパス設定
+            add_dl_path(
+                &input_context,
+                state.settings_data->editor_settings_program.root_src_path
+            );
+
+            init_settings_src(&input_context.editor_api,&input_context);
+        }   
+
+    }
     
     
     int load_icon_rt = 0;
+    
     load_icon_rt = 
-        load_icon_data("/home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/editor_icon_settings.json",
+        load_icon_data(ICON_SETTINGS_PATH,
                 &settings_data.icon_data);
 
     if(load_icon_rt != 0){
         error_log("can not load icon data");
     }
-
-    MY_TXT_EDITOR_API settings_api;
-    init_settings_src(&settings_api,&input_context);
 
 
     char *now_dir = getcwd(NULL,0);
@@ -442,8 +460,12 @@ int main(int argc, char *argv[])
         }
         
         //補完候補があるか確認し、あれば補完ウィンドウを有効にする
+
+        //補完機能が有効か
         if(state.settings_data->auto_complete_settings_data.auto_complete_enabled){
+            //補完ウィンドウの表示フラグがたっているか
             if(state.edit_input_complete_data.show){
+                //補完ウィンドウ表示フラグがたっているのに補完候補が0ならバグとして認識し、補完ウィンドウ表示フラグをfalseに戻す
                 if(state.edit_input_complete_data.comp_world_candidacy_part_data.comp_w_cand_part_d_count <= 0){
                     state.edit_input_complete_data.show = false;
                 }
@@ -464,9 +486,10 @@ int main(int argc, char *argv[])
             is_cur_hide = true;
             refresh();
         }
-
-        
+    
+        //画面更新元(この関数外では画面を更新しない)
         update_screen(&input_context);
+        
         if(editor_get_screen_state(&state) == edit_screen || 
             editor_get_screen_state(&state) == filetree_screen){
                 
@@ -481,6 +504,7 @@ int main(int argc, char *argv[])
 
         if(is_cur_hide){
             my_cur_set(&state,true);
+            editor_log_msg("h");
         }
 
 
@@ -488,7 +512,7 @@ int main(int argc, char *argv[])
         
         //キーログスタックに追加する
         if(state.settings_data->key_log_settings.use_key_log){
-            if(input_result == OK && iswalnum(ch)){
+            if((input_result == OK && iswalnum(ch)) || ch == KEY_MOUSE){
                 KL_add(
                     &state,
                     ch,
@@ -498,15 +522,16 @@ int main(int argc, char *argv[])
             }
         }
 
+        //ユーザイベント確認
+        if(state.settings_data->editor_settings_program.enabled){
+            check_user_settings_event(&input_context);
+            
+        }
 
         
-        size_t n = 0;
-        KL_GetScreenLog(edit_screen,&state,NULL,&n);
-        if(n > 0){
-        
-        }
-    
         if (input_result == ERR)continue;
+
+        //リサイズイベント
         if (input_result == KEY_CODE_YES && ch == KEY_RESIZE) {
             handle_resize(win, &input_context);
             // 画面寸法が変わると表示範囲が変わるため、構文情報を全再計算する。
@@ -545,11 +570,14 @@ int main(int argc, char *argv[])
     if(handle != NULL){
         dlclose(handle);
     }
-    free(input_context.key_mapp_list.key_mapp_list);
-    for(int i = 0;i < input_context.dl_data.now_loading_lib_num;i++){
-        dlclose(input_context.dl_data.now_loading_dynamic_lib[i]);
+
+
+    if(state.settings_data->editor_settings_program.root_src_path != NULL){
+        free(state.settings_data->editor_settings_program.root_src_path);
     }
-    free(input_context.dl_data.now_loading_dynamic_lib);
+
+    free(input_context.input_manager.key_maps.key_mapp_list);
+    destroy_dl_path(&input_context);
     if(epfd >= 0)
         close(epfd);
     lsp_close_server(&lsp);
@@ -558,6 +586,7 @@ int main(int argc, char *argv[])
     fputs(CURSOR_SHAPE[CURSOR_DEFAULT_MODE],stdout);
     fflush(stdout);
 
+
     return 0;
 }
 
@@ -565,7 +594,6 @@ int main(int argc, char *argv[])
 // stateの行・本文・設定項目・アイコン用メモリとログを解放し、端末表示を終了する。
 // 返り値: なし。stateとその参照先は初期化済みであること。
 static void end_process(struct editor_state *state){
-    clear();
     free(state->file_data.file_str_data);
     free(state->file_data.file_line_start_num);
     free(state->str.chr_file_all_str_data);
@@ -586,6 +614,8 @@ static void end_process(struct editor_state *state){
     editor_free_text_buffer(state);
 
     close_error_log_file();
+    clear();
+    refresh();
     endwin();
 }
 

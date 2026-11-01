@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <wchar.h>
 #include <wctype.h>
-#include "error_log.h"
+#include "editor_log.h"
 #include "txt_editor.h"
 #include "txt_editor_screen.h"
 #include "txt_editor_syntax.h"
@@ -266,18 +266,17 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
             int table_rows = file_browse->dir_name_table_rows;
             struct dir_table table[table_rows];
             int men_num = check_dir_mem(table,table_rows);
-            if(men_num >= 0){
+            if(men_num > 0){
                 file_browse->dir_num = men_num;
                 file_browse->dir_name_table_num = men_num;
                 file_browse->select_line.now_logical_line = 0;
-                if(men_num > 0 &&
-                   (file_browse->select_line.now_line < 0 ||
+                
+                if((file_browse->select_line.now_line < 0 ||
                     file_browse->select_line.now_line >= men_num)){
                     set_file_select_line(state,file_browse->dir_name_table_num,0);
                 }
                 for(int i = 0; i < table_rows;i++){
                     if(i < men_num){
-
                         snprintf(file_browse->dir_name_table[i].name,
                             sizeof(file_browse->dir_name_table[i].name),
                             "%s",table[i].d_name);

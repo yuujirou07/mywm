@@ -23,6 +23,7 @@ int update_screen_ratio(struct editor_input_context *ctx);
 void restore_edit_screen(struct editor_state *state);
 int set_status_bar_size(struct editor_input_context *ctx,struct box box);
 
+int file_save_motion(struct editor_input_context *ctx);
 
 
 #endif

@@ -48,18 +48,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
         return true;
     }
     else if(ch == CTRL('s')){
-        // 編集位置はstate->cursorが持ち続けるため、画面を離れる前の退避は不要。
-        save_file(state);
-        flushinp();
-        if(editor_get_screen_state(state) == ask_make_file_mode){
-            show_make_file_prompt(
-                win,
-                state,
-                &state->ask_make_file_box,
-                ctx->ask_make_file_mode.screen_center_y,
-                ctx->ask_make_file_mode.screen_center_pos
-            );
-        }
+        file_save_motion(ctx);
         return true;
     }
     else if(ch == CTRL('n')){

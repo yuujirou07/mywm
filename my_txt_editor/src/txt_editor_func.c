@@ -10,7 +10,7 @@
 #include <wctype.h>
 #include "default_settings.h"
 #include "editor_types.h"
-#include "error_log.h"
+#include "editor_log.h"
 #include "filetree.h"
 #include "ftj.h"
 #include "input_complete.h"
@@ -1029,3 +1029,4 @@ int SetCursorColor(struct editor_state *state,CURSOR_COLOR color){
     fflush(stdout);
     return 0;
 }
+

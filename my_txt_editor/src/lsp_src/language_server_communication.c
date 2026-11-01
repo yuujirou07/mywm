@@ -12,7 +12,7 @@
 #include<cjson/cJSON.h>
 #include "lsp_src/language_server_communication.h"
 #include "txt_editor.h"
-#include "error_log.h"
+#include "editor_log.h"
 
 #define LSP_INVALID_FD (-1) // 言語サーバーとのパイプが未接続であることを表す値。
 #define LSP_HEADER_MAX 8192 // 受信するLSPヘッダーの最大バイト数。
@@ -445,8 +445,14 @@ void set_lsp_use_language(struct lsp_process *lsp,char *language){
         return;
     }
 
-    snprintf(lsp->lsp_language_id, sizeof(lsp->lsp_language_id),
-         "%s", language);
+    snprintf(
+        lsp->lsp_language_id,
+        language_name_size,
+        "%.31s",//31バイトに制限する
+        language
+        );
+
+    return;
 }
 
 // 文書を開いたことと全文をLSPサーバへ通知する。

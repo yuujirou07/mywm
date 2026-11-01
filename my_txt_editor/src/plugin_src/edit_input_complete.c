@@ -6,7 +6,7 @@
 #include <wctype.h>
 #include "default_settings.h"
 #include "editor_types.h"
-#include "error_log.h"
+#include "editor_log.h"
 #include"input_complete.h"
 #include"txt_editor.h"
 

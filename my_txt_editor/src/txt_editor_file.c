@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include<dirent.h>
 #include<sys/stat.h>
-#include "error_log.h"
+#include "editor_log.h"
 #include "txt_editor.h"
 #include "txt_editor_screen.h"
 #include "json_read.h"
@@ -710,6 +710,10 @@ void load_default_editor_settings(struct editor_settings *settings_data){
     settings_data->settings_lang                = DEFAULT_SETTINGS_LANGUAGE;
     settings_data->key_log_settings.use_key_log = DEFAULT_USE_KEY_LOG;
     settings_data->key_log_settings.key_log_buffer_size = DEFAULT_KEY_LOG_BUFFER_SIZE;
+    snprintf(settings_data->lsp.lsp_language,sizeof(settings_data->lsp.lsp_language),"%s",DEFAULT_LSP_LANGUAGE);
+    settings_data->editor_settings_program.enabled      = DEFAULT_EDITOR_SETTINGS_PROGRAM_ENABLED;
+    settings_data->editor_settings_program.language     = DEFAULT_EDITOR_SETTINGS_PROGRAM_LANGUAGE;
+    settings_data->editor_settings_program.root_src_path = NULL;
 }
 
 // 現在の選択行をprevious_lineに保存し、新しい選択行を設定する。
@@ -746,11 +750,11 @@ const wchar_t *now_open_path_name(struct dir_table *path,enum flags flags){
     static wchar_t wide_path[PATH_MAX]; // now_open_path.path_nameを変換した返値用バッファ。
     if(flags == set){
         size_t path_size = strlen(path->path_name);
-        const char *name_end = path->path_name + path_size;
+        char *name_end = path->path_name + path_size;
         while(name_end > path->path_name + 1 && name_end[-1] == '/'){
             name_end--;
         }
-        const char *name_start = name_end;
+        char *name_start = name_end;
         while(name_start > path->path_name && name_start[-1] != '/'){
             name_start--;
         }
@@ -878,7 +882,7 @@ enum select_state get_path_state(const char *path){
     else return unkown;
 }
 
-// パス入力欄の完成済みパスを開き、種類に応じて画面状態を更新する。
+// パス入力欄の完成済みパスを開き、種類(ファイルやディレクトリ)に応じて画面状態を更新する。
 // 引数: state=読込先の編集状態、ctx=ファイルブラウザと描画状態を持つ入力context。 返り値: 成功時0、引数不正・判定失敗時-1。完成パスが無い場合はtrue。
 int now_input_path_open(struct editor_state *state,struct editor_input_context *ctx){
     if(state == NULL || ctx == NULL)return -1;

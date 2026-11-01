@@ -39,14 +39,181 @@
 #define DEFAULT_USE_KEY_LOG true
 #define DEFAULT_KEY_LOG_BUFFER_SIZE 2048
 
+#define DEFAULT_LSP_LANGUAGE "" // 起動対象の言語サーバー名の既定値。空なら未指定。
+#define DEFAULT_EDITOR_SETTINGS_PROGRAM_ENABLED true // 設定プログラムを使う既定値。
+#define DEFAULT_EDITOR_SETTINGS_PROGRAM_LANGUAGE editor_settings_program_lang_UNKNOWN // 設定プログラムの言語の既定値。
+
+
+
+// JSONオブジェクトごとのキー文字列。SETTINGS_JSON_KEY_STR[オブジェクト][キー]で引く。
+typedef enum{
+    JSON_OBJ_ROOT = 0,
+    JSON_OBJ_BUFFER = 1,
+    JSON_OBJ_DISPLAY = 2,
+    JSON_OBJ_EDITOR = 3,
+    JSON_OBJ_AUTO_COMPLETE = 4,
+    JSON_OBJ_WINDOW = 5,
+    JSON_OBJ_KEY_LOG = 6,
+    JSON_OBJ_LSP = 7,
+    JSON_OBJ_EDITOR_SETTINGS_PROGRAM = 8,
+    JSON_OBJ_NUM = 9,
+}settings_json_obj;
+
+typedef enum{
+    ROOT_KEY_BUFFER = 0,
+    ROOT_KEY_DISPLAY = 1,
+    ROOT_KEY_EDITOR = 2,
+    ROOT_KEY_AUTO_COMPLETE = 3,
+    ROOT_KEY_KEY_LOG = 4,
+    ROOT_KEY_SETTINGS_LANGUAGE = 5,
+    ROOT_KEY_LSP = 6,
+    ROOT_KEY_SETTINGS_PROGRAM = 7,
+}settings_root_key;
+
+typedef enum{
+    BUFFER_KEY_MAX_LINES = 0,
+    BUFFER_KEY_MAX_LINE_SIZE = 1,
+    BUFFER_KEY_DEFAULT_LOAD_LINE_SIZE = 2,
+    BUFFER_KEY_LOAD_BUFFER_LINES = 3,
+}settings_buffer_key;
+
+typedef enum{
+    DISPLAY_KEY_LINE_NUMBER_SPACE = 0,
+    DISPLAY_KEY_SHOW_STATUS_BAR = 1,
+    DISPLAY_KEY_STATUS_BAR_SIDE = 2,
+    DISPLAY_KEY_DRAW_SPLIT_LINE = 3,
+    DISPLAY_KEY_SHOW_START_MENU = 4,
+    DISPLAY_KEY_USE_ICON = 5,
+}settings_display_key;
+
+typedef enum{
+    EDITOR_KEY_INDENT_RANGE = 0,
+    EDITOR_KEY_JMP_SET_CUR_POS = 1,
+    EDITOR_KEY_BUILT_IN_SYNTAX = 2,
+    EDITOR_KEY_AUTO_COMPLETE = 3,
+}settings_editor_key;
+
+typedef enum{
+    AUTO_COMPLETE_KEY_ENABLED = 0,
+    AUTO_COMPLETE_KEY_WINDOW = 1,
+}settings_auto_complete_key;
+
+typedef enum{
+    WINDOW_KEY_SHOW = 0,
+    WINDOW_KEY_WIDTH = 1,
+    WINDOW_KEY_HEIGHT = 2,
+    WINDOW_KEY_POSITION_MODE = 3,
+}settings_window_key;
+
+typedef enum{
+    KEY_LOG_KEY_ENABLED = 0,
+    KEY_LOG_KEY_BUFFER_SIZE = 1,
+}settings_key_log_key;
+
+typedef enum{
+    LSP_KEY_LAUNCH_STARTUP_EDITOR = 0,
+    LSP_KEY_EPOLL_TIMEOUT_MS = 1,
+}settings_lsp_key;
+
+typedef enum{
+    EDITOR_SETTINGS_PROGRAM_ENABLED  = 0,
+    EDITOR_SETTINGS_PROGRAM_LANGUAGE = 1,
+    EDITOR_SETTINGS_PROGRAM_ROOT_SRC_PATH = 2,
+}editor_settings_program;
+
+static const char *const SETTINGS_ROOT_KEY_STR[] = {
+    [ROOT_KEY_BUFFER] = "buffer",
+    [ROOT_KEY_DISPLAY] = "display",
+    [ROOT_KEY_EDITOR] = "editor",
+    [ROOT_KEY_AUTO_COMPLETE] = "auto_complete",
+    [ROOT_KEY_KEY_LOG] = "key_log",
+    [ROOT_KEY_SETTINGS_LANGUAGE] = "settings_language",
+    [ROOT_KEY_LSP] = "lsp",
+    [ROOT_KEY_SETTINGS_PROGRAM] = "editor_settings_program",
+};
+
+static const char *const SETTINGS_BUFFER_KEY_STR[] = {
+    [BUFFER_KEY_MAX_LINES] = "max_lines",
+    [BUFFER_KEY_MAX_LINE_SIZE] = "max_line_size",
+    [BUFFER_KEY_DEFAULT_LOAD_LINE_SIZE] = "default_load_line_size",
+    [BUFFER_KEY_LOAD_BUFFER_LINES] = "load_buffer_lines",
+};
+
+static const char *const SETTINGS_DISPLAY_KEY_STR[] = {
+    [DISPLAY_KEY_LINE_NUMBER_SPACE] = "line_number_space",
+    [DISPLAY_KEY_SHOW_STATUS_BAR] = "show_status_bar",
+    [DISPLAY_KEY_STATUS_BAR_SIDE] = "status_bar_side",
+    [DISPLAY_KEY_DRAW_SPLIT_LINE] = "draw_split_line",
+    [DISPLAY_KEY_SHOW_START_MENU] = "show_start_menu",
+    [DISPLAY_KEY_USE_ICON] = "use_icon",
+};
+
+static const char *const SETTINGS_EDITOR_KEY_STR[] = {
+    [EDITOR_KEY_INDENT_RANGE] = "indent_range",
+    [EDITOR_KEY_JMP_SET_CUR_POS] = "jmp_set_cur_pos",
+    [EDITOR_KEY_BUILT_IN_SYNTAX] = "built_in_syntax",
+    [EDITOR_KEY_AUTO_COMPLETE] = "auto_complete",
+};
+
+static const char *const SETTINGS_AUTO_COMPLETE_KEY_STR[] = {
+    [AUTO_COMPLETE_KEY_ENABLED] = "enabled",
+    [AUTO_COMPLETE_KEY_WINDOW] = "window",
+};
+
+static const char *const SETTINGS_WINDOW_KEY_STR[] = {
+    [WINDOW_KEY_SHOW] = "show",
+    [WINDOW_KEY_WIDTH] = "width",
+    [WINDOW_KEY_HEIGHT] = "height",
+    [WINDOW_KEY_POSITION_MODE] = "position_mode",
+};
+
+static const char *const SETTINGS_KEY_LOG_KEY_STR[] = {
+    [KEY_LOG_KEY_ENABLED] = "enabled",
+    [KEY_LOG_KEY_BUFFER_SIZE] = "buffer_size",
+};
+
+static const char *const SETTINGS_LSP_KEY_STR[] = {
+    [LSP_KEY_LAUNCH_STARTUP_EDITOR] = "launch_startup_editor",
+    [LSP_KEY_EPOLL_TIMEOUT_MS] = "epoll_timeout_ms",
+};
+
+static const char *const EDITOR_SETTINGS_PROGRAM_KEY_STR[] = {
+    [EDITOR_SETTINGS_PROGRAM_ENABLED] = "enabled",
+    [EDITOR_SETTINGS_PROGRAM_LANGUAGE] = "language",
+    [EDITOR_SETTINGS_PROGRAM_ROOT_SRC_PATH] = "root_src_path",
+};
+
+
+static const char *const *const SETTINGS_JSON_KEY_STR[JSON_OBJ_NUM] = {
+    [JSON_OBJ_ROOT] = SETTINGS_ROOT_KEY_STR,
+    [JSON_OBJ_BUFFER] = SETTINGS_BUFFER_KEY_STR,
+    [JSON_OBJ_DISPLAY] = SETTINGS_DISPLAY_KEY_STR,
+    [JSON_OBJ_EDITOR] = SETTINGS_EDITOR_KEY_STR,
+    [JSON_OBJ_AUTO_COMPLETE] = SETTINGS_AUTO_COMPLETE_KEY_STR,
+    [JSON_OBJ_WINDOW] = SETTINGS_WINDOW_KEY_STR,
+    [JSON_OBJ_KEY_LOG] = SETTINGS_KEY_LOG_KEY_STR,
+    [JSON_OBJ_LSP] = SETTINGS_LSP_KEY_STR,
+    [JSON_OBJ_EDITOR_SETTINGS_PROGRAM] = EDITOR_SETTINGS_PROGRAM_KEY_STR,
+};
+
 
 
 
 typedef enum{
-    c   = 0,
-    lua = 1,
-    unknown = 2,
+    settings_lang_C   = 0,
+    settings_lang_LUA = 1,
+    settings_lang_UNKNOWN = 2,
+    settings_lang_LANG_NUM = 3,
 }settings_lang;
+
+
+typedef enum{
+    editor_settings_program_lang_C = 0,
+    editor_settings_program_lang_LUA = 1,
+    editor_settings_program_lang_UNKNOWN = 2,
+    editor_settings_program_lang_LANG_NUM = 3,
+}editor_settings_program_lang;
+
 
 static const char *const SETTINGS_LANGUAGE_JSON_KEY_STR[] =
     {
@@ -84,6 +251,11 @@ typedef enum{
 
 
 
+settings_lang comb_str_to_lang(char *str);
+editor_settings_program_lang comb_str_to_program_lang(char *str);
+
+
+
 
 // LSPの有効状態、起動方法、ポーリング条件を保持する設定。
 struct lsp_settings_data{
@@ -108,6 +280,13 @@ typedef struct{
     size_t key_log_buffer_size; // 記録する最大件数。設定JSONでは1〜65535。
 }key_log_settings;
 
+
+typedef struct{
+    bool enabled;
+    editor_settings_program_lang language;
+    char *root_src_path;
+}editor_settings_program_data;
+
 // 既定値と設定JSONを統合した、実行中のエディタ設定。
 struct editor_settings{
     int max_lines; // 扱う最大行数として保持する設定値。
@@ -130,6 +309,7 @@ struct editor_settings{
     struct lsp_settings_data lsp; // LSP連携の設定一式。
     icon_data icon_data; // 読み込んだ拡張子別アイコン配列を所有する。
     settings_lang settings_lang;
+    editor_settings_program_data editor_settings_program;
 };
 
 

@@ -30,7 +30,7 @@ typedef struct{
 
 int KL_add(struct editor_state *state,wchar_t ch,int result,screen_state screen_state);
 int KL_write_file();
-int KL_GetScreenLog(screen_state screen_state,struct editor_state *state,key_data **data,size_t *n);
+const key_data *KL_GetLog(struct editor_state *state,size_t *n);
 
-int KL_open_key_log_file(const char *path);
+int KL_open_key_log_file(const char *relative_path);
 #endif

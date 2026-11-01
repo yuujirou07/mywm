@@ -3,12 +3,14 @@
 
 #include <cjson/cJSON.h>
 #include <dirent.h>
+#include <limits.h>
 #include <stddef.h>
 #include<stdio.h>
 #include<sys/stat.h>
 #include<string.h>
 #include<stdlib.h>
-#include"error_log.h"
+#include"editor_log.h"
+#include "path_util.h"
 #include"txt_editor.h"
 #include"json_read.h"
 #include "txt_editor_icon.h"
@@ -23,10 +25,18 @@ static void clear_icon_lib(icon_data *icon_data_ptr){
     icon_data_ptr->icon_lib_allocate_num = 0;
 }
 
-// pathのJSON配列からfile_ext/ext_codeを読み、icon_data_ptr所有の対応表を作る。格納先は初期化済みとする。
+// relative_pathのJSON配列からfile_ext/ext_codeを読み、icon_data_ptr所有の対応表を作る。格納先は初期化済みとする。
+// 引数: relative_path=my_txt_editor/直下からの相対パス(例: "editor_settings/x.json")。
 // 返り値: 成功0、読込・形式・確保失敗-1。配列確認前の失敗は旧表を保持し、作り直し開始後の失敗は空にする。
-int load_icon_data(char *path,icon_data *icon_data_ptr){
-    if(path == NULL)return -1;
+int load_icon_data(const char *relative_path,icon_data *icon_data_ptr){
+    if(relative_path == NULL)return -1;
+
+    char path[PATH_MAX];
+    if(editor_path_from_exe_dir(path,sizeof(path),relative_path) == NULL){
+        error_log("can not resolve icon file path");
+        return -1;
+    }
+
     struct stat icon_stat;
     if(stat(path,&icon_stat) != 0){
         error_log("can not read icon file");
@@ -129,12 +139,19 @@ int load_icon_data(char *path,icon_data *icon_data_ptr){
 const char *get_file_ext_code(char *file_ext,icon_data *icon_data_ptr){
 
     struct stat state;
-    if(stat(file_ext,&state) == 0 && (S_ISDIR(state.st_mode) || S_ISLNK(state.st_mode)))return "\U0001F4C2";
+    if(stat(file_ext,&state) == 0 && (S_ISDIR(state.st_mode) || S_ISLNK(state.st_mode)))return "\uf07b";
     
+    char *lastslash = strrchr(file_ext,'/');
+    //パスの途中の.を拾う可能性があるため、最後の/以降の.から拡張子を判断する
+    if(lastslash != NULL){
+        file_ext = lastslash;
+    }
+
     const char *return_code = "\uef4c";
     for(int i = 0;i < icon_data_ptr->icon_lib_num;i++){
         char *ext_dot_ptr = strrchr(file_ext,'.');
         if(ext_dot_ptr == NULL){
+            
             return return_code;
         }
         ext_icon *data = &icon_data_ptr->icon_lib[i];

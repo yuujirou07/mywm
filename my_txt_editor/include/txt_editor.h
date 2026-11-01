@@ -313,21 +313,45 @@ struct ask_make_file_mode_context {
     struct pos screen_center_pos; // 画面中央のx/y座標(画面座標)。
 };
 
+// ユーザー設定が登録したキーマップ1件。ch[0]・ch[1]の2キー列をmodeの画面で入力すると、action_funcを呼ぶ。
 typedef struct{
-    wchar_t ch[2];
-    EDITOR_ACTION action_func;
-}settings_key_mapps;
+    wchar_t ch[2]; // 2キーのショートカット。ch[0]が先に押したキー。
+    MY_TXT_EDITOR_SCREEN_MODE mode; // このキーマップを有効にする画面。
+    EDITOR_ACTION action_func; // 一致したときに呼ぶ処理。呼出し可能な関数であること。
+}key_map_data;
 
+// key_map_dataの動的配列。api_key_mapping()が追加し、確保・解放はmain()側が行う。
 typedef struct{
-    settings_key_mapps *key_mapp_list;
-    int key_map_num;
-    int key_map_allocate_num;
-}settings_key_mapp_list_data;
+    key_map_data *key_mapp_list; // 登録済みキーマップの配列。未確保ならNULL。
+    int key_map_num; // 登録済みの件数。KEY_MAPPING_MAX_NUMを超えない。
+    int key_map_allocate_num; // 配列へ確保済みの要素数。
+}key_map_list_data;
 
+// キー1文字の入力イベントへ登録する処理1件。
 typedef struct{
-    void **now_loading_dynamic_lib;
-    int now_loading_lib_num;
-    int now_loading_lib_allocate_num;
+    wchar_t chr; // 対象の入力文字。
+    EDITOR_ACTION action_func; // 入力されたときに呼ぶ処理。
+}key_event_data;
+
+// key_event_dataの一覧。現状は1件分のメンバしか持たず、一覧としての確保・追加は未実装。
+typedef struct{
+    key_event_data *key_event_data; // 登録された入力イベント。
+    int key_map_num; // 登録済みの件数。
+    int key_map_allocate_num; // 確保済みの要素数。
+}key_event_list_data;
+
+// ユーザー設定の入力(キーマップ、今後はマウスイベントも)をまとめて管理する。
+typedef struct{
+    key_map_list_data key_maps; // ユーザーが登録したキーマップの一覧。
+    key_event_list_data key_events; // ユーザーが登録した入力イベントの一覧。
+}editor_input_manager;
+
+// 設定プログラム(共有ライブラリ)の読込状態。パス配列とハンドル配列は同じ添字で対応する。
+typedef struct{
+    char **loading_dynamic_lib; // 読み込むライブラリの絶対パス配列。各要素はこの構造体が所有し、destroy_dl_path()が解放する。
+    int now_loading_lib_num; // 登録済みのパス数。
+    int now_loading_lib_allocate_num; // パス配列へ確保済みの要素数。
+    void **dl_handles; // dlopenしたライブラリのハンドル配列。loading_dynamic_libと同じ添字で対応する。未確保ならNULL、終了時に各要素をdlcloseして配列をfreeする。
 }loading_dl_data;
 
 // 全画面の入力ハンドラへ渡す共有参照と、画面別の配置情報。
@@ -340,8 +364,9 @@ struct editor_input_context {
     struct edit_screen_context edit_screen; // 編集画面の配置情報。
     struct ask_make_file_mode_context ask_make_file_mode; // 新規作成ダイアログの配置情報。
     struct start_menu_screen_context start_menu_screen; // スタートメニューの借用データ。
-    settings_key_mapp_list_data key_mapp_list;
+    editor_input_manager input_manager; // ユーザー設定の入力管理。
     loading_dl_data dl_data;
+    MY_TXT_EDITOR_API editor_api;
 };
 
 // ファイルツリーを表示中に編集領域を右へ寄せる列数を返す。
@@ -351,7 +376,7 @@ static inline int editor_filetree_offset(struct editor_state *state){
         return 0;
     }
     int offset = state->file_tree_data.ft_box.pos.x +
-                 state->file_tree_data.ft_box.w;
+                 state->file_tree_data.ft_box.w + 1;
 
     return (offset > 0) ? offset : 0;
 }
@@ -507,7 +532,7 @@ static inline int editor_next_char_col(struct editor_state *state, int line, int
     }
     wint_t *cells = editor_line_cells(state, line);
     int width = (cells != NULL && cells[col] != 0)
-        ? wcwidth((wchar_t)cells[col]) : 1;
+        ?wcwidth((wchar_t)(cells[col])): 1;
     if(width < 1){
         width = 1;
     }

@@ -24,5 +24,10 @@
     "enabled": true,
     "buffer_size": 1024
   },
-  "settings_language":"c"
+
+  "editor_settings_program":{
+    "enabled":true,
+    "language":"c",
+    "root_src_path":"so_file/settings.so"
+  }
 }

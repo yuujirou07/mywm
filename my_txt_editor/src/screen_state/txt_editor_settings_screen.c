@@ -5,7 +5,7 @@
 #include "settings_screen.h"
 #include "txt_editor.h"
 #include "txt_editor_screen.h"
-#include"error_log.h"
+#include"editor_log.h"
 
 
 

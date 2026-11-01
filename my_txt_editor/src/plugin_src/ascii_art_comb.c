@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include<stdio.h>
 #include <string.h>
-#include"error_log.h"
+#include"editor_log.h"
 #include"ascii_art_comb.h"
 
 // ASCIIアートをfileから読み込み、画面幅に収まる場合だけascii_dataへ保持する。
@@ -24,6 +24,5 @@ void get_ascii_data(struct ascii_data *ascii_data,FILE *file,int screen_width){
                 }
                 ascii_data->h++;
         }
-
         return;
 }

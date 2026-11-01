@@ -14,7 +14,7 @@
 #include "settings_screen.h"
 #include "txt_editor.h"
 #include"txt_editor_syntax.h"
-#include"error_log.h"
+#include"editor_log.h"
 #include"txt_editor_icon.h"
 
 #define SETTINGS_EXPLATAION_BOX_MIN_W 12 // 設定説明欄へ確保する最小幅（端末セル数）。
@@ -1047,7 +1047,8 @@ static void draw_settings_explanation_box(struct editor_input_context *ctx){
     if(is_cur_showed)my_cur_set(state,true);
 }
 // 説明文をboxの内側幅で分割し、上から順に描画する。
-// 引数: str=描画するNUL終端文字列、box=枠線を含む描画領域。 返り値: なし。空文字列なら何も描画しない。strがNULLまたはbox.wが2以下の場合の動作は未定義。
+// 引数: str=描画するNUL終端文字列、box=枠線を含む描画領域。 返り値: なし。
+// 空文字列なら何も描画しない。strがNULLまたはbox.wが2以下の場合の動作は未定義。
 static void draw_explanation_str(const char *str,struct box box){
     int str_len = strlen(str);
     if(str_len <= 0)return;

@@ -22,6 +22,7 @@ cui_proj/ystemd-inhibit --list
 my_txt_editor/main
 my_txt_editor/fork
 my_txt_editor/so_file/
+my_txt_editor/editor_settings/so_file/
 
 mybar_proj/mybar
 mybar_proj/result.png

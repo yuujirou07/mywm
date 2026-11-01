@@ -1,0 +1,1 @@
+-I/home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/settings_libs/include

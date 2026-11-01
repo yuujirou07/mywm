@@ -20,7 +20,7 @@ typedef struct{
    int icon_lib_allocate_num; // 配列へ確保済みの要素数。
 }icon_data;
 
-int load_icon_data(char *path,icon_data *icon_data_ptr);
+int load_icon_data(const char *relative_path,icon_data *icon_data_ptr);
 const char *get_file_ext_code(char *file_ext,icon_data *icon_data_ptr);
 
 int destroy_icon_data(icon_data *icon_data_ptr);

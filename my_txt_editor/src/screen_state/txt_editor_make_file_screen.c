@@ -1,3 +1,4 @@
+#include <ncurses.h>
 #include <string.h>
 #include <wctype.h>
 #include "txt_editor.h"
@@ -97,4 +98,24 @@ void show_make_file_prompt(WINDOW *win, struct editor_state *state, struct box *
     state->render_flags |= RENDER_MAKE_FILE;
     state->cursor.is_cur_show = false;
     *file_box = make_file_box;
+}
+
+//編集画面でファイルを保存するときのモーション
+int file_save_motion(struct editor_input_context *ctx){
+
+    struct editor_state *state = ctx->state;
+    WINDOW *win = ctx->win;
+      // 編集位置はstate->cursorが持ち続けるため、画面を離れる前の退避は不要。
+    save_file(state);
+    flushinp();
+    if(editor_get_screen_state(state) == ask_make_file_mode){
+        show_make_file_prompt(
+            win,
+            state,
+            &state->ask_make_file_box,
+            ctx->ask_make_file_mode.screen_center_y,
+            ctx->ask_make_file_mode.screen_center_pos
+        );
+    }
+    return 0;
 }

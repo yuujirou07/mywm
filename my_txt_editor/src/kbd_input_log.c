@@ -1,11 +1,13 @@
 #include "kbd_input_log.h"
+#include <limits.h>
+#include "path_util.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <wchar.h>
 #include "editor_types.h"
-#include "error_log.h"
+#include "editor_log.h"
 #include "txt_editor.h"
 
 FILE *key_log_file = NULL;
@@ -64,53 +66,33 @@ int KL_add(struct editor_state *state,wchar_t ch,int result,screen_state screen_
 }
 
 
-// 記録済みのキー履歴からscreen_stateの画面で入力された分を取り出す。2回呼びで使う。
-// 1回目: 該当件数を*nへ入れて0を返す。2回目: *nを上限に該当要素のポインタをdataへ詰め、件数を返す。dataがNULLなら*nを0にして-1を返す。
-int KL_GetScreenLog(screen_state screen_state,struct editor_state *state,key_data **data,size_t *n){
-    
-    static bool IsGetNum = false;
-    key_log_data tmp_log_data = state->key_bord_data.Key_log_data;
-    *n = 0;
-
-    if(!IsGetNum){
-        for(size_t i = 0;i < tmp_log_data.key_count;i++){
-            if(tmp_log_data.key_log[i].screen_state == screen_state)(*n)++;
-        }
-        IsGetNum = true;
-        return 0;
+// 記録済みのキー履歴を、全画面分まとめて返す。
+// 引数: state=キー履歴を持つエディタ状態、n=件数の出力先。 返り値: 履歴配列の先頭(読み取り専用、件数は*n)。履歴が空ならNULLで*nは0。
+// 所有権: 配列はstateが所有する。KL_add()で再確保されると無効になるので、取得後すぐに使う。
+const key_data *KL_GetLog(struct editor_state *state,size_t *n){
+    *n = state->key_bord_data.Key_log_data.key_count;
+    if(*n == 0){
+        return NULL;
     }
-    else{
-        if(data == NULL){
-            *n = 0;
-            IsGetNum = false;
-            return -1;
-        }
-        size_t count = 0;
-        size_t loop_count = (tmp_log_data.key_count - 1 < *n)?tmp_log_data.key_count - 1:*n;
-        for(size_t i = tmp_log_data.key_count - 1;i < loop_count;i--){
-            if(tmp_log_data.key_log[i].screen_state == screen_state){
-                data[count++] = &tmp_log_data.key_log[i];
-            }
-        }
-        IsGetNum = false;
-        return count;
-    }
-    return -1;
+    return state->key_bord_data.Key_log_data.key_log;
 }
 
 
 
-// キー履歴の出力先ファイルpathを追記モードで開く。既に開いていれば何もしない。
+// キー履歴の出力先ファイルを追記モードで開く。relative_pathはmy_txt_editor/直下からの相対パス。既に開いていれば何もしない。
 // 返り値: 成功0、開けなかった場合-1(error_logへ記録する)。
-int KL_open_key_log_file(const char *path){
+int KL_open_key_log_file(const char *relative_path){
     if(key_log_file == NULL){
+        char path[PATH_MAX];
+        if(editor_path_from_exe_dir(path,sizeof(path),relative_path) == NULL){
+            error_log("can not resolve key log file path");
+            return -1;
+        }
         key_log_file = fopen(path,"a+");
         if(key_log_file == NULL){
             error_log("can not open key log file");
             return -1;
         }
     }
-    
-
     return 0;
 }

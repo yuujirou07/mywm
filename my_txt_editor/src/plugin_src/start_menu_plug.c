@@ -3,7 +3,7 @@
 #include <string.h>
 #include <wctype.h>
 #include<time.h>
-#include"error_log.h"
+#include"editor_log.h"
 #include"ascii_art_comb.h"
 #include"start_menu.h"
 #include"path_util.h"
@@ -109,14 +109,10 @@ static void write_startup_time_log(const struct timespec *start_time, const char
 // 引数: screen_mid_pos=画面中央座標、ascii_data=読み込んだロゴ情報の保存先。 返り値: なし。ファイルを開けない場合はログを残して描画しない。
 void draw_ascii_logo(struct pos screen_mid_pos,struct ascii_data *ascii_data){
 
-        const char *ascii_name = "my_txt_editor_settings_folder/ascii_art_img.txt";
-        // カレントディレクトリ→実行ファイルの隣、の順で探す
-        FILE *ascii_file = fopen(ascii_name,"r");
-        if(ascii_file == NULL){
-                char ascii_path[PATH_MAX];
-                if(editor_path_from_exe_dir(ascii_path, sizeof(ascii_path), ascii_name) != NULL){
-                        ascii_file = fopen(ascii_path,"r");
-                }
+        FILE *ascii_file = NULL;
+        char ascii_path[PATH_MAX];
+        if(editor_path_from_exe_dir(ascii_path, sizeof(ascii_path), ASCII_ART_PATH) != NULL){
+                ascii_file = fopen(ascii_path,"r");
         }
         if(ascii_file == NULL){
                 error_log_write("can not open ascii art file\n");
