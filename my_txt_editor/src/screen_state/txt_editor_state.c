@@ -47,13 +47,14 @@ static long clamp_editor_target_line(struct editor_state *state, long target_lin
 // 指定行を少し下に表示するための表示開始行を返す。
 // 引数: state=表示領域の高さを持つエディタ状態、target_line=画面内に表示したい論理行番号。 返り値: scr_start_numへ設定する表示開始行。
 static int draw_start_line_for_target(struct editor_state *state, long target_line){
-    int line_limit = get_line_limit();
+    int line_limit = state->settings_data->default_load_line_size;
     int context_lines = state->write_area.h - 1;
     if(context_lines > 15) context_lines = 15;
     if(context_lines < 0) context_lines = 0;
 
     target_line = (target_line + state->write_area.h > line_limit)
         ? line_limit - state->write_area.h + context_lines : target_line;
+        
     return (target_line > context_lines) ? (target_line - context_lines) : 0;
 }
 

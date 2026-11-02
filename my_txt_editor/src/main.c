@@ -28,7 +28,6 @@
 #include "ftj.h"
 #include "kbd_input_log.h"
 #include "lsp_src/language_server_communication.h"
-#include "public_data/c_settings/c_settings_setting.h"
 #include "txt_editor.h"
 #include "txt_editor_screen.h"
 #include"editor_log.h"
@@ -135,8 +134,7 @@ int main(int argc, char *argv[])
     getmaxyx(win, state.scr.scr_size.y, state.scr.scr_size.x);
     clear();
 
-    set_line_limit(state.settings_data->default_load_line_size);
-    int line_cap = get_line_limit();
+    int line_cap = state.settings_data->default_load_line_size;
     // ファイルを開くまでは各行へ画面幅分の容量を割り当てておく。
     // 足りなくなった行はeditor_ensure_line_cap()が伸ばす。
     int default_line_cols = (state.scr.scr_size.x > 0)
@@ -404,17 +402,17 @@ int main(int argc, char *argv[])
         input_context.dl_data.loading_dynamic_lib = NULL;
         input_context.dl_data.now_loading_lib_allocate_num = 0;
         input_context.dl_data.now_loading_lib_num = 0;
-
+        //JSONでルートパスが設定されているか確認
         if(state.settings_data->editor_settings_program.root_src_path != NULL){
             //dlファイルパス設定
-            add_dl_path(
+            int rt = add_dl_path(
                 &input_context,
                 state.settings_data->editor_settings_program.root_src_path
             );
-
-            init_settings_src(&input_context.editor_api,&input_context);
+            if(rt == 0){
+                init_settings_src(&input_context.editor_api,&input_context);
+            }
         }   
-
     }
     
     
@@ -504,7 +502,6 @@ int main(int argc, char *argv[])
 
         if(is_cur_hide){
             my_cur_set(&state,true);
-            editor_log_msg("h");
         }
 
 
@@ -525,7 +522,6 @@ int main(int argc, char *argv[])
         //ユーザイベント確認
         if(state.settings_data->editor_settings_program.enabled){
             check_user_settings_event(&input_context);
-            
         }
 
         

@@ -52,16 +52,16 @@ int main(void){
     printf("case1: 通常の書き込み\n");
     fflush(stdout);
     reset_log(log_abs_path);
-    editor_log("hello","Nov  1 2026","02:40:12");
+    editor_log("hello","Nov  1 2026","02:40:12","f.c",7);
     CHECK(read_text(log_abs_path,read_buf,sizeof(read_buf)) > 0);
-    CHECK(strcmp(read_buf," LOG: hello DATE: Nov  1 2026 TIME: 02:40:12") == 0);
+    CHECK(strcmp(read_buf," LOG: hello DATE: Nov  1 2026 TIME: 02:40:12 FILE: f.c LINE: 7\n") == 0);
 
     printf("case2: NULLはunknownになる\n");
     fflush(stdout);
     reset_log(log_abs_path);
-    editor_log(NULL,NULL,NULL);
+    editor_log(NULL,NULL,NULL,NULL,0);
     CHECK(read_text(log_abs_path,read_buf,sizeof(read_buf)) > 0);
-    CHECK(strcmp(read_buf," LOG: unknown DATE: unknown TIME: unknown") == 0);
+    CHECK(strcmp(read_buf," LOG: unknown DATE: unknown TIME: unknown FILE: unknown LINE: 0\n") == 0);
 
     printf("case3: editor_log_msgマクロ\n");
     fflush(stdout);
@@ -71,12 +71,13 @@ int main(void){
     CHECK(strncmp(read_buf," LOG: macro DATE: ",strlen(" LOG: macro DATE: ")) == 0);
     CHECK(strstr(read_buf,__DATE__) != NULL);
     CHECK(strstr(read_buf,__TIME__) != NULL);
+    CHECK(strstr(read_buf,__FILE__) != NULL);
 
     printf("case4: 2回書くと両方残る\n");
     fflush(stdout);
     reset_log(log_abs_path);
-    editor_log("first","d1","t1");
-    editor_log("second","d2","t2");
+    editor_log("first","d1","t1","f.c",1);
+    editor_log("second","d2","t2","f.c",2);
     CHECK(read_text(log_abs_path,read_buf,sizeof(read_buf)) > 0);
     CHECK(strstr(read_buf,"first") != NULL);
     CHECK(strstr(read_buf,"second") != NULL);

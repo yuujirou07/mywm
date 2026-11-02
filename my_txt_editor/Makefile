@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Wall -g3 -O3 -fsanitize=address -Wextra -Werror -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600 -I./include -I./include/lsp_src
+CFLAGS := -Wall -g3 -O2 -fsanitize=address -Wextra -Werror -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600 -I./include -I./include/lsp_src
 
 # build.shの引数outに相当: make OUT=build/main.out
 OUT := build/main

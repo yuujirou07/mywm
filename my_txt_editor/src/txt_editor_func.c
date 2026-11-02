@@ -19,8 +19,6 @@
 #include"txt_editor_syntax.h"
 #include"editor_types.h"
 
-static int limit = 0;
-
 // stateの画面寸法からブラウザの枠・入力欄・内側領域を再計算し、高さ変更時に一覧を再読込する。
 // 返り値: なし。一覧の容量不足は再確保し、失敗時は表示行数を既存容量へ制限する。
 void resize_file_browser(struct editor_state *state){
@@ -277,11 +275,24 @@ void handle_char_input(WINDOW *win, wchar_t ch, struct editor_state *state){
     if(view_cols <= 0){
         return;
     }
-    state->cursor.file_pos.x = editor_clamp_int(state->cursor.file_pos.x, 0, view_cols - 1);
-    state->cursor.file_pos.x = editor_cursor_col_boundary(state, line,
-        state->cursor.file_pos.x);
+
+    state->cursor.file_pos.x = 
+        editor_clamp_int(
+            state->cursor.file_pos.x,
+            0,
+             view_cols - 1
+        );
+
+    state->cursor.file_pos.x = 
+        editor_cursor_col_boundary(
+        state,
+        line,
+        state->cursor.file_pos.x
+        );
 
     int writing_area = state->cursor.file_pos.x;
+
+    //上のまるめ作業でほぼ成立しないが、仕様変更などの保険で判定している
     if(writing_area < 0 || writing_area >= view_cols){
         return;
     }
@@ -289,8 +300,14 @@ void handle_char_input(WINDOW *win, wchar_t ch, struct editor_state *state){
     // 挿入後に必要となる桁数を先に確保する。行末追記なら書き込み位置+文字幅、
     // 途中挿入なら既存の行長+文字幅まで伸びる。
     int line_len = editor_line_len(state, line);
-    int need = (writing_area < line_len) ? line_len + char_width
-                                         : writing_area + char_width;
+
+    //入力後そのセルが何セル必要かの処理。
+    //(writing_area < line_len)入力途中
+    //だと右にline_len(行の保存セル数) + char_width(今回の入力の必要なセル数)
+    //になり、その行のセル数を延長するときに使う
+    int need = (writing_area < line_len) ? 
+        line_len + char_width : writing_area + char_width;
+        
     if(!editor_ensure_line_cap(state, line, need)){
         return;
     }
@@ -309,8 +326,9 @@ void handle_char_input(WINDOW *win, wchar_t ch, struct editor_state *state){
         //画面外にある桁も含めて右へずらす
         int insert_count = line_len - writing_area;
         if (insert_count > 0)
-            memmove(&cells[writing_area + char_width], &cells[writing_area],
-                    insert_count * sizeof(wint_t));
+            memmove(&cells[writing_area + char_width],
+                &cells[writing_area],
+                insert_count * sizeof(wint_t));
     }
 
     cells[writing_area] = ch;
@@ -393,7 +411,7 @@ void handle_mouse(struct editor_input_context *ctx,int dir_num) {
 // 引数: ctx=カーソルと表示位置を持つ入力context、ch=KEY_UP/DOWN/LEFT/RIGHT。 返り値: なし。
 void handle_input_allow(struct editor_input_context *ctx,wchar_t ch){
     struct editor_state *state = ctx->state;
-    int line_limit = get_line_limit();
+    int line_limit = state->settings_data->default_load_line_size;
     if(line_limit <= 0)return;
     
 
@@ -450,19 +468,6 @@ void handle_input_allow(struct editor_input_context *ctx,wchar_t ch){
     }
     state->render_flags |= RENDER_LINE_STATUS;
 }
-
-// カーソル移動などが参照する共有行数上限を更新する。
-// 引数: line_limit=新しい行数上限。 返り値: なし。
-void set_line_limit(int line_limit){
-    limit = line_limit;
-}
-
-// 共有されている行数上限を返す。
-// 引数: なし。 返り値: set_line_limit()で最後に設定した値。
-int get_line_limit(){
-    return limit;
-}
-
 
 // stateのremove_line_num行（1以上）を直前の行へ結合し、後続の行情報を前へ詰める。
 // 返り値: 結合後のセル数、状態・行・セルが不正なら-1。結合した行が削除行の容量も引き継ぐ。

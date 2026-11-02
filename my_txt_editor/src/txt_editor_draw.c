@@ -403,7 +403,7 @@ void set_file_select_line(struct editor_state *state,int dir_num,int line){
 // 返り値: なし。移動先が有効な場合だけ更新し、桁は移動先行へ丸める。呼び出し側で行を二重加算しない。
 void editor_screen_move_line(struct editor_input_context *ctx,int num){
     struct editor_state *state = ctx->state;
-    int line_limit = get_line_limit();
+    int line_limit = state->settings_data->default_load_line_size;
     int next_cursor_line = state->cursor.file_pos.y + num;
     int next_scr_start = state->scr.scr_start_num + num;
     if(line_limit <= 0 || next_cursor_line < 0 || next_cursor_line >= line_limit || next_scr_start < 0){

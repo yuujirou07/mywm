@@ -66,6 +66,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
 
 
     }
+    //デバッグ用
     else if(ch == CTRL(' ')){
        lsp_send_completion(ctx->lsp_data->to_server_fd,state);
     }
@@ -79,6 +80,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
 
         if (ch == KEY_ENTER || ch == '\n' || ch == '\r') {
             bool is_new_line = true;
+            //入力補完設定
             if(state->settings_data->auto_complete_settings_data.auto_complete_enabled){
                 if(state->edit_input_complete_data.
                     comp_world_candidacy_part_data.
@@ -104,8 +106,9 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
             handle_tab(win, state);
         } else if (ch == KEY_LEFT || ch == KEY_RIGHT || ch == KEY_UP || ch == KEY_DOWN){
             handle_input_allow(ctx,ch);
-
+        //通常可視文字入力
         } else if (input_result == OK && iswprint((wint_t)ch)) {
+            //デバッグ用
             if (ch == 'q') {
                 return false;
 

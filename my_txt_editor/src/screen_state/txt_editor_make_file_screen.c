@@ -8,17 +8,19 @@
 // 引数: ctx=確認ダイアログと編集画面復帰に必要なcontext、input_result=get_wch()の結果、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
 bool handle_ask_make_file_mode_input(struct editor_input_context *ctx, int input_result, wint_t ch){
     struct editor_state *state = ctx->state;
-
+    //入力画面時処理
     if(state->make_file_mode_status.is_input_scene){
         int input_limit = state->write_file_name_area.w - 2;
         if(input_result == OK && iswprint((wint_t)ch) &&
            state->make_file_mode_status.new_file_name_counter < input_limit &&
            state->make_file_mode_status.new_file_name_counter <
                (int)sizeof(state->make_file_mode_status.new_file_name) - 1){
+
             int index = state->make_file_mode_status.new_file_name_counter++;
             state->make_file_mode_status.new_file_name[index] = (char)ch;
             state->make_file_mode_status.new_file_name[index + 1] = '\0';
             state->render_flags |= RENDER_MAKE_FILE;
+            
         }
         else if (input_result == KEY_CODE_YES && ch == KEY_BACKSPACE && state->cursor.is_cur_show
             && state->make_file_mode_status.new_file_name_counter > 0){
@@ -99,6 +101,7 @@ void show_make_file_prompt(WINDOW *win, struct editor_state *state, struct box *
     state->cursor.is_cur_show = false;
     *file_box = make_file_box;
 }
+
 
 //編集画面でファイルを保存するときのモーション
 int file_save_motion(struct editor_input_context *ctx){

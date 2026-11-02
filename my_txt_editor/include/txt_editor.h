@@ -30,11 +30,15 @@
 #define box_retention_max 64    // 1回の更新まで保持できる矩形消去要求数。
 #define screen_state_log_storage 256 // 画面遷移履歴へ保持できる状態数。
 // ファイルブラウザ一覧に保持する名前の最大長。
+// 使用: ファイルブラウザ・ファイルツリーの項目構造体の名前配列(d_name・name)のサイズ。
 #define DIR_ENTRY_NAME_MAX 256
-// 各行へ前もって足しておく余白列数。ここに収まる入力は再配置なしで処理できる。
+// 各行へ前もって足す余白列数。ここに収まる入力は再配置なしで処理できる。
+// 使用: 読込時の行容量計算、editor_ensure_line_capの伸長の初期値、空行の確保、画面幅が取れないときの代替値。
 #define EDITOR_LINE_COL_SLACK 16
 // 1行が確保できる列数の絶対上限。これを超える伸長要求は拒否する。
+// 使用: editor_ensure_line_capの上限判定と容量の丸め、設定値max_line_sizeの許可範囲の上限。
 #define EDITOR_LINE_COL_MAX 65536
+
 
 
 static const char *const MY_TXT_EDITOR_CURRENT_DIR_NAME = "my_txt_editor";
@@ -573,10 +577,25 @@ int set_cur_pos(struct editor_state *state);
 // 論理カーソル位置から表示座標を計算して反映待ちへ積む。
 // 引数: state=論理カーソル位置と反映待ち座標を持つエディタ状態。 返り値: なし。
 static inline void editor_sync_cursor(struct editor_state *state){
-    state->cursor.file_pos.x = editor_cursor_col_boundary(state, state->cursor.file_pos.y,
-        state->cursor.file_pos.x);
+    state->cursor.file_pos.x = 
+        editor_cursor_col_boundary(
+            state,
+             state->cursor.file_pos.y,
+            state->cursor.file_pos.x
+        );
     struct pos pos = editor_cursor_screen_pos(state);
     cur_pos_push(pos,state);
+}
+
+// stateの論理カーソルを0始まりのline行・colセルへそのまま書く。行長・可視幅・文字境界への丸めはしない。
+// 引数: line・colが行・行長の範囲内かは呼び出し側で保証すること。 返り値: 成功0、stateがNULLまたはline・colが負なら-1(変更しない)。端末への反映はeditor_sync_cursorで行う。
+static inline int editor_set_cursor_unchecked(struct editor_state *state, int line, int col){
+    if(state == NULL || line < 0 || col < 0){
+        return -1;
+    }
+    state->cursor.file_pos.y = line;
+    state->cursor.file_pos.x = col;
+    return 0;
 }
 
 // stateの論理カーソルを0始まりのline行・colセルへ移し、行範囲・可視幅・文字境界へ丸める。
@@ -584,11 +603,12 @@ static inline void editor_sync_cursor(struct editor_state *state){
 static inline void editor_set_cursor(struct editor_state *state, int line, int col){
     int line_limit = editor_line_limit(state);
     if(line_limit <= 0){
-        state->cursor.file_pos = (struct pos){0,0};
+        (void)editor_set_cursor_unchecked(state,0,0);
         return;
     }
-    state->cursor.file_pos.y = editor_clamp_int(line, 0, line_limit - 1);
-    state->cursor.file_pos.x = editor_cursor_col_boundary(state, state->cursor.file_pos.y, col);
+    int clamped_line = editor_clamp_int(line, 0, line_limit - 1);
+    // 丸め済みで負にならないため-1は返らない。
+    (void)editor_set_cursor_unchecked(state,clamped_line,editor_cursor_col_boundary(state, clamped_line, col));
 }
 
 // stateの論理カーソル行をdelta行動かし、列を移動先の行長・可視幅・文字境界へ丸める。
@@ -672,8 +692,6 @@ void handle_tab(WINDOW *win, struct editor_state *state);
 void handle_char_input(WINDOW *win, wchar_t ch, struct editor_state *state);
 void handle_mouse(struct editor_input_context *ctx,int dir_num);
 void handle_input_allow(struct editor_input_context *ctx,wchar_t ch);
-void set_line_limit(int limit);
-int get_line_limit();
 int remove_line_join_str_data(struct editor_state *state,long remove_line_num);
 int make_new_line_space(struct editor_state *state,long make_space_line_num);
 void editor_screen_mouse_event(struct editor_input_context *ctx);

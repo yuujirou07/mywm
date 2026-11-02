@@ -20,7 +20,7 @@ int main(){
     error_log("hello tester");
 
 
-    editor_log("hello tester",__DATE__,__TIME__);
+    editor_log_msg("hello tester");
 
 
     close_error_log_file();

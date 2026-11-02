@@ -2,7 +2,8 @@
 
 
 #include <bits/time.h>
-#include<time.h>
+#include<stdlib.h>
+
 
 #include"public_data/c_settings/c_settings_setting.h"
 #include"/home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/settings_libs/include/settings_helper.h"
@@ -12,8 +13,18 @@
 // 返り値: 戻らない。エディタ側の通常の終了処理は経由しない。
 void func(const MY_TXT_EDITOR_API *api){
     api->save_file(api->userdata);
+
 }
 
+void func_2(const MY_TXT_EDITOR_API *api){
+    MY_TXT_EDITOR_SCREEN_MODE scr_mode;
+    api->get_screen_mode(api,&scr_mode);
+    
+
+    api->set_text_cursor_row(api,10);
+
+    return;
+}
 
 
 void input_func(const MY_TXT_EDITOR_API *api){
@@ -42,4 +53,5 @@ void input_func(const MY_TXT_EDITOR_API *api){
 void ST_INIT(const MY_TXT_EDITOR_API *api){
     api->key(api->userdata,L'o',L'o',EDIT_MODE,func);
     api->input_event(api->userdata,L'j',input_func);
+    api->input_event(api->userdata,L'l',func_2);
 }

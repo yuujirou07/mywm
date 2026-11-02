@@ -1,5 +1,4 @@
 #include "editor_log.h"
-#include "txt_editor.h"
 #include "path_util.h"
 
 #include <linux/limits.h>
@@ -127,106 +126,30 @@ void error_log_write(char *error_comment){
 
 
 
-void editor_log(const char msg[],const char date[],const char time[]){
+void editor_log(const char msg[],const char date[],const char time[],const char file[],int line){
     if(log_file == NULL){
         error_log("can not open editor log file");
         return;
     }
 
-    
-
-    const char *tmp_msg  = msg;
-    const char *tmp_date = date;
-    const char *tmp_time = time;
-
-
-
     if(msg == NULL){
-        tmp_msg = "unknown";
+        msg = "unknown";
     }
     if(date == NULL){
-        tmp_date = "unknown";
+        date = "unknown";
     }
     if(time == NULL){
-        tmp_time = "unknown";
+        time = "unknown";
+    }
+    if(file == NULL){
+        file = "unknown";
     }
 
-    const char *def_log_msg = " LOG: " ;
-    const char *def_date_msg= " DATE: ";
-    const char *def_time_msg= " TIME: ";
-     
-
-    size_t tmp_msg_len  = strlen(tmp_msg);
-    size_t tmp_date_len = strlen(tmp_date);
-    size_t tmp_time_len = strlen(tmp_time);
-    size_t tmp_def_msg_len = strlen(def_log_msg);
-    size_t tmp_daf_date_msg_len = strlen(def_date_msg);
-    size_t tmp_def_time_msg_len = strlen(def_time_msg);
-
-
-    //合計の文字配列数
-    size_t jointed_len = 
-        tmp_msg_len +
-        tmp_date_len +
-        tmp_time_len +
-        tmp_def_msg_len +
-        tmp_daf_date_msg_len + 
-        tmp_def_time_msg_len + 1;
-        
-
-    char jointed_str[jointed_len];
-    jointed_str[0] = '\0';
-
-    //LOG:
-    memcpy(
-        jointed_str,
-        def_log_msg,
-        tmp_def_msg_len
-        );
-
-    //msg string
-    memcpy(
-        jointed_str + tmp_def_msg_len,
-        tmp_msg,
-        tmp_msg_len
-        );
-
-    // DATE: string
-    memcpy(
-        jointed_str + tmp_def_msg_len + tmp_msg_len,
-        def_date_msg,
-        tmp_def_msg_len
-        );
-
-    //tmp_date string
-    memcpy(
-        jointed_str + tmp_def_msg_len + tmp_msg_len + tmp_def_msg_len,
-        tmp_date,
-        tmp_date_len
-        );
-
-    // TIME: string
-    memcpy(
-        jointed_str + tmp_def_msg_len + tmp_msg_len + tmp_def_msg_len + tmp_date_len,
-        def_time_msg,
-        tmp_def_time_msg_len
-        );
-
-    //tmp_time string
-    memcpy(
-        jointed_str + tmp_def_msg_len + tmp_msg_len + tmp_def_msg_len + tmp_date_len + tmp_def_time_msg_len,
-        tmp_time,
-        tmp_time_len
-        );
-    
-    jointed_str[jointed_len - 1] = '\0';
-
-    if(fputs(jointed_str,log_file) < 0){
+    if(fprintf(log_file," LOG: %s DATE: %s TIME: %s FILE: %s LINE: %d\n",msg,date,time,file,line) < 0){
         error_log("can not puts log data");
         wrp_stderr_puts("can not puts log data");
     }
     else{
-        fputc('\n',log_file);
         fflush(log_file);
     }
 

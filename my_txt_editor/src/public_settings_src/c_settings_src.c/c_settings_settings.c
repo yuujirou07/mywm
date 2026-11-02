@@ -9,6 +9,7 @@
 #include<stdlib.h>
 #include <sys/stat.h>
 #include <wchar.h>
+#include<unistd.h>
 
 
 #include "c_settings.h"
@@ -21,11 +22,13 @@
 #include"string.h"
 #include "txt_editor_screen.h"
 
-static void api_save_file(void *userdata);
+static MY_TXT_EDITOR_RESULT api_save_file(void *userdata);
 static void *load_current_settings_obj_c_file(struct editor_input_context *ctx);
-static void api_key_mapping(void *userdata,wchar_t key1,wchar_t key2,MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action);
-static void add_key_input_event_handle(void *userdata,wchar_t chr,EDITOR_ACTION action);
+static MY_TXT_EDITOR_RESULT api_key_mapping(void *userdata,wchar_t key1,wchar_t key2,MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action);
+static MY_TXT_EDITOR_RESULT add_key_input_event_handle(void *userdata,wchar_t chr,EDITOR_ACTION action);
 static int check_input_handle(struct editor_input_context *ctx,wchar_t chr);
+static MY_TXT_EDITOR_RESULT get_editor_screen_mode(const MY_TXT_EDITOR_API *api,MY_TXT_EDITOR_SCREEN_MODE *mode);
+static MY_TXT_EDITOR_RESULT set_text_cursor_row(const MY_TXT_EDITOR_API *api,int row);
 
 
 // apiへ借用したctxと、保存・キーマップ登録用の関数ポインタを接続する。
@@ -35,32 +38,40 @@ void connect_api_mem_data(MY_TXT_EDITOR_API *const api,struct editor_input_conte
     api->save_file = api_save_file;
     api->key = api_key_mapping;
     api->input_event = add_key_input_event_handle;
-
+    api->get_screen_mode = get_editor_screen_mode;
+    api->set_text_cursor_row = set_text_cursor_row;
     return;
 }
 
 // userdataをeditor_input_contextとして扱い、そのstateの本文を保存する。
-// 返り値: なし。userdataは有効なctxであること。保存結果の画面遷移はsave_fileに従う。
-static void api_save_file(void *userdata){
+// 返り値: 成功API_OK、userdata NULLはAPI_ERR_NULL、編集画面以外はAPI_ERR_WRONG_MODE。保存結果の画面遷移はsave_fileに従う。
+static MY_TXT_EDITOR_RESULT api_save_file(void *userdata){
     struct editor_input_context *tmp_ctx = userdata;
-    //編集画面しか機能しないようにする
-    if(editor_get_screen_state(tmp_ctx->state) == edit_screen){
-        file_save_motion(tmp_ctx);
+    if(tmp_ctx == NULL){
+        return API_ERR_NULL;
     }
-    return;
+    //編集画面しか機能しないようにする
+    if(editor_get_screen_state(tmp_ctx->state) != edit_screen){
+        return API_ERR_WRONG_MODE;
+    }
+    file_save_motion(tmp_ctx);
+    return API_OK;
 }
 
 
 
 // userdataのctxへkey1・key2の組とmode(有効にする画面)・actionを登録する。キーマップ配列は事前に確保しておく。
-// 返り値: なし。上限到達・再確保失敗はログを残して追加しない。actionは呼出し可能な関数を渡す。
-static void api_key_mapping(void *userdata,wchar_t key1,wchar_t key2,MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action){
+// 返り値: 成功API_OK、userdata・action NULLはAPI_ERR_NULL、上限到達・再確保失敗はログを残してAPI_ERR_NO_MEMORY(追加しない)。
+static MY_TXT_EDITOR_RESULT api_key_mapping(void *userdata,wchar_t key1,wchar_t key2,MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action){
     struct editor_input_context *ctx = (struct editor_input_context *)userdata;
+    if(ctx == NULL || action == NULL){
+        return API_ERR_NULL;
+    }
 
     //キーマップ最大登録数ガード
     if(ctx->input_manager.key_maps.key_map_num >= KEY_MAPPING_MAX_NUM){
         error_log("over flow key map tabele");
-        return;
+        return API_ERR_NO_MEMORY;
     }
 
     //メモリの拡張処理
@@ -70,7 +81,7 @@ static void api_key_mapping(void *userdata,wchar_t key1,wchar_t key2,MY_TXT_EDIT
                 sizeof(key_map_data) * (ctx->input_manager.key_maps.key_map_num * 2)); 
             if(tmp_key_mapps == NULL){
                 error_log(can not realloc);
-                return;
+                return API_ERR_NO_MEMORY;
             }
             ctx->input_manager.key_maps.key_mapp_list = tmp_key_mapps;
             ctx->input_manager.key_maps.key_map_allocate_num = ctx->input_manager.key_maps.key_map_num * 2;
@@ -80,7 +91,7 @@ static void api_key_mapping(void *userdata,wchar_t key1,wchar_t key2,MY_TXT_EDIT
     ctx->input_manager.key_maps.key_mapp_list[ctx->input_manager.key_maps.key_map_num].mode = mode;
     ctx->input_manager.key_maps.key_mapp_list[ctx->input_manager.key_maps.key_map_num].action_func = action;
     ctx->input_manager.key_maps.key_map_num++;
-    return;
+    return API_OK;
 }
 
 
@@ -135,10 +146,10 @@ void check_key_mapps_entry(struct editor_input_context *ctx,wchar_t chr[2],MY_TX
 // キー入力chrに登録された入力イベントを呼ぶ予定の関数。
 // 現実装は引数の確認だけで、イベントは呼ばない(未実装)。引数: ctx=入力context、chr=入力文字、api=ユーザー設定へ渡すAPI。 返り値: 引数不正は-1。
 
-static void add_key_input_event_handle(void *userdata,wchar_t chr,EDITOR_ACTION action){
-    if(userdata== NULL){
+static MY_TXT_EDITOR_RESULT add_key_input_event_handle(void *userdata,wchar_t chr,EDITOR_ACTION action){
+    if(userdata== NULL || action == NULL){
         error_log("argument error");
-        return;
+        return API_ERR_NULL;
     }
 
     struct editor_input_context *ctx = userdata;
@@ -157,7 +168,7 @@ static void add_key_input_event_handle(void *userdata,wchar_t chr,EDITOR_ACTION 
             );
         if(tmp_key_event_data == NULL){
             error_log("argument error");
-            return;
+            return API_ERR_NO_MEMORY;
         }
 
         ctx->input_manager.key_events.key_event_data = tmp_key_event_data;
@@ -171,7 +182,7 @@ static void add_key_input_event_handle(void *userdata,wchar_t chr,EDITOR_ACTION 
     tmp_key_event->chr = chr;
     tmp_key_event->action_func = action;
     ctx->input_manager.key_events.key_map_num++;
-    return;
+    return API_OK;
 }
 
 // ctxのハンドル格納余地を確認し、editor_settings/so_file/settings.soをdlopenする。
@@ -256,6 +267,7 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
         wrp_stderr_puts("argument error");
         return -1;
     }
+
     //初期化malloc
     if(ctx->dl_data.loading_dynamic_lib == NULL){
 
@@ -283,7 +295,7 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
         wrp_stderr_puts("can not get settings dir");
         return -1;
     }
-
+    
     size_t full_path_size = strlen(base_dir) + strlen(dl_path) + 1;
     char *full_path = malloc(full_path_size);
     if(full_path == NULL){
@@ -291,7 +303,29 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
         return -1;
     }
     snprintf(full_path,full_path_size,"%s%s",base_dir,dl_path);
-    editor_log_msg(full_path);
+
+    if(access(full_path,F_OK) != 0){
+        free(full_path);
+        error_log("dl path cannot access");
+        return -1;
+    }
+
+    //editor_log_msgメッセージ作成
+    const char log_msg[] = "DL Path Add SUCCESS: ";
+    size_t log_msg_len   = strlen(log_msg);
+    size_t full_path_len = strlen(full_path);
+    size_t jointed_msg_len = log_msg_len + full_path_len + 1;
+
+    char editor_msg[jointed_msg_len];
+    editor_msg[0] = '\0';
+
+    memcpy(editor_msg,log_msg,log_msg_len);
+    memcpy(editor_msg + log_msg_len,full_path,full_path_len);
+
+    editor_msg[log_msg_len + full_path_len] = '\0';
+    editor_log_msg(editor_msg);
+
+    //dl path追加
     ctx->dl_data.loading_dynamic_lib[ctx->dl_data.now_loading_lib_num] = full_path;
     ctx->dl_data.now_loading_lib_num++;
     return 0;
@@ -330,3 +364,45 @@ static int check_input_handle(struct editor_input_context *ctx,wchar_t chr){
     return 0;
 }
 
+// 現在の画面モードを*modeへ書く。返り値: 成功API_OK、NULL引数はAPI_ERR_NULL(modeが有効なら*modeはUNKNOWN_MODE)。
+MY_TXT_EDITOR_RESULT get_editor_screen_mode(const MY_TXT_EDITOR_API *api,MY_TXT_EDITOR_SCREEN_MODE *mode){
+    if(mode == NULL){
+        return API_ERR_NULL;
+    }
+    *mode = UNKNOWN_MODE;
+
+    if(api == NULL || api->userdata == NULL){
+        return API_ERR_NULL;
+    }
+
+    struct editor_input_context *ctx = api->userdata;
+    screen_state scr_state = editor_get_screen_state(ctx->state);
+    *mode = comb_screen_state_To_my_txt_editor_screen_mode(scr_state);
+    return API_OK;
+}
+
+
+static MY_TXT_EDITOR_RESULT set_text_cursor_row(const MY_TXT_EDITOR_API *api,int row){
+    if(api == NULL || row < 0){
+        return API_ERR_INVALID_ARG;
+    }
+
+    struct editor_input_context *ctx = api->userdata;
+    struct editor_state *state = ctx->state; 
+
+    if(ctx == NULL || state == NULL){
+        return API_ERR_INVALID_ARG;
+    }
+
+    if(editor_get_screen_state(state) != edit_screen){
+        return API_ERR_WRONG_MODE;
+    }
+
+    if(row > state->settings_data->default_load_line_size){
+        return API_ERR_INVALID_ARG;
+    }      
+    
+    move_view_to_line(state,row,0);
+
+    return API_OK;
+}

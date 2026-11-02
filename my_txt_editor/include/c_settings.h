@@ -28,8 +28,28 @@ static inline screen_state comb_my_txt_editor_screen_mode_To_screen_state(MY_TXT
             return filetree_screen;
         case HOME_SCREEN_MODE:
             return start_menu_screen;
+        case UNKNOWN_MODE:
+            break;
     }
     return screen_state_log_error;
+}
+
+// screen_stateを設定側のMY_TXT_EDITOR_SCREEN_MODEへ変換する(comb_my_txt_editor_screen_mode_To_screen_stateの逆)。
+// 返り値: 対応するMODE。設定側に対応するモードが無いscreen_stateはUNKNOWN_MODE。
+static inline MY_TXT_EDITOR_SCREEN_MODE comb_screen_state_To_my_txt_editor_screen_mode(screen_state state){
+    switch(state){
+        case edit_screen:
+            return EDIT_MODE;
+        case file_browse_screen:
+            return FILE_SEARCH_MODE;
+        case filetree_screen:
+            return FILE_TREE_MODE;
+        case start_menu_screen:
+            return HOME_SCREEN_MODE;
+        default:
+            break;
+    }
+    return UNKNOWN_MODE;
 }
 
 

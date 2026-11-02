@@ -212,6 +212,7 @@ bool editor_ensure_line_cap(struct editor_state *state, int line, int need){
        state->str.line_offset == NULL || state->str.line_cap == NULL){
         return false;
     }
+    
     if(line < 0 || line >= state->str.line_capacity || need < 0){
         return false;
     }
@@ -226,35 +227,46 @@ bool editor_ensure_line_cap(struct editor_state *state, int line, int need){
     // 各行のoffsetも更新する必要がある。倍々で伸ばすのはこの高コストな操作の回数を減らすため。
     int old_cap = state->str.line_cap[line];
     int new_cap = (old_cap > 0) ? old_cap : EDITOR_LINE_COL_SLACK;
+
     while(new_cap < need){
-        if(new_cap > EDITOR_LINE_COL_MAX / 2){
-            new_cap = EDITOR_LINE_COL_MAX;
-            break;
-        }
         new_cap *= 2;
     }
+    if(new_cap > EDITOR_LINE_COL_MAX){
+        new_cap = EDITOR_LINE_COL_MAX;
+    }
 
-    long delta     = (long)new_cap - old_cap;
-    long new_total = state->str.total_capacity + delta;
+    long delta     = (long)new_cap - old_cap;//その行の拡張後と拡張前の要素数の差
+    long new_total = state->str.total_capacity + delta;//拡張後の合計要素数
+
     if(new_total < 0 || (size_t)new_total > SIZE_MAX / sizeof(wint_t)){
         return false;
     }
 
-    wint_t *buf = realloc(state->str.wint_line_str_data,
-                          (size_t)new_total * sizeof(wint_t));
+    wint_t *buf = 
+        realloc(
+            state->str.wint_line_str_data,
+            (size_t)new_total * sizeof(wint_t)
+        );
+
     if(buf == NULL){
         return false;
     }
 
     // 対象行の直後から末尾までをdelta分後方へ動かし、空いた隙間を0で埋める
     long tail_start = state->str.line_offset[line] + old_cap;
+    //lineが最終行番号だと、
+    // tail_startが確保している要素数になるため、tail_lenが0以下になる
     long tail_len   = state->str.total_capacity - tail_start;
+    //最終行だと配列終端のためガードで避ける
     if(tail_len > 0){
+        //もともとline + 1行目の始まり(tail_start)に
+        // 新しくline行の文字としてdelta分文字を追加するので、
+        //line + 1行目の文字をline + deltaに移動する
         memmove(&buf[tail_start + delta], &buf[tail_start],
                 (size_t)tail_len * sizeof(wint_t));
     }
     memset(&buf[tail_start], 0, (size_t)delta * sizeof(wint_t));
-
+    //delta分ずらしたのでオフセットもずらす
     for(int i = line + 1; i < state->str.line_capacity; i++){
         state->str.line_offset[i] += delta;
     }
@@ -289,6 +301,7 @@ bool editor_ensure_row_capacity(struct editor_state *state, int need_rows){
     int  *line        = realloc(state->str.line, (size_t)new_cap * sizeof(int));
     long *line_offset = realloc(state->str.line_offset, (size_t)new_cap * sizeof(long));
     int  *line_cap    = realloc(state->str.line_cap, (size_t)new_cap * sizeof(int));
+    
     // reallocは失敗しても元のポインタを解放しないため、成功した分だけでも
     // state側へ反映させておく(そうしないと古いポインタのままfreeし損ねる/二重解放になる)。
     if(line != NULL)        state->str.line        = line;
