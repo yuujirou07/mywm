@@ -40,6 +40,7 @@ typedef MY_TXT_EDITOR_RESULT (*SET_TEXT_CURSOR_ROW)(const MY_TXT_EDITOR_API *,in
 typedef MY_TXT_EDITOR_RESULT (*SET_TEXT_CURSOR_COL)(const MY_TXT_EDITOR_API *,int col);
 
 typedef MY_TXT_EDITOR_RESULT (*INPUT_CHAR)(const MY_TXT_EDITOR_API *api,wchar_t chr);
+typedef MY_TXT_EDITOR_RESULT (*UNDO_TEXT_INPUT)(const MY_TXT_EDITOR_API *api,size_t n);
 
 struct MY_TXT_EDITOR_API{
     void * userdata;
@@ -51,6 +52,7 @@ struct MY_TXT_EDITOR_API{
     SET_TEXT_CURSOR_ROW set_text_cursor_row;
     SET_TEXT_CURSOR_COL set_text_cursor_col;
     INPUT_CHAR input_char;
+    UNDO_TEXT_INPUT undo_text_input;
 };
 
 

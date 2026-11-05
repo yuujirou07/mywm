@@ -153,6 +153,14 @@ int main(int argc, char *argv[])
     }
     state.str.chr_file_all_str_data = NULL;
 
+
+    state.str.input_data_list.input_data_allocate_num = 64;
+    state.str.input_data_list.input_data_num = 0;
+    state.str.input_data_list.input_data = NULL;
+    
+
+
+
     input_context.ask_make_file_mode.screen_center_y =  state.scr.scr_size.y / 2;
 
     input_context.input_manager.key_maps.key_map_allocate_num  = 16;

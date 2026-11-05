@@ -33,4 +33,7 @@ int KL_write_file();
 const key_data *KL_GetLog(struct editor_state *state,size_t *n);
 
 int KL_open_key_log_file(const char *relative_path);
+
+int KL_get_key_data_log(struct editor_state *state,key_data **key,size_t *n);
+
 #endif

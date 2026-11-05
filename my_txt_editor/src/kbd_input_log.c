@@ -97,3 +97,12 @@ int KL_open_key_log_file(const char *relative_path){
     return 0;
 }
 
+int KL_get_key_data_log(struct editor_state *state,key_data **key,size_t *n){
+    if(state == NULL || key == NULL || n == NULL){
+        return -1;
+    }
+
+    *key = state->key_bord_data.Key_log_data.key_log;
+    *n = state->key_bord_data.Key_log_data.key_count;
+    return 0;
+}

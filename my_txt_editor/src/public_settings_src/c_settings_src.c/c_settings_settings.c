@@ -33,7 +33,7 @@ static MY_TXT_EDITOR_RESULT get_editor_screen_mode(const MY_TXT_EDITOR_API *api,
 static MY_TXT_EDITOR_RESULT set_text_cursor_row(const MY_TXT_EDITOR_API *api,int row);
 static MY_TXT_EDITOR_RESULT input_char(const MY_TXT_EDITOR_API *api,wchar_t chr);
 static MY_TXT_EDITOR_RESULT set_text_cursor_col(const MY_TXT_EDITOR_API *api,int col);
-
+static MY_TXT_EDITOR_RESULT undo_text_input(const MY_TXT_EDITOR_API *api,size_t n);
 
 static int is_user_event_key(wchar_t chr);
 
@@ -48,6 +48,7 @@ void connect_api_mem_data(MY_TXT_EDITOR_API *const api,struct editor_input_conte
     api->set_text_cursor_row = set_text_cursor_row;
     api->input_char = input_char;
     api->set_text_cursor_col = set_text_cursor_col;
+    api->undo_text_input = undo_text_input;
     return;
 }
 
@@ -492,4 +493,19 @@ static MY_TXT_EDITOR_RESULT set_text_cursor_col(const MY_TXT_EDITOR_API *api,int
     state->cursor.file_pos.x = col;
 
     return API_OK;
+}
+
+
+static MY_TXT_EDITOR_RESULT undo_text_input(const MY_TXT_EDITOR_API *api,size_t n){
+    if(api == NULL || n == 0){
+        return API_ERR_INVALID_ARG;
+    }
+    struct editor_input_context *ctx = api->userdata;
+    struct editor_state *state = ctx->state;
+
+
+        
+
+    
+
 }

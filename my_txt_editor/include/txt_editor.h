@@ -3,6 +3,7 @@
 
 #include <ncurses.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <wchar.h>
 #include <wctype.h>
@@ -89,6 +90,7 @@ struct jump_mode{
     char jump_line_num[JUMP_LINE_NUM_DIGITS + 1]; // 入力中のジャンプ先行番号文字列。
     int  jump_line_num_counter; // jump_line_numに入っている文字数。
 };
+
 
 
 // 開いているファイルと、読み込み済みテキストの行情報。
@@ -198,6 +200,20 @@ struct cursor {
     CURSOR_COLOR Color;
 };
 
+typedef struct{
+    wint_t chr;//入力文字
+    long line;//論理行
+    long col;//論理桁
+}input_data;
+
+
+typedef struct{
+    input_data *input_data;
+    size_t input_data_num;
+    size_t input_data_allocate_num;
+}_input_data_list;   
+
+
 // 編集バッファ本体と、行ごとの文字数・容量情報。
 // wint_line_str_dataは「行数×画面幅」の矩形ではなく、行ごとに必要な分だけを
 // 連続領域へ詰めた可変長レイアウトで持つ。行の先頭位置はline_offsetが持ち、
@@ -210,6 +226,7 @@ struct str_data {
     int    *line_cap; // 論理行番号で引く、その行に確保済みの列数。
     long    total_capacity; // wint_line_str_data全体の要素数。
     int     line_capacity; // 扱える最大行数。
+    _input_data_list input_data_list;
 };
 
 
