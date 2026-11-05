@@ -35,6 +35,7 @@
 #include "txt_editor_icon.h"
 #include"txt_editor_syntax.h"
 #include"input_complete.h"
+#include"editor_color.h"
 
 static void end_process(struct editor_state *state);
 static void lsp_poll_events(int *epfd, struct lsp_process *lsp, int timeout_ms);
@@ -115,18 +116,15 @@ int main(int argc, char *argv[])
     nodelay(stdscr,false);
     keypad(win, TRUE); 
     my_cur_set(&state,false);
-    
-    start_color();
-    if (has_colors()) {
-        init_pair(1, COLOR_WHITE, COLOR_BLACK);
-        attrset(COLOR_PAIR(1));
+
+    //cursesカーラー初期化
+    init_curses_color(&input_context);
+
+
+    // 8色の組み合わせはinit_curses_colorが登録済み。256色の構文色だけその次の番号から登録する。
+    if(state.settings_data->built_in_syntax){
+        init_syntax_colors();
     }
-    init_pair(2, COLOR_BLACK, COLOR_WHITE);
-    init_pair(3, COLOR_BLACK, COLOR_RED);
-    init_pair(4,COLOR_WHITE,COLOR_BLACK);
-    // 色ペア1〜4は本文・選択・エラー・枠消去用に固定。構文色はその次の番号から登録する。
-    init_syntax_colors();
-    init_pair(SETTINGS_ACCENT_COLOR_PAIR, COLOR_CYAN, COLOR_BLACK);
 
     state.scr.scr_start_num = 0;
 
@@ -196,6 +194,8 @@ int main(int argc, char *argv[])
         perror("getcwd");
         return 1;
     }
+
+
     struct dir_table now_path = {.path_name = state.file_browse.path_name};
     if(now_open_path_name(&now_path,set) == NULL)return 0;
     state.file_data.description_line_end = 0;
@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
     input_context.ask_make_file_mode.screen_center_pos.x = state.scr.scr_size.x / 2;
     input_context.ask_make_file_mode.screen_center_pos.y = input_context.ask_make_file_mode.screen_center_y;
     
-    bkgd(COLOR_PAIR(1));
+    bkgd(COLOR_PAIR(get_color_pair(&input_context,COLOR_WHITE,COLOR_BLACK)));
     editor_sync_cursor(&state);
     set_cur_pos(&state);
     refresh();
@@ -312,7 +312,6 @@ int main(int argc, char *argv[])
                 error_log_write("dlsym failed\n");
                 dlclose(handle);
                 end_process(&state);
-                
                 return 1;
             }
         }
@@ -524,7 +523,6 @@ int main(int argc, char *argv[])
         if(state.settings_data->editor_settings_program.enabled){
             check_user_settings_event(&input_context);
         }
-
         
         if (input_result == ERR)continue;
 
@@ -574,6 +572,7 @@ int main(int argc, char *argv[])
     }
 
     free(input_context.input_manager.key_maps.key_mapp_list);
+    free(input_context.color_list.col_id_data);
     destroy_dl_path(&input_context);
     if(epfd >= 0)
         close(epfd);

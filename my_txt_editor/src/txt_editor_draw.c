@@ -14,6 +14,7 @@
 #include "settings_screen.h"
 #include "txt_editor.h"
 #include"txt_editor_syntax.h"
+#include"editor_color.h"
 #include"editor_log.h"
 #include"txt_editor_icon.h"
 
@@ -21,7 +22,7 @@
 
 static void draw_search_box(struct box search_box,WINDOW *win);
 static int settings_item_name_width(const char *name);
-static void draw_settings_title(struct box box,WINDOW *win);
+static void draw_settings_title(struct editor_input_context *ctx,struct box box);
 static void draw_settings_screen(struct editor_input_context *ctx);
 static void draw_settings_explanation_box(struct editor_input_context *ctx);
 static int draw_settings_search_box(struct editor_input_context *ctx);
@@ -231,11 +232,11 @@ void draw_box(struct box box, WINDOW *win){
 }
 
 // queueの矩形全体を消去してから枠を順に描き、件数を0へ戻す。
-// 引数: queue=有効な枠キュー、win=枠描画関数へ渡すウィンドウ。返り値: なし。
-static void flush_box_queue(struct box_queue *queue, WINDOW *win){
+// 引数: ctx=色表を持つcontext、queue=有効な枠キュー、win=枠描画関数へ渡すウィンドウ。返り値: なし。
+static void flush_box_queue(struct editor_input_context *ctx,struct box_queue *queue, WINDOW *win){
 
     for(int i = 0; i < queue->count; i++){
-        clear_box_area(queue->box[i]);
+        clear_box_area(ctx,queue->box[i]);
         draw_box(queue->box[i], win);
     }
     queue->count = 0;
@@ -370,8 +371,8 @@ void draw_select_dir_scene_color(struct editor_state *state,int dir_num,int num)
 
     if(state->file_browse.select_line.previous_line != state->file_browse.select_line.now_line){
         int previous_line = state->file_browse.area.pos.y + state->file_browse.select_line.previous_line;
-        // 色ペア1は通常の本文色。選択が移った前の行をここで元に戻す。
-        mvchgat(previous_line,state->file_browse.area.pos.x,state->file_browse.area.w,A_NORMAL,1,NULL);
+        // 選択が移った前の行を通常の本文色へ戻す。
+        mvchgat(previous_line,state->file_browse.area.pos.x,state->file_browse.area.w,A_NORMAL,get_color_pair(state->input_ctx,COLOR_WHITE,COLOR_BLACK),NULL);
     }
     move(cur_y,cur_x);
 }
@@ -442,9 +443,10 @@ void editor_error_screen(struct editor_state *state,char *error_comment){
     int press_enter_comment_start_pos_x = screen_center_x - (press_enter_comment/2);
     int screen_center_y        =  state->file_browse.area.pos.y + (state->file_browse.area.h/2);
 
-    attron(COLOR_PAIR(3));
+    attr_t error_attr = COLOR_PAIR(get_color_pair(state->input_ctx,COLOR_BLACK,COLOR_RED));
+    attron(error_attr);
     mvaddstr(screen_center_y-10,error_start_pos_x,"error");
-    attroff(COLOR_PAIR(3));
+    attroff(error_attr);
     mvaddstr(screen_center_y-9,comment_start_pos_x,error_comment);
     mvaddstr(screen_center_y-8,press_enter_comment_start_pos_x,"press enter to back");
     error_log(error_comment);//ファイル出力
@@ -663,7 +665,7 @@ void update_screen(struct editor_input_context *ctx){
                       ctx->edit_screen.line_end_pos, win, all_draw_mode);
         }
         if(flags & RENDER_SELECT_DIR_SCENE_COLOR){
-            draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,2);
+            draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,get_color_pair(ctx,COLOR_BLACK,COLOR_WHITE));
         }
         if(flags & RENDER_EDIT_SCREEN_BASE){
             draw_edit_screen_base(state, win, ctx->edit_screen.line_start_pos,
@@ -682,7 +684,7 @@ void update_screen(struct editor_input_context *ctx){
             draw_now_path_name(state->file_browse.box,
                                state->file_browse.path_name);
             draw_box_inside_dir(state, state->file_browse.dir_name_table);
-            draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,2);
+            draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,get_color_pair(ctx,COLOR_BLACK,COLOR_WHITE));
 
             //サーチボックスの描画とサーチボックス内のパス描画
             if(get_file_browse_path_input_mode(&state->file_browse)){
@@ -717,7 +719,7 @@ void update_screen(struct editor_input_context *ctx){
             }
         }
         if(flags & RENDER_BOX){
-            flush_box_queue(&state->draw_box_queue, win);
+            flush_box_queue(ctx,&state->draw_box_queue, win);
         }
         if(flags & RENDER_LINE_JUMP){
            draw_line_jump(state);
@@ -807,19 +809,18 @@ static int settings_item_name_width(const char *name){
     return (width < 0) ? -1 : width;
 }
 
-// 設定画面のbox上辺中央へタイトルを重ねる。draw_boxの後に呼ぶ。winは未使用。
+// 設定画面のbox上辺中央へタイトルを重ねる。draw_boxの後に呼ぶ。
 // 返り値: なし。タイトルと左右余白が枠幅に収まらなければ描画しない。
-static void draw_settings_title(struct box box,WINDOW *win){
-    (void)win;
-
+static void draw_settings_title(struct editor_input_context *ctx,struct box box){
     const char *title = " Settings ";
     int title_len = (int)strlen(title);
     if(box.w < title_len + 2)return;
 
     int title_x = box.pos.x + (box.w - title_len) / 2;
-    attron(COLOR_PAIR(SETTINGS_ACCENT_COLOR_PAIR) | A_BOLD);
+    attr_t accent_attr = COLOR_PAIR(get_color_pair(ctx,COLOR_CYAN,COLOR_BLACK)) | A_BOLD;
+    attron(accent_attr);
     mvaddstr(box.pos.y,title_x,title);
-    attroff(COLOR_PAIR(SETTINGS_ACCENT_COLOR_PAIR) | A_BOLD);
+    attroff(accent_attr);
 }
 
 // stateの項目名の表示幅・項目数・画面寸法から、中央寄せした設定画面の枠を決める。
@@ -874,7 +875,7 @@ static void draw_settings_screen(struct editor_input_context *ctx){
     settings_screen_data st_scr_data = state->settings_screen_data;
 
     draw_box(st_scr_data.box,ctx->win);
-    draw_settings_title(st_scr_data.box,ctx->win);
+    draw_settings_title(ctx,st_scr_data.box);
 
     int item_num = st_scr_data.settings_item_data_num;
     int inner_w = st_scr_data.box.w - 2;
@@ -934,13 +935,14 @@ static void draw_settings_screen(struct editor_input_context *ctx){
 
             wchar_t key_code[SETTINGS_ITEM_KEY_WIDTH + 1] =
                 {L'[',(wchar_t)item.key_code,L']',L'\0'};
-            attron(COLOR_PAIR(SETTINGS_ACCENT_COLOR_PAIR) | A_BOLD);
+            attr_t accent_attr = COLOR_PAIR(get_color_pair(ctx,COLOR_CYAN,COLOR_BLACK)) | A_BOLD;
+            attron(accent_attr);
             mvaddnwstr(scr_pos_y,key_pos_x,key_code,SETTINGS_ITEM_KEY_WIDTH);
-            attroff(COLOR_PAIR(SETTINGS_ACCENT_COLOR_PAIR) | A_BOLD);
+            attroff(accent_attr);
 
             //反転は最後に重ねる。名前とキーの色より選択表示を優先する。
             if(is_select){
-                mvchgat(scr_pos_y,col_pos_x,col_w,A_NORMAL,2,NULL);
+                mvchgat(scr_pos_y,col_pos_x,col_w,A_NORMAL,get_color_pair(ctx,COLOR_BLACK,COLOR_WHITE),NULL);
             }
         }
     }
@@ -1203,7 +1205,7 @@ int draw_editor_complete_word_box(struct editor_input_context *ctx){
     //補完ウィンドウが動く前に消しておく
     if(state->edit_input_complete_data.box.h > 0 && 
         state->edit_input_complete_data.box.w > 0){
-        clear_box_area(complete_box_screen(state));
+        clear_box_area(ctx,complete_box_screen(state));
     }
 
     struct box old_box = {0};
@@ -1273,7 +1275,7 @@ int draw_editor_complete_word_box(struct editor_input_context *ctx){
             set_syntax_color_line(ctx,old_box.pos.y,old_box.h);
         }
     }
-    clear_box_area(complete_box_screen(state));
+    clear_box_area(ctx,complete_box_screen(state));
     draw_box(complete_box_screen(state),stdscr);
     state->render_flags |= RENDER_BOX;
     return 0;
@@ -1282,11 +1284,12 @@ int draw_editor_complete_word_box(struct editor_input_context *ctx){
 
 // 画面上を空白で消す。
 // 返り値: 幅・高さが2以下なら-1、それ以外0。ncursesの描画失敗は通知しない。
-int clear_box_area(struct box b){
+int clear_box_area(struct editor_input_context *ctx,struct box b){
     if(b.h <= 2 || b.w <= 2)return -1;
+    attr_t clear_attr = COLOR_PAIR(get_color_pair(ctx,COLOR_WHITE,COLOR_BLACK));
     for(int i = 0;i < b.h;i++){
-        // 色ペア4(構文色の先頭)で塗る。b.w-1にして右端の枠線列は残す。
-        mvhline(b.pos.y + i,b.pos.x,L' '|COLOR_PAIR(4),b.w - 1);
+        // 本文色で塗る。b.w-1にして右端の枠線列は残す。
+        mvhline(b.pos.y + i,b.pos.x,L' '|clear_attr,b.w - 1);
     }
     return 0;
 }

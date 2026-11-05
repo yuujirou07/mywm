@@ -40,7 +40,7 @@
 // 使用: editor_ensure_line_capの上限判定と容量の丸め、設定値max_line_sizeの許可範囲の上限。
 #define EDITOR_LINE_COL_MAX 65536
 
-
+#define SUPPORT_COLOR_NUM 64
 
 static const char *const MY_TXT_EDITOR_CURRENT_DIR_NAME = "my_txt_editor";
 
@@ -251,6 +251,7 @@ struct screen_state_log{
 
 // エディタ全体で共有する実行時状態。
 struct editor_state {
+    struct editor_input_context *input_ctx; // 色表などを参照するための借用ポインタ。init_input_contextが設定する。
     struct editor_settings    *settings_data; // 設定ファイルとデフォルト値から作った設定。
     struct scr_data            scr; // 画面サイズ・スクロール状態。
     struct str_data            str; // 編集バッファと行長情報。
@@ -376,6 +377,19 @@ typedef struct{
     void **dl_handles; // dlopenしたライブラリのハンドル配列。loading_dynamic_libと同じ添字で対応する。未確保ならNULL、終了時に各要素をdlcloseして配列をfreeする。
 }loading_dl_data;
 
+
+typedef struct{
+    int id;
+    int fg_col;
+    int bg_col;
+}color_id_data;
+
+typedef struct{
+    color_id_data *col_id_data;
+    size_t col_data_num;
+    size_t col_data_allocate_num;
+}col_list_data;
+
 // 全画面の入力ハンドラへ渡す共有参照と、画面別の配置情報。
 struct editor_input_context {
     WINDOW *win; // ncursesの標準描画先への借用ポインタ。
@@ -388,6 +402,7 @@ struct editor_input_context {
     struct start_menu_screen_context start_menu_screen; // スタートメニューの借用データ。
     editor_input_manager input_manager; // ユーザー設定の入力管理。
     loading_dl_data dl_data;
+    col_list_data color_list;
     MY_TXT_EDITOR_API editor_api;
 };
 
@@ -672,7 +687,7 @@ void request_clear_box(struct editor_state *state, struct box box);
 void draw_line_jump(struct editor_state *state);
 int set_clear_box(struct clear_box_data *clear_box_data,struct box box);
 int clear_status_bar_outline(struct editor_state *state);
-int clear_box_area(struct box b);
+int clear_box_area(struct editor_input_context *ctx,struct box b);
 struct box complete_box_screen(struct editor_state *state);
 int draw_editor_complete_word_box(struct editor_input_context *ctx);
 int draw_edit_complete_world(struct editor_state *state);

@@ -77,9 +77,9 @@ int init_syntax(syntax *syntax);
 void init_syntax_colors(void);
 
 // 構文分類に対応するncurses色ペア番号を返す。
-// 引数: word_typeは着色分類。使用前にinit_syntax_colors()を呼び出す。
-// 戻り値: 対応する色ペア。色非対応なら0、分類不正またはペア不足なら1。
-short syntax_color_pair(syntax_type word_type);
+// 引数: ctxは色表を持つcontext、word_typeは着色分類。使用前にinit_syntax_colors()を呼び出す。
+// 戻り値: 対応する色ペア。色非対応なら0、分類不正なら本文色、ペア不足なら8色の色ペア。
+short syntax_color_pair(struct editor_input_context *ctx,syntax_type word_type);
 
 // 本文領域を通常色に戻し、登録済みの構文色を画面へ適用する。
 // 引数: ctxは有効なstateを持つコンテキスト、syntaxは着色配列を借用する浅いコピー。

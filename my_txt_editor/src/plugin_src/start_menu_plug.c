@@ -26,9 +26,11 @@ static void write_startup_time_log(const struct timespec *start_time, const char
 
 // screen_max_w/hの画面でメニュー入力を待つ。ascii_data_ptrはロゴ情報の出力先（NULL可）。
 // 返り値: 選択した処理番号またはresize_request。startup_start_time/log_pathは初回描画の所要時間記録用（NULL可）。
+// normal_color_pairは選択肢の強調に使う本文色の色ペア番号。
 int draw_start_menu(int screen_max_w,int screen_max_h,struct ascii_data *ascii_data_ptr,
         const struct timespec *startup_start_time,
-                const char *startup_log_path){
+                const char *startup_log_path,
+                short normal_color_pair){
 
         static bool is_first_start_menu = 1;
         struct pos screen_max_pos   = (struct pos){screen_max_w,screen_max_h};
@@ -51,7 +53,7 @@ int draw_start_menu(int screen_max_w,int screen_max_h,struct ascii_data *ascii_d
 
         for(int i = 0;i < option_count;i++){
                 mvchgat(option_data[i].y,option_data[i].x,
-                        option_data[i].w,A_BOLD,1,NULL);
+                        option_data[i].w,A_BOLD,normal_color_pair,NULL);
         }
 
         refresh();

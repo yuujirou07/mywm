@@ -17,6 +17,7 @@
 #include "txt_editor.h"
 #include "txt_editor_screen.h"
 #include"txt_editor_syntax.h"
+#include"editor_color.h"
 #include"editor_types.h"
 
 // stateの画面寸法からブラウザの枠・入力欄・内側領域を再計算し、高さ変更時に一覧を再読込する。
@@ -98,9 +99,10 @@ void handle_resize(WINDOW *win, struct editor_input_context *ctx){
         int msg_y = state->scr.scr_size.y / 2;
 
         clear();
-        attron(COLOR_PAIR(3));
+        attr_t error_attr = COLOR_PAIR(get_color_pair(ctx,COLOR_BLACK,COLOR_RED));
+        attron(error_attr);
         mvaddnstr(msg_y, msg_x, resize_msg, draw_len);
-        attroff(COLOR_PAIR(3));
+        attroff(error_attr);
         refresh();
 
         // リサイズ以外の入力は捨て、サイズが変わるたびに新しい中央へ描き直す
@@ -940,6 +942,7 @@ int editor_set_env_lang(struct editor_input_context *ctx,language lang){
 int init_input_context(struct editor_input_context *ctx,struct editor_state *state,MEVENT *mouse_event){
     memset(ctx,0,sizeof(*ctx));
     ctx->state       = state;
+    state->input_ctx = ctx;
     ctx->mouse_event = mouse_event;
 
     ctx->input_manager.key_maps.key_map_allocate_num = 16;
@@ -1052,4 +1055,3 @@ int SetCursorColor(struct editor_state *state,CURSOR_COLOR color){
     fflush(stdout);
     return 0;
 }
-

@@ -1,4 +1,5 @@
 #include "start_menu.h"
+#include "editor_color.h"
 #include "txt_editor.h"
 #include "txt_editor_screen.h"
 
@@ -20,7 +21,8 @@ bool handle_start_menu_input(struct editor_input_context *ctx, wint_t ch){
         state->scr.scr_size.x,state->scr.scr_size.y,
         ctx->start_menu_screen.ascii_data,
         ctx->start_menu_screen.startup_start_time,
-        ctx->start_menu_screen.startup_log_path);
+        ctx->start_menu_screen.startup_log_path,
+        get_color_pair(ctx,COLOR_WHITE,COLOR_BLACK));
     flushinp();
     *ctx->start_menu_screen.open = false;
 

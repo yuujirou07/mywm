@@ -12,6 +12,7 @@ MAIN_SRC := src/main.c \
 	src/txt_editor_draw.c \
 	src/txt_editor_file.c \
 	src/txt_editor_syntax.c \
+	src/editor_color.c \
 	src/json_read.c \
 	src/editor_log.c \
 	src/kbd_input_log.c \

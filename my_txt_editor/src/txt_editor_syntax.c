@@ -10,8 +10,9 @@
 
 #include"txt_editor.h"
 #include"txt_editor_syntax.h"
+#include"editor_color.h"
 
-// Dark Modernの256色近似。色ペア1〜3は本文・選択・エラー表示が使用する。
+// Dark Modernの256色近似。
 static const struct {
     short color_256; // 256色以上の端末で使う前景色番号。
     short color_8; // 256色未満の端末で使う基本色番号。
@@ -36,27 +37,28 @@ static int collection_count = 0;
 static void color_text_cells(struct editor_state *state,int y,int x,int width,short color);
 
 
-// ncursesとstart_color初期化後に、利用可能な構文色ペアを4番以降へ登録する。
-// 引数・返り値: なし。色非対応なら何もせず、色登録の失敗は通知しない。
+// ncursesとstart_color初期化後に、256色の構文色ペアをget_color_idの表より後ろの番号へ登録する。
+// 引数・返り値: なし。256色未満なら8色の表を使うので何もせず、色登録の失敗は通知しない。
 void init_syntax_colors(void){
-    if(!has_colors())return;
+    if(!has_colors() || COLORS < 256)return;
     for(size_t i = 0;i < sizeof(syntax_colors) / sizeof(syntax_colors[0]);i++){
-        short pair = (short)(4 + i);
-        if(pair >= COLOR_PAIRS)break; // 端末のペア上限を超える分は登録しない(syntax_color_pairが本文色へ退避)。
-        short foreground = (COLORS >= 256)
-            ? syntax_colors[i].color_256 : syntax_colors[i].color_8;
-        init_pair(pair,foreground,COLOR_BLACK);
+        short pair = (short)(SUPPORT_COLOR_NUM + i);
+        if(pair >= COLOR_PAIRS)break; // 端末のペア上限を超える分は登録しない(syntax_color_pairが8色へ退避)。
+        init_pair(pair,syntax_colors[i].color_256,COLOR_BLACK);
     }
 }
 
 // word_typeに対応する構文色ペア番号を返す。事前にinit_syntax_colorsを呼ぶ。
-// 返り値: 色非対応は0、分類不正・ペア不足は本文用の1、それ以外は4+word_type。
-short syntax_color_pair(syntax_type word_type){
+// 返り値: 色非対応は0、分類不正は本文色、256色はSUPPORT_COLOR_NUM+word_type、それ以外は8色の色ペア。
+short syntax_color_pair(struct editor_input_context *ctx,syntax_type word_type){
     if(!has_colors())return 0;
     //suntax_typeが要素数より上の値かの条件分岐
-    if((unsigned int)word_type >= sizeof(syntax_colors) / sizeof(syntax_colors[0]))return 1;
-    short pair = (short)(4 + word_type);
-    return (pair < COLOR_PAIRS) ? pair : 1;
+    if((unsigned int)word_type >= sizeof(syntax_colors) / sizeof(syntax_colors[0])){
+        return get_color_pair(ctx,COLOR_WHITE,COLOR_BLACK);
+    }
+    short pair = (short)(SUPPORT_COLOR_NUM + word_type);
+    if(COLORS >= 256 && pair < COLOR_PAIRS)return pair;
+    return get_color_pair(ctx,syntax_colors[word_type].color_8,COLOR_BLACK);
 }
 
 static const wchar_t *const reserved_words[] = {
@@ -340,7 +342,7 @@ void set_syntax_color_line(struct editor_input_context *ctx,uint16_t line,uint16
             while(end < len && end < view_cols && cells[end] == 0)end++;
 
             
-            short syntax_color = syntax_color_pair(tmp_syntax_data.type);
+            short syntax_color = syntax_color_pair(ctx,tmp_syntax_data.type);
             color_text_cells(state,
                 syntax_box.pos.y + state->write_area.y_start,
                 col + state->write_area.x_start,
@@ -393,11 +395,12 @@ int apply_syntax_color(struct editor_input_context *ctx,syntax syntax){
 
     int syntax_num = syntax.syntax_list_data.syntax_list_num;
     
-    // 本文描画の後に色だけを重ねる方式なので、まず色ペア1(通常色)に戻して前回の着色を消す。
+    // 本文描画の後に色だけを重ねる方式なので、まず通常色に戻して前回の着色を消す。
+    short normal_color = get_color_pair(ctx,COLOR_WHITE,COLOR_BLACK);
     for(int h = 0;h < state->write_area.h;h++){
         if(state->write_area.w > 0){
             color_text_cells(state,state->write_area.y_start + h,state->write_area.x_start,
-                state->write_area.w,1);
+                state->write_area.w,normal_color);
             }
     }
     if(syntax.lang == UNKNOWN)return 0;
@@ -409,7 +412,7 @@ int apply_syntax_color(struct editor_input_context *ctx,syntax syntax){
 
         else if(area->pos.y >= state->write_area.h || area->pos.y + area->h - 1 >= state->write_area.h)continue;
 
-        short syntax_color = syntax_color_pair(data->type); 
+        short syntax_color = syntax_color_pair(ctx,data->type); 
         color_text_cells(state,state->write_area.y_start + area->pos.y,
             state->write_area.x_start + area->pos.x,
             area->w,syntax_color);

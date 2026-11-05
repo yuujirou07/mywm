@@ -7,7 +7,8 @@
 // スタートメニュープラグインの呼出し規約。返り値は下記の操作コード。
 typedef int (*Start_Menu)(int screen_w, int screen_h, struct ascii_data *ascii_data,
                           const struct timespec *startup_start_time,
-                          const char *startup_log_path);
+                          const char *startup_log_path,
+                          short normal_color_pair);
 
 // スタートメニュー画面の入力とプラグイン呼出しに必要な借用データ。
 struct start_menu_screen_context {
@@ -30,6 +31,7 @@ struct start_menu_screen_context {
 
 int draw_start_menu(int screen_max_w,int screen_max_h,struct ascii_data *ascii_data_ptr,
                     const struct timespec *startup_start_time,
-                    const char *startup_log_path);
+                    const char *startup_log_path,
+                    short normal_color_pair);
 
 #endif
