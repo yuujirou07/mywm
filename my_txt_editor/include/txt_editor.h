@@ -334,6 +334,7 @@ typedef struct{
 // キー1文字の入力イベントへ登録する処理1件。
 typedef struct{
     wchar_t chr; // 対象の入力文字。
+    MY_TXT_EDITOR_SCREEN_MODE mode; // このイベントを有効にする画面。
     EDITOR_ACTION action_func; // 入力されたときに呼ぶ処理。
 }key_event_data;
 

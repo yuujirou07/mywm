@@ -96,3 +96,4 @@ int KL_open_key_log_file(const char *relative_path){
     }
     return 0;
 }
+

@@ -4,12 +4,14 @@
 #include <dlfcn.h>
 #include <limits.h>
 #include <linux/limits.h>
+#include <ncurses.h>
 #include <stddef.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include <sys/stat.h>
 #include <wchar.h>
 #include<unistd.h>
+#include <wctype.h>
 
 
 #include "c_settings.h"
@@ -25,11 +27,15 @@
 static MY_TXT_EDITOR_RESULT api_save_file(void *userdata);
 static void *load_current_settings_obj_c_file(struct editor_input_context *ctx);
 static MY_TXT_EDITOR_RESULT api_key_mapping(void *userdata,wchar_t key1,wchar_t key2,MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action);
-static MY_TXT_EDITOR_RESULT add_key_input_event_handle(void *userdata,wchar_t chr,EDITOR_ACTION action);
+static MY_TXT_EDITOR_RESULT add_key_input_event_handle(void *userdata,wchar_t chr,MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action);
 static int check_input_handle(struct editor_input_context *ctx,wchar_t chr);
 static MY_TXT_EDITOR_RESULT get_editor_screen_mode(const MY_TXT_EDITOR_API *api,MY_TXT_EDITOR_SCREEN_MODE *mode);
 static MY_TXT_EDITOR_RESULT set_text_cursor_row(const MY_TXT_EDITOR_API *api,int row);
+static MY_TXT_EDITOR_RESULT input_char(const MY_TXT_EDITOR_API *api,wchar_t chr);
+static MY_TXT_EDITOR_RESULT set_text_cursor_col(const MY_TXT_EDITOR_API *api,int col);
 
+
+static int is_user_event_key(wchar_t chr);
 
 // apiへ借用したctxと、保存・キーマップ登録用の関数ポインタを接続する。
 // 返り値: なし。apiとctxは非NULLで、API利用中はctxを有効に保つ。
@@ -40,6 +46,8 @@ void connect_api_mem_data(MY_TXT_EDITOR_API *const api,struct editor_input_conte
     api->input_event = add_key_input_event_handle;
     api->get_screen_mode = get_editor_screen_mode;
     api->set_text_cursor_row = set_text_cursor_row;
+    api->input_char = input_char;
+    api->set_text_cursor_col = set_text_cursor_col;
     return;
 }
 
@@ -67,6 +75,12 @@ static MY_TXT_EDITOR_RESULT api_key_mapping(void *userdata,wchar_t key1,wchar_t 
     if(ctx == NULL || action == NULL){
         return API_ERR_NULL;
     }
+
+    //ユーザーが指定できるキーのガード
+    if(is_user_event_key(key1) != 0 || is_user_event_key(key2) != 0){
+        return API_ERR_INVALID_ARG;
+    }
+
 
     //キーマップ最大登録数ガード
     if(ctx->input_manager.key_maps.key_map_num >= KEY_MAPPING_MAX_NUM){
@@ -122,6 +136,7 @@ void init_settings_src(MY_TXT_EDITOR_API *const api,struct editor_input_context 
 // 返り値: なし。chrは2要素以上で、登録関数・ctx・apiは有効であること。不一致は何もしない。
 void check_key_mapps_entry(struct editor_input_context *ctx,wchar_t chr[2],MY_TXT_EDITOR_API *api){
     if(api == NULL || ctx == NULL)return;
+
     screen_state editor_screen_state = editor_get_screen_state(ctx->state);
 
     
@@ -143,10 +158,10 @@ void check_key_mapps_entry(struct editor_input_context *ctx,wchar_t chr[2],MY_TX
     return;
 }
 
-// キー入力chrに登録された入力イベントを呼ぶ予定の関数。
-// 現実装は引数の確認だけで、イベントは呼ばない(未実装)。引数: ctx=入力context、chr=入力文字、api=ユーザー設定へ渡すAPI。 返り値: 引数不正は-1。
+// userdataのctxへ、入力文字chrとmode(有効にする画面)・actionの入力イベントを登録する。
+// 返り値: 成功API_OK、userdata・action NULLはAPI_ERR_NULL、再確保失敗はAPI_ERR_NO_MEMORY。
 
-static MY_TXT_EDITOR_RESULT add_key_input_event_handle(void *userdata,wchar_t chr,EDITOR_ACTION action){
+static MY_TXT_EDITOR_RESULT add_key_input_event_handle(void *userdata,wchar_t chr,MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action){
     if(userdata== NULL || action == NULL){
         error_log("argument error");
         return API_ERR_NULL;
@@ -180,6 +195,7 @@ static MY_TXT_EDITOR_RESULT add_key_input_event_handle(void *userdata,wchar_t ch
         &ctx->input_manager.key_events.key_event_data[ctx->input_manager.key_events.key_map_num];
     
     tmp_key_event->chr = chr;
+    tmp_key_event->mode = mode;
     tmp_key_event->action_func = action;
     ctx->input_manager.key_events.key_map_num++;
     return API_OK;
@@ -226,24 +242,28 @@ int check_user_settings_event(struct editor_input_context *ctx){
     //ショートカットキー処理
     size_t tmp_key_data_arry_num = 0;
     const key_data *tmp_key_data_arry = KL_GetLog(ctx->state,&tmp_key_data_arry_num);
+
+
     //ショートカットは2キー以上からなのでそれ以下は除外する
     if(tmp_key_data_arry_num > 0){
         if(tmp_key_data_arry_num > 1){
-            wchar_t chr[2] = 
-                {
-                    tmp_key_data_arry[tmp_key_data_arry_num - 2].key,
-                    tmp_key_data_arry[tmp_key_data_arry_num - 1].key
-                };
-
-            //同じスクリーンステートのでのショートカットキーに今のとこ限定する
-            if(tmp_key_data_arry[tmp_key_data_arry_num - 1].screen_state ==
+            //直近2入力がどちらも通常文字で、同じスクリーンステートのときだけショートカット判定する
+            if(tmp_key_data_arry[tmp_key_data_arry_num - 1].input_result == OK &&
+                tmp_key_data_arry[tmp_key_data_arry_num - 2].input_result == OK &&
+                tmp_key_data_arry[tmp_key_data_arry_num - 1].screen_state ==
                 tmp_key_data_arry[tmp_key_data_arry_num - 2].screen_state){
-                check_key_mapps_entry(ctx,chr,&ctx->editor_api);      
-            }  
+                wchar_t chr[2] =
+                    {
+                        tmp_key_data_arry[tmp_key_data_arry_num - 2].key,
+                        tmp_key_data_arry[tmp_key_data_arry_num - 1].key
+                    };
+                check_key_mapps_entry(ctx,chr,&ctx->editor_api);
+            }
         }
-        check_input_handle(ctx,tmp_key_data_arry[tmp_key_data_arry_num - 1].key);
+        if(tmp_key_data_arry[tmp_key_data_arry_num - 1].input_result == OK){
+            check_input_handle(ctx,tmp_key_data_arry[tmp_key_data_arry_num - 1].key);
+        }
     }
-    
     
 
 
@@ -356,8 +376,12 @@ static int check_input_handle(struct editor_input_context *ctx,wchar_t chr){
         return -1;
     }
 
+    screen_state editor_screen_state = editor_get_screen_state(ctx->state);
+
     for(int i = 0; i < ctx->input_manager.key_events.key_map_num;i++){
-        if(ctx->input_manager.key_events.key_event_data[i].chr == chr){
+        if(ctx->input_manager.key_events.key_event_data[i].chr == chr &&
+            editor_screen_state ==
+                comb_my_txt_editor_screen_mode_To_screen_state(ctx->input_manager.key_events.key_event_data[i].mode)){
             ctx->input_manager.key_events.key_event_data[i].action_func(&ctx->editor_api);
         }
     }
@@ -403,6 +427,69 @@ static MY_TXT_EDITOR_RESULT set_text_cursor_row(const MY_TXT_EDITOR_API *api,int
     }      
     
     move_view_to_line(state,row,0);
+
+    return API_OK;
+}
+
+
+// chrがユーザーがショートカット/入力イベントに指定できるキーかを判定する。現状は英数字(iswalnum)のみ許可する。
+// 引数: chr=判定するキー文字。 返り値: 指定できる(英数字)なら0、できないなら-1。
+static int is_user_event_key(wchar_t chr){
+    if(iswalnum(chr)){
+        return 0;
+    }
+    return -1;
+}
+
+
+// ユーザー設定用API。編集画面のカーソル位置へ文字chrを1文字入力する(キー判定やショートカットは通さず、通常の文字入力と同じ処理を行う)。
+// 引数: api=ユーザー設定へ渡すAPI(userdataにeditor_input_contextを持つ)、chr=入力する文字。
+// 返り値: 成功API_OK、api・ctx・state NULLまたは編集画面以外はAPI_ERR_INVALID_ARG。
+static MY_TXT_EDITOR_RESULT input_char(const MY_TXT_EDITOR_API *api,wchar_t chr){
+    if(api == NULL){
+        return API_ERR_INVALID_ARG;
+    }
+
+    struct editor_input_context *ctx = api->userdata;
+    struct editor_state *state = ctx->state;
+
+    if(ctx == NULL || state == NULL){
+        return API_ERR_INVALID_ARG;
+    }
+
+    if(editor_get_screen_state(state) != edit_screen){
+        return API_ERR_INVALID_ARG;
+    }
+
+    handle_char_input(ctx->win,chr,state);
+    return API_OK;
+}
+
+// ユーザー設定用API。現在のカーソル行の桁位置をcolへ移動する。行のセル数を超える場合は行末に丸める。
+// 引数: api=ユーザー設定へ渡すAPI、col=移動先の桁(0以上)。
+// 返り値: 成功API_OK、api NULL・colが負・ctx/state NULL・現在行が空(セル数0以下)はAPI_ERR_INVALID_ARG。
+static MY_TXT_EDITOR_RESULT set_text_cursor_col(const MY_TXT_EDITOR_API *api,int col){
+    if(api == NULL || col < 0){
+        return API_ERR_INVALID_ARG;
+    }
+
+
+    struct editor_input_context *ctx = api->userdata;
+    struct editor_state *state = ctx->state;
+
+    if(ctx == NULL || state == NULL){
+        return API_ERR_INVALID_ARG;
+    }
+
+    int logical_line = editor_cursor_logical_line_pos(state);
+    int line_cell_num = editor_line_len(state,logical_line);
+    if(line_cell_num <= 0){
+        return API_ERR_INVALID_ARG;
+    }
+    //行が持つセル数内に丸める
+    col = (line_cell_num < col)?line_cell_num:col;
+
+    state->cursor.file_pos.x = col;
 
     return API_OK;
 }

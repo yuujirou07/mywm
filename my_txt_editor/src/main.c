@@ -470,6 +470,10 @@ int main(int argc, char *argv[])
                 else{
                     state.render_flags |= RENDER_EDIT_COMPLETE_WINDOW;
                 }
+                //編集画面以外では描画しない
+                if(editor_get_screen_state(&state) != edit_screen){
+                   state.render_flags &= ~RENDER_EDIT_COMPLETE_WINDOW;
+                }
             }
         }
     
@@ -509,14 +513,12 @@ int main(int argc, char *argv[])
         
         //キーログスタックに追加する
         if(state.settings_data->key_log_settings.use_key_log){
-            if((input_result == OK && iswalnum(ch)) || ch == KEY_MOUSE){
-                KL_add(
-                    &state,
-                    ch,
-                    input_result,
-                    editor_get_screen_state(&state)
-                );
-            }
+            KL_add(
+                &state,
+                ch,
+                input_result,
+                editor_get_screen_state(&state)
+            );
         }
 
         //ユーザイベント確認

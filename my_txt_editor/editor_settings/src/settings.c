@@ -21,7 +21,7 @@ void func_2(const MY_TXT_EDITOR_API *api){
     api->get_screen_mode(api,&scr_mode);
     
 
-    api->set_text_cursor_row(api,10);
+    api->set_text_cursor_col(api,10);
 
     return;
 }
@@ -39,7 +39,7 @@ void input_func(const MY_TXT_EDITOR_API *api){
     ST_time time2 = ST_gettime_msec();
 
     double d = ST_getdifftime_msec(time,time2);
-        
+       
     if(d < 500){
         api->save_file(api->userdata);
     }
@@ -52,6 +52,6 @@ void input_func(const MY_TXT_EDITOR_API *api){
 // 返り値: なし。apiとuserdata・keyはホスト側で接続済みであること。
 void ST_INIT(const MY_TXT_EDITOR_API *api){
     api->key(api->userdata,L'o',L'o',EDIT_MODE,func);
-    api->input_event(api->userdata,L'j',input_func);
-    api->input_event(api->userdata,L'l',func_2);
+    api->input_event(api->userdata,L'j',EDIT_MODE,input_func);
+    api->input_event(api->userdata,L'l',EDIT_MODE,func_2);
 }

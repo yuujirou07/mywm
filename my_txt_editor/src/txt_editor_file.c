@@ -883,8 +883,7 @@ enum select_state get_path_state(const char *path){
         if(strlen(error_msg) + 1 > ERROR_MSG_SIZE_MAX){
             error_msg[ERROR_MSG_SIZE_MAX - 1] = '\0';
         }
-        error_log_write(error_msg);
-        error_log_write((char*)path);
+       return unkown;
     }
     if(stat_state.st_mode & S_IFREG){
         return file;
@@ -901,6 +900,7 @@ int now_input_path_open(struct editor_state *state,struct editor_input_context *
     if(state == NULL || ctx == NULL)return -1;
     struct dir_table dir_info = {0};
     now_open_path_name(&dir_info,get);
+
     if(dir_info.path_name == NULL)return true;
 
     struct file_browse_select_state select_state;

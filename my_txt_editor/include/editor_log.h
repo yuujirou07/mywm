@@ -22,7 +22,7 @@ int close_editor_log();
 
 #define wrp_stderr_puts(msg)\
 do{\
-    fprintf(stderr,"MSG: %.*s FILE: %s  LINE: %d　DATE: %s TIME: %s\n",LOG_MSG_SIZE_MAX,(msg),__FILE__,__LINE__,__DATE__,__TIME__);\
+    fprintf(stderr,"MSG: %.*s FILE: %s  LINE: %d DATE: %s TIME: %s\n",LOG_MSG_SIZE_MAX,(msg),__FILE__,__LINE__,__DATE__,__TIME__);\
     fflush(stderr);\
 }while(0)
 

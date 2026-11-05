@@ -34,10 +34,12 @@ typedef struct MY_TXT_EDITOR_API MY_TXT_EDITOR_API;
 
 typedef void (*EDITOR_ACTION)(const MY_TXT_EDITOR_API *);
 typedef MY_TXT_EDITOR_RESULT (*KEY_SET)(void *userdata,wchar_t key1,wchar_t key2,MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action);
-typedef MY_TXT_EDITOR_RESULT (*ADD_INPUT_CALL_BACK)(void *userdata,wchar_t input,EDITOR_ACTION action);
+typedef MY_TXT_EDITOR_RESULT (*ADD_INPUT_CALL_BACK)(void *userdata,wchar_t input,MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action);
 typedef MY_TXT_EDITOR_RESULT (*GET_SCREEN_MODE)(const MY_TXT_EDITOR_API *,MY_TXT_EDITOR_SCREEN_MODE *rt);
 typedef MY_TXT_EDITOR_RESULT (*SET_TEXT_CURSOR_ROW)(const MY_TXT_EDITOR_API *,int row);
+typedef MY_TXT_EDITOR_RESULT (*SET_TEXT_CURSOR_COL)(const MY_TXT_EDITOR_API *,int col);
 
+typedef MY_TXT_EDITOR_RESULT (*INPUT_CHAR)(const MY_TXT_EDITOR_API *api,wchar_t chr);
 
 struct MY_TXT_EDITOR_API{
     void * userdata;
@@ -47,6 +49,8 @@ struct MY_TXT_EDITOR_API{
     ADD_INPUT_CALL_BACK input_event;
     GET_SCREEN_MODE get_screen_mode;
     SET_TEXT_CURSOR_ROW set_text_cursor_row;
+    SET_TEXT_CURSOR_COL set_text_cursor_col;
+    INPUT_CHAR input_char;
 };
 
 
