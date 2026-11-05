@@ -724,6 +724,7 @@ struct pos editor_pos_to_buffer_pos(
                 struct editor_state *state,
                 struct pos editor_pos);
 bool screen_pos_to_box_pos(struct box b1,struct pos p1,struct pos *rt1);
+int init_input_context(struct editor_input_context *ctx,struct editor_state *state,MEVENT *mouse_event);
 int init_settings_data(struct editor_input_context *ctx);
 int editor_set_env_lang(struct editor_input_context *ctx,language lang);
 int env_language_ctl(language *lang,enum flags flags);

@@ -91,12 +91,15 @@ int main(int argc, char *argv[])
     state.settings_data = &settings_data;
     state.mylsp_use     = mylsp;
 
-    struct editor_input_context input_context = {0};
-    // 設定読み込みがctx->stateを参照するため、呼び出し前に借用先を設定する。
-    input_context.state = &state;
+    struct editor_input_context input_context;
     struct box status_bar;
     MEVENT mouse_event;
     WINDOW *win = NULL;
+
+    // 設定読み込みがctx->stateを参照するため、呼び出し前に借用先を設定する。
+    if(init_input_context(&input_context,&state,&mouse_event) != 0){
+        return 1;
+    }
 
    //カスタム設定のバグになる値を検出する関数の設置
     init_settings_data(&input_context);
@@ -162,14 +165,6 @@ int main(int argc, char *argv[])
 
 
     input_context.ask_make_file_mode.screen_center_y =  state.scr.scr_size.y / 2;
-
-    input_context.input_manager.key_maps.key_map_allocate_num  = 16;
-    input_context.input_manager.key_maps.key_map_num = 0;
-    input_context.input_manager.key_maps.key_mapp_list =
-        malloc(sizeof(key_map_data) * input_context.input_manager.key_maps.key_map_allocate_num);
-    if(input_context.input_manager.key_maps.key_mapp_list == NULL){
-        error_log("malloc");
-    }
 
     state.file_browse.box.w = state.scr.scr_size.x / 3;
     state.file_browse.box.h = input_context.ask_make_file_mode.screen_center_y;
@@ -372,7 +367,6 @@ int main(int argc, char *argv[])
     }
 
     input_context.win = win;
-    input_context.mouse_event = &mouse_event;
     input_context.lsp_data = &lsp;
     editor_set_env_lang(&input_context,C);
     input_context.edit_screen.line_start_pos.x = state.write_area.x_start - 1;
@@ -407,9 +401,6 @@ int main(int argc, char *argv[])
 
     //設定プログラムファイルロード　
     if(state.settings_data->editor_settings_program.enabled){
-        input_context.dl_data.loading_dynamic_lib = NULL;
-        input_context.dl_data.now_loading_lib_allocate_num = 0;
-        input_context.dl_data.now_loading_lib_num = 0;
         //JSONでルートパスが設定されているか確認
         if(state.settings_data->editor_settings_program.root_src_path != NULL){
             //dlファイルパス設定

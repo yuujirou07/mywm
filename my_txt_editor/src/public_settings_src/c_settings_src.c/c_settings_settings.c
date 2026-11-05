@@ -507,5 +507,5 @@ static MY_TXT_EDITOR_RESULT undo_text_input(const MY_TXT_EDITOR_API *api,size_t 
         
 
     
-
+    return API_OK;
 }

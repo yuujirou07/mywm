@@ -934,6 +934,24 @@ int editor_set_env_lang(struct editor_input_context *ctx,language lang){
 
 
 
+// ctxを0クリアし、stateとmouse_eventの借用先とキーマップ配列を設定する。
+// win・lsp_data・画面配置は値が決まってから呼び出し側が設定する。
+// 返り値: 成功0、キーマップ配列の確保失敗-1。stateとmouse_eventはctxより長く生きること。
+int init_input_context(struct editor_input_context *ctx,struct editor_state *state,MEVENT *mouse_event){
+    memset(ctx,0,sizeof(*ctx));
+    ctx->state       = state;
+    ctx->mouse_event = mouse_event;
+
+    ctx->input_manager.key_maps.key_map_allocate_num = 16;
+    ctx->input_manager.key_maps.key_mapp_list =
+        malloc(sizeof(key_map_data) * ctx->input_manager.key_maps.key_map_allocate_num);
+    if(ctx->input_manager.key_maps.key_mapp_list == NULL){
+        error_log("malloc");
+        return -1;
+    }
+    return 0;
+}
+
 // ctx->state->settings_dataへ既定値を設定してから、設定JSONの有効な項目で上書きする。
 // 返り値: 常に0。ctx・state・settings_dataは呼び出し前に接続しておく。
 int init_settings_data(struct editor_input_context *ctx){
