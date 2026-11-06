@@ -160,8 +160,9 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
         }
     }
 
-    if(ch == '>' || ch == '<'){
-        int size_fiff = (ch == '<')?-1:1;
+    if(ch == '>' || ch == '<' || ch == KEY_LEFT || ch == KEY_RIGHT){
+        int size_fiff = (ch == '<')?-1:(ch == KEY_LEFT)?-1:1;
+        //画面外にいくかの判定をつける
         int ft_w = ctx->state->file_tree_data.ft_box.w + size_fiff;
         change_file_tree_width(ctx,ft_w);
     }

@@ -154,6 +154,7 @@ executable(
         'my_txt_editor/src/txt_editor_draw.c',
         'my_txt_editor/src/txt_editor_file.c',
         'my_txt_editor/src/txt_editor_syntax.c',
+        'my_txt_editor/src/editor_mouse.c',
         'my_txt_editor/src/json_read.c',
         'my_txt_editor/src/error_log.c',
         'my_txt_editor/src/path_util.c',

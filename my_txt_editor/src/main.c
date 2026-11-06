@@ -292,6 +292,7 @@ int main(int argc, char *argv[])
 
 
     void *handle = NULL;
+    
     //スタートメニュー表示判定
     Start_Menu start_menu = NULL;
     bool open_start_menu = state.settings_data->show_start_menu;
