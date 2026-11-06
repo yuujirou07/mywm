@@ -1,6 +1,0 @@
--D_DEFAULT_SOURCE
--D_XOPEN_SOURCE=600
--Iinclude
--Iinclude/lsp_src
--Isrc/screen_state
--Iftj_temp
