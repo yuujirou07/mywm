@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
     if(set_log_file(EDITOR_LOG_DATA) != 0){
         return EXIT_SUCCESS;
     }
+    
 
     
 
