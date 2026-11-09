@@ -4,6 +4,7 @@
         "editor.detectIndentation": false,
 		"editor.inlineSuggest.enabled": false,
 		"editor.suggestOnTriggerCharacters": true,
+		"github.copilot.inlineSuggest.enable": false,
     	"clangd.arguments": [
 		"--compile-commands-dir=/home/yuujirou07/vscode_proj/mywm.c/my_txt_editor/compile_commands.json",
 		"--header-insertion=never",
