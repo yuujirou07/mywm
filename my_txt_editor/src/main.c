@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     if(set_log_file(EDITOR_LOG_DATA) != 0){
         return EXIT_SUCCESS;
     }
-
+    
     bool mylsp = false;
     //引数解析
     if(argc > startuptime_log_file_argument_num){
