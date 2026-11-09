@@ -2,7 +2,8 @@
         "editor.tabSize": 8,
         "editor.insertSpaces": false,
         "editor.detectIndentation": false,
-	
+		"editor.inlineSuggest.enabled": false,
+		"editor.suggestOnTriggerCharacters": true,
     	"clangd.arguments": [
 		"--compile-commands-dir=/home/yuujirou07/vscode_proj/mywm.c/my_txt_editor/compile_commands.json",
 		"--header-insertion=never",
