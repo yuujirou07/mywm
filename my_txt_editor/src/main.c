@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 
 
     char startuptime_log_file_path_name[PATH_MAX] = {0};
+    
 
     struct timespec startup_start_time;
     clock_gettime(CLOCK_MONOTONIC, &startup_start_time);
