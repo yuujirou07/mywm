@@ -321,6 +321,23 @@ static inline void editor_set_screen_state(struct editor_state *state,
     log->screen_state_log[log->screen_state_log_counter++] = next_state;
 }
 
+//編集ファイルのスクロール処理
+static inline int editor_scroll_logical_line(struct editor_state *state,int diff){
+    if(state == NULL){
+        return -1;
+    }
+    int tmp_line_num = state->scr.scr_start_num + diff;
+    //スクロール時の最小値最大値ガード
+    tmp_line_num = (tmp_line_num < 0)
+        ?0:(tmp_line_num + state->write_area.h > 
+            state->settings_data->default_load_line_size)
+                ?state->settings_data->default_load_line_size - 
+                    state->write_area.h:tmp_line_num;
+
+    state->scr.scr_start_num = tmp_line_num;
+    return 0;
+}
+
 
 
 

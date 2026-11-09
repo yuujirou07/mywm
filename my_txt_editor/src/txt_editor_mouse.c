@@ -14,6 +14,7 @@
 #include "editor_types.h"
 #include "filetree.h"
 #include "ftj.h"
+#include "my_cui_lib.h"
 #include "txt_editor.h"
 #include "txt_editor_syntax.h"
 
@@ -66,6 +67,7 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
 
     //エディター画面下スクロール処理
     if (event->bstate & BUTTON5_PRESSED && can_scroll_down){
+
         
         bool is_cur_on_edit_screen = true;
         //ファイルツリーが表示されている場合
@@ -80,7 +82,10 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
             }
         }
         if(is_cur_on_edit_screen){
-            state->scr.scr_start_num++;
+
+            //文字のスクロール処理
+            
+            editor_scroll_logical_line(state,1);
             // 構文情報は画面相対行で持つため、既存分を1行ずらし、新しく見える最下行だけ解析する。
             if(state->settings_data->built_in_syntax){
                 scroll_syntax_pos_data(&ctx->syntax_data,-1,state->write_area.h);
@@ -92,23 +97,58 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
     }else if ((event->bstate & BUTTON4_PRESSED) && state->scr.scr_start_num > 0) {
         bool is_cur_on_edit_screen = true;
          if(state->file_tree_data.is_show){
+
             struct box tmp_write_area_box = 
                 {(struct pos){state->write_area.x_start,state->write_area.y_start},
                     state->write_area.w,state->write_area.h};    
+
             if(!box_contains_point(tmp_write_area_box,(struct pos){event->x,event->y})){
                 editor_set_screen_state(state,filetree_screen);
                 is_cur_on_edit_screen = false;
             }
         }
         if(is_cur_on_edit_screen){ 
-            state->scr.scr_start_num--;
-            // 下スクロールの逆。既存分を1行下げ、新しく見える最上行(0)だけ解析する。
-            if(state->settings_data->built_in_syntax){
-                scroll_syntax_pos_data(&ctx->syntax_data,+1,state->write_area.h);
-                update_line_syntax_data(ctx,0);
-            }
+            wchar_t chr;
+            
+            nodelay(stdscr,true);
+            MEVENT tmp_msev;
+            bool loop_enable = true;
+            do{
+
+                editor_scroll_logical_line(state,-1);
+                // 下スクロールの逆。既存分を1行下げ、新しく見える最上行(0)だけ解析する。
+                if(state->settings_data->built_in_syntax){
+                    scroll_syntax_pos_data(&ctx->syntax_data,+1,state->write_area.h);
+                    update_line_syntax_data(ctx,0);
+                }
+
+                int rt = get_wch(&chr);
+                if(rt != OK){
+                    if(rt != ERR){
+                        unget_wch(chr);
+                    }
+                    break;
+                }
+                if(chr == KEY_MOUSE){
+                    if(getmouse(&tmp_msev) != OK){
+                        loop_enable = false;
+                        break;
+                    }
+                    if(tmp_msev.bstate & BUTTON4_PRESSED){
+                        loop_enable = true;
+                    }
+                    else{
+                        loop_enable = false;
+                        break;
+                    }
+                }
+                else{
+                    break;
+                }
+            }while(loop_enable);
         }
     }
+    //マウスクリック処理
     else if(event->bstate &
             (BUTTON1_PRESSED | BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED)){
         int x = event->x;
