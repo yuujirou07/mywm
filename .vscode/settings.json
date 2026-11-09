@@ -13,7 +13,7 @@
 		},
 		"editor.wordBasedSuggestions": "currentDocument",
     	"clangd.arguments": [
-		"--compile-commands-dir=/home/yuujirou07/vscode_proj/mywm.c/my_txt_editor",
+		"--compile-commands-dir=/home/yuujirou07/vscode_proj/mywm/my_txt_editor",
 		"--header-insertion=never",
 		"--clang-tidy",
 		"--enable-config"
