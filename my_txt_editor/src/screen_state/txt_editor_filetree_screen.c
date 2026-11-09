@@ -21,6 +21,7 @@ int get_root_file_tree_data(file_tree_data *file_tree,char *path){
     int mem_num = file_tree->root_node->c_table_num;
     file_tree->open_check_data = NULL;
     file_tree->open_count_num = 0;
+    file_tree->open_check_data_allocate_num = 0;
     file_tree->is_grabed = false;
     if(mem_num == 0)return 0;
 
@@ -31,6 +32,7 @@ int get_root_file_tree_data(file_tree_data *file_tree,char *path){
         return -1;
     }
     file_tree->open_count_num = mem_num;
+    file_tree->open_check_data_allocate_num = mem_num;
 
     for(int i = 0;i < mem_num;i++){
         file_tree->open_check_data[i].table_ptr = &file_tree->root_node->c_table[i];
@@ -53,9 +55,20 @@ ft_path_open_check_data *get_filetree_item_data(file_tree_data *file_tree,
     }
 
     int new_count = file_tree->open_count_num + 1;
-    ft_path_open_check_data *new_data = realloc(file_tree->open_check_data,
-        sizeof(ft_path_open_check_data) * new_count);
-    if(new_data == NULL)return NULL;
+    ft_path_open_check_data *new_data = file_tree->open_check_data;
+
+    // 確保数が足りないときだけ2倍に拡張する(確保数0からは1にする)。
+    if(file_tree->open_check_data_allocate_num < new_count){
+
+        int new_allocate_num = (file_tree->open_check_data_allocate_num > 0)
+            ?file_tree->open_check_data_allocate_num * 2 : 1;
+
+        new_data = realloc(file_tree->open_check_data,
+            sizeof(ft_path_open_check_data) * new_allocate_num);
+            
+        if(new_data == NULL)return NULL;
+        file_tree->open_check_data_allocate_num = new_allocate_num;
+    }
 
     file_tree->open_check_data = new_data;
     file_tree->open_count_num = new_count;
@@ -135,7 +148,7 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
     (void)input_result;
     struct editor_state *state = ctx->state;
     if(state->cursor.is_cur_show)my_cur_set(state,false);
-    
+
     if(ch == CTRL('n')){
         // ツリーを出したキーと同じキーで閉じる。
         hide_filetree(ctx);
@@ -149,15 +162,6 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
     if(ch == 'q')return false;
     if(ch == KEY_MOUSE){
         handle_mouse(ctx,0);
-
-        if(state->file_tree_data.is_grabed){
-            MEVENT me = *ctx->mouse_event;
-            int ft_w = me.x - state->file_tree_data.ft_box.pos.x;
-
-            if(ft_w >= 3 && ft_w < getmaxx(ctx->win)){
-                change_file_tree_width(ctx,ft_w);
-            }
-        }
     }
 
     if(ch == '>' || ch == '<' || ch == KEY_LEFT || ch == KEY_RIGHT){

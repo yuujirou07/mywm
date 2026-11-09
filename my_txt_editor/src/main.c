@@ -94,11 +94,10 @@ int main(int argc, char *argv[])
 
     struct editor_input_context input_context;
     struct box status_bar;
-    MEVENT mouse_event;
     WINDOW *win = NULL;
 
     // 設定読み込みがctx->stateを参照するため、呼び出し前に借用先を設定する。
-    if(init_input_context(&input_context,&state,&mouse_event) != 0){
+    if(init_input_context(&input_context,&state) != 0){
         return 1;
     }
 
@@ -173,6 +172,9 @@ int main(int argc, char *argv[])
     state.file_tree_data.ft_search_box = (struct box){(struct pos){0,0},0,0};
     state.file_tree_data.root_node = NULL;
     state.file_tree_data.is_show = false;
+    state.file_tree_data.outline_click_data.outline_click_count = 0;
+    state.file_tree_data.outline_click_data.first_click_time.tv_nsec = 0;
+    state.file_tree_data.outline_click_data.first_click_time.tv_sec = 0;
 
     state.edit_input_complete_data.box.pos = (struct pos){0,0};
     state.edit_input_complete_data.box.h = 
@@ -182,11 +184,14 @@ int main(int argc, char *argv[])
         settings_data.auto_complete_settings_data.auto_complete_window_size.x;
 
     
+    
     my_cur_set(&state,true);
     raw();
     scrollok(win, TRUE);
     mouseinterval(0); // クリックの判定待ちを最小にして、ダブルクリックを待たず即反応させる。
     mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);  
+    printf("\033[?1002h");
+    fflush(stdout);
     
 
     // ファイルブラウザ初期ディレクトリの絶対パスを取得する。
@@ -393,6 +398,8 @@ int main(int argc, char *argv[])
     input_context.state->key_bord_data.Key_log_data.key_allocate_num = 0;
     input_context.state->key_bord_data.Key_log_data.key_count  = 0;
     input_context.state->key_bord_data.Key_log_data.key_log  = NULL;
+
+    
 
     if(KL_open_key_log_file(KEY_EVENT_LOG_PATH) != 0){
     

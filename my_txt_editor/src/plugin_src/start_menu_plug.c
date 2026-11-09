@@ -41,13 +41,13 @@ int draw_start_menu(int screen_max_w,int screen_max_h,struct ascii_data *ascii_d
 
         draw_ascii_logo(screen_mid_pos,&ascii_data);
         int option_count = 
-                draw_option(
-                        screen_max_pos,
-                        &option_start_pos,
-                        ascii_data,
-                        option_data,
-                        option_list_max
-                );
+            draw_option(
+                    screen_max_pos,
+                    &option_start_pos,
+                    ascii_data,
+                    option_data,
+                    option_list_max
+            );
 
         draw_version(screen_mid_pos,ascii_data);
 
@@ -197,7 +197,6 @@ int draw_option(struct pos screen_max_pos,struct pos *option_start_pos,
                 mvaddstr(option_y,option_pos_x,option_data[i].option_name);
                 mvaddstr(option_y,option_pos_x + option_short_cut_key,skt);
         }
-
         return option_list_counter;
 }
 

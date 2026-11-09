@@ -36,7 +36,7 @@ int load_dir_table(struct editor_state *state,struct dir_entry **table,int *tabl
 
     // 読み込む件数はテーブルの行数と表示できる行数の小さい方まで。
     DIR *dir = opendir(path_name);
-    if(!dir){
+    if(dir == NULL){
         perror("/");
         return -1;
     }
@@ -46,9 +46,15 @@ int load_dir_table(struct editor_state *state,struct dir_entry **table,int *tabl
     while(readdir(dir) != NULL){
         entry_num++;
     }
+
+    //配列拡張
     if(entry_num > *table_rows){
-        struct dir_entry *new_table = realloc(*table,
-            (size_t)entry_num * sizeof(*new_table));
+        struct dir_entry *new_table = 
+            realloc(
+                *table,
+                (size_t)entry_num * sizeof(*new_table)
+            );
+
         if(new_table == NULL){
             closedir(dir);
             return -1;
@@ -56,15 +62,23 @@ int load_dir_table(struct editor_state *state,struct dir_entry **table,int *tabl
         *table = new_table;
         *table_rows = entry_num;
     }
+
     rewinddir(dir);
+
     memset(*table,0,(size_t)*table_rows * sizeof(**table));
     entry_num = 0;
+
     while ((ent = readdir(dir))) {
-        snprintf((*table)[entry_num].name,
-                 sizeof((*table)[entry_num].name), "%s", ent->d_name);
+        snprintf(
+            (*table)[entry_num].name,
+            sizeof((*table)[entry_num].name),
+            "%s", ent->d_name
+        );
+        
         (*table)[entry_num].d_type = ent->d_type;
         entry_num++;
     }
+
     closedir(dir);
     *dir_num = entry_num;
     *table_num = (start_num < entry_num) ? entry_num - start_num : 0;
@@ -837,37 +851,78 @@ int check_dir_mem(struct dir_table *dir_table,int size){
     char_path[converted] = '\0';
 
     char dir_name[PATH_MAX] = ".";
-    const char *now_dir_mem_name = char_path;
     char *last_slash = strrchr(char_path,'/');
+    
+    const char *now_dir_mem_name = NULL;
     if(last_slash != NULL){
         now_dir_mem_name = last_slash + 1;
+        //パスが(ルートディレクトリだったら)('/')
         if(last_slash == char_path){
             dir_name[0] = '/';
             dir_name[1] = '\0';
         }
         else{
             size_t dir_name_size = (size_t)(last_slash - char_path);
+            //最後の'/'までコピーする
             memcpy(dir_name,char_path,dir_name_size);
             dir_name[dir_name_size] = '\0';
         }
     }
+    else{
+        return -1;
+    }
 
     DIR *dir = opendir(dir_name);
     if(dir == NULL)return -1;
-    struct dirent *dirent_dir = NULL;
-    
+
+    struct dirent dirent_dir[size];
+    size_t dir_mem_pos[size]; // 各候補で入力文字が見つかった位置(先頭からの文字数)。
+
     int dir_mem_counter = 0;
-    while((dirent_dir = readdir(dir)) != NULL){
-        if(dir_mem_counter >= size)break;
-        size_t dirent_name_size = strlen(dirent_dir->d_name);
-        if(strstr(dirent_dir->d_name,now_dir_mem_name) != NULL){
+    struct dirent *tmp_dir = NULL;
+    //最後の'/'以降の入力文字列がディレクトリ内のテーブルにあるものを抽出する
+    while((tmp_dir = readdir(dir)) != NULL){
+        size_t dirent_name_size = strlen(tmp_dir->d_name);
+
+        if(dir_mem_counter >= size){
+            break;
+        }
+    
+        char *hit_ptr = strstr(tmp_dir->d_name,now_dir_mem_name);
+        if(hit_ptr != NULL){
             if(dirent_name_size >= sizeof(dir_table[dir_mem_counter].d_name))continue;
-            memcpy(dir_table[dir_mem_counter].d_name,
-                   dirent_dir->d_name,dirent_name_size + 1);
-            dir_table[dir_mem_counter].d_type = dirent_dir->d_type;
+            memcpy(dirent_dir[dir_mem_counter].d_name,tmp_dir->d_name,sizeof(tmp_dir->d_name));
+            dirent_dir[dir_mem_counter].d_type = tmp_dir->d_type;
+            // readdirのバッファ内の位置なので、コピー前の名前からの差を整数で保存する。
+            dir_mem_pos[dir_mem_counter] = (size_t)(hit_ptr - tmp_dir->d_name);
             dir_mem_counter++;
         }
+
+    }  
+    //候補を文字列内で'/'以降の入力文字が見つかるのが速かった順にソートする
+    // 各候補より前に並ぶ候補の数を数えて、それをそのまま並び順(行番号)にする。
+    // 見つかる位置が同じ場合は元の順を保つ。
+    struct dirent sorted_dirent[size];
+    for(int i = 0;i < dir_mem_counter;i++){
+        size_t dir_mem_len_i = dir_mem_pos[i];
+        int sorted_idx = 0;
+        for(int j = 0;j < dir_mem_counter;j++){
+            if(i == j)continue;
+            size_t dir_mem_len_j = dir_mem_pos[j];
+            if(dir_mem_len_j < dir_mem_len_i ||
+                (dir_mem_len_j == dir_mem_len_i && j < i)){
+                sorted_idx++;
+            }
+        }
+        sorted_dirent[sorted_idx] = dirent_dir[i];
     }
+
+    for(int i = 0; i < dir_mem_counter;i++){
+        memcpy(dir_table[i].d_name,sorted_dirent[i].d_name,sizeof(sorted_dirent[i].d_name));
+        dir_table[i].d_type = sorted_dirent[i].d_type;
+        dir_table[i].path_name = NULL;
+    }
+
     closedir(dir);
     return dir_mem_counter;
 }
@@ -876,6 +931,7 @@ int check_dir_mem(struct dir_table *dir_table,int size){
 // 引数: path=判定するNUL終端パス。 返り値: 通常ファイルならfile、ディレクトリならfolder、その他はunkown、NULLならerror。
 enum select_state get_path_state(const char *path){
     if(path == NULL)return error;
+   
     struct stat stat_state = {0};
     int stat_rt = stat(path,&stat_state);
     if(stat_rt == -1){
@@ -928,8 +984,7 @@ int now_input_path_open(struct editor_state *state,struct editor_input_context *
                 sizeof(char) * ((last_slash_ptr+2) - &dir_info.path_name[0]));
         }
     }
-
-    if(select_state.select_state == file){
+    else if(select_state.select_state == file){
         load_screen_size(state);
         editor_set_cursor(state,0,0);
         restore_edit_screen(state);

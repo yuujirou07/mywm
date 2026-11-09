@@ -116,11 +116,11 @@ void init_settings_src(MY_TXT_EDITOR_API *const api,struct editor_input_context 
     connect_api_mem_data(api,ctx);
    
     void *handle = load_current_settings_obj_c_file(ctx);
-    assert(handle);
     if(handle == NULL){
+        error_log_write("handle null error");
         return;
     }
-    dlerror();
+
     void (*settings_init)(const MY_TXT_EDITOR_API *) = dlsym(handle,"ST_INIT");
     char *error = dlerror();
     if(error != NULL || settings_init == NULL){
@@ -502,7 +502,7 @@ static MY_TXT_EDITOR_RESULT undo_text_input(const MY_TXT_EDITOR_API *api,size_t 
     }
     struct editor_input_context *ctx = api->userdata;
     struct editor_state *state = ctx->state;
-
+    (void)state;
 
         
 

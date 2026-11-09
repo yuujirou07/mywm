@@ -1,6 +1,7 @@
 CC ?= gcc
 
 CFLAGS ?= -Wall -Wextra -g3 -O2
+CFLAGS += -fsanitize=address -fno-omit-frame-pointer
 CFLAGS += -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600 -I./include -I./include/lsp_src
 
 LDLIBS := -lcjson -lncursesw -ldl -lm
@@ -22,7 +23,7 @@ SRC := src/main.c \
 	src/txt_editor_file.c \
 	src/txt_editor_syntax.c \
 	src/editor_color.c \
-	src/editor_mouse.c \
+	src/txt_editor_mouse.c \
 	src/json_read.c \
 	src/editor_log.c \
 	src/kbd_input_log.c \

@@ -1,6 +1,7 @@
 
 
 
+#include <assert.h>
 #include <cjson/cJSON.h>
 #include <dirent.h>
 #include <limits.h>
@@ -139,15 +140,17 @@ int load_icon_data(const char *relative_path,icon_data *icon_data_ptr){
 const char *get_file_ext_code(char *file_ext,icon_data *icon_data_ptr){
 
     struct stat state;
-    if(stat(file_ext,&state) == 0 && (S_ISDIR(state.st_mode) || S_ISLNK(state.st_mode)))return "\uf07b";
-    
+    // "\uf07b" = フォルダのアイコン(Nerd Font: nf-fa-folder)
+    if(stat(file_ext,&state) == 0 && ((S_ISDIR(state.st_mode) != 0 || S_ISLNK(state.st_mode) != 0)))return "\uf07b";
+
     char *lastslash = strrchr(file_ext,'/');
     //パスの途中の.を拾う可能性があるため、最後の/以降の.から拡張子を判断する
     if(lastslash != NULL){
         file_ext = lastslash;
     }
 
-    const char *return_code = "\uef4c";
+    // "\uef4c" = 横線が並んだアイコン(Nerd Font: nf-fa-grip_lines)。拡張子が不明なときの既定アイコン
+    const char *return_code = "\u2630";
     for(int i = 0;i < icon_data_ptr->icon_lib_num;i++){
         char *ext_dot_ptr = strrchr(file_ext,'.');
         if(ext_dot_ptr == NULL){

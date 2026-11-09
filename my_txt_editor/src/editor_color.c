@@ -18,6 +18,7 @@ int init_curses_color(struct editor_input_context *ctx){
     if (!has_colors() || COLOR_PAIRS < 64) {
         return 0;
     }
+    
 
     ctx->color_list.col_id_data = malloc(sizeof(color_id_data) * SUPPORT_COLOR_NUM);
     if(ctx->color_list.col_id_data == NULL){
@@ -45,7 +46,7 @@ int get_color_id(struct editor_input_context *ctx,int fg,int bg){
     if(ctx == NULL){
         return -1;
     }
-
+    
     if(ctx->color_list.col_data_allocate_num <= 0){
         return -1;
     }

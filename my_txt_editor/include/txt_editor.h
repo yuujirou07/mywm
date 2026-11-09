@@ -18,6 +18,7 @@
 #include"filetree.h"
 #include"input_complete.h"
 #include "txt_editor_syntax.h"
+#include "txt_editor_mouse.h"
 #include "public_data/c_settings/c_settings_setting.h"
 
 
@@ -393,7 +394,7 @@ typedef struct{
 // 全画面の入力ハンドラへ渡す共有参照と、画面別の配置情報。
 struct editor_input_context {
     WINDOW *win; // ncursesの標準描画先への借用ポインタ。
-    MEVENT *mouse_event; // main()が所有する直近のマウスイベントへの借用ポインタ。
+    MEVENT mouse_event; // 直近のマウスイベント。
     struct editor_state *state; // エディタ全体の状態への借用ポインタ。
     struct lsp_process *lsp_data; // 言語サーバー状態への借用ポインタ。未使用時はNULL。
     syntax syntax_data; // 構文着色状態と、その所有する着色情報。
@@ -723,27 +724,21 @@ void handle_backspace(struct editor_input_context *ctx);
 void handle_newline(struct editor_input_context *ctx);
 void handle_tab(WINDOW *win, struct editor_state *state);
 void handle_char_input(WINDOW *win, wchar_t ch, struct editor_state *state);
-void handle_mouse(struct editor_input_context *ctx,int dir_num);
 void handle_input_allow(struct editor_input_context *ctx,wchar_t ch);
 int remove_line_join_str_data(struct editor_state *state,long remove_line_num);
 int make_new_line_space(struct editor_state *state,long make_space_line_num);
-void editor_screen_mouse_event(struct editor_input_context *ctx);
-void file_browse_screen_mouse_event(WINDOW *win, MEVENT *event, struct editor_state *state,int dir_num);
 void set_file_browse_path_input_mode(struct file_browse_state *file_browse,bool flag);
 bool get_file_browse_path_input_mode(struct file_browse_state *file_browse);
 void my_cur_set(struct editor_state *state,bool set);
-bool box_contains_point(struct box b,struct pos p);
-struct pos editor_mouse_to_buffer_pos(struct editor_state *state,
-                        struct pos mouse_pos);
-struct pos editor_pos_to_buffer_pos(
-                struct editor_state *state,
-                struct pos editor_pos);
-bool screen_pos_to_box_pos(struct box b1,struct pos p1,struct pos *rt1);
-int init_input_context(struct editor_input_context *ctx,struct editor_state *state,MEVENT *mouse_event);
+int init_input_context(struct editor_input_context *ctx,struct editor_state *state);
 int init_settings_data(struct editor_input_context *ctx);
 int editor_set_env_lang(struct editor_input_context *ctx,language lang);
 int env_language_ctl(language *lang,enum flags flags);
 language get_env_language();
+
+
+
+double comb_time_interval_ms(struct timespec t1,struct timespec t2);
 
 // screen_state/txt_editor_edit_screen.c
 int editor_input_str(struct editor_state *state,wchar_t *str);

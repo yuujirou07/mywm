@@ -1,10 +1,18 @@
+#include "txt_editor_mouse.h"
+#include <bits/time.h>
+#include <math.h>
 #include <ncurses.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <wchar.h>
+#include <wctype.h>
 #include "default_settings.h"
 #include "editor_log.h"
 #include "editor_types.h"
+#include "filetree.h"
 #include "ftj.h"
 #include "txt_editor.h"
 #include "txt_editor_syntax.h"
@@ -13,7 +21,7 @@
 // 返り値: なし。イベント取得失敗や未対応画面では何もしない。
 void handle_mouse(struct editor_input_context *ctx,int dir_num) {
     WINDOW *win = ctx->win;
-    MEVENT *event = ctx->mouse_event;
+    MEVENT *event = &ctx->mouse_event;
     struct editor_state *state = ctx->state;
 
     
@@ -22,35 +30,6 @@ void handle_mouse(struct editor_input_context *ctx,int dir_num) {
         return;
     }
     screen_state scr_state = editor_get_screen_state(state);
-
-    //ファイルツリー画面の可変イベント判定
-    //編集画面かファイルツリー画面で
-    // ファイルツリーの枠線をダブルクリックした場合にリサイズ処理に移る
-    if(state->file_tree_data.is_show == true){
-        if(scr_state == edit_screen || scr_state == filetree_screen){
-            //枠線のダブルクリック判定
-            //ダブルクリックかつボタンを離してい
-            if((event->bstate & BUTTON1_DOUBLE_CLICKED) && 
-                    state->file_tree_data.ft_box.pos.x + 
-                    state->file_tree_data.ft_box.w){
-
-                state->file_tree_data.is_grabed = true;
-            }
-        }
-        if(event->bstate & BUTTON1_RELEASED && 
-            state->file_tree_data.is_grabed == true){
-
-            state->file_tree_data.is_grabed = false;
-        }
-    }
-    else{
-        state->file_tree_data.is_grabed = false;
-    }
-
-    if(state->file_tree_data.is_grabed){
-        exit(0);
-    }
-
 
     switch(scr_state){
         case edit_screen:{
@@ -79,7 +58,7 @@ void handle_mouse(struct editor_input_context *ctx,int dir_num) {
 // ctxの取得済みマウスイベントでスクロール・本文クリック・ツリーへの移行を処理する。
 // 返り値: なし。ホイールは表示開始行だけ、本文クリックは論理カーソルを動かし、最後にカーソル表示可否を更新する。
 void editor_screen_mouse_event(struct editor_input_context *ctx){
-    MEVENT *event = ctx->mouse_event;
+    MEVENT *event = &ctx->mouse_event;
     struct editor_state *state = ctx->state;
 
     int line_limit = editor_line_limit(state);
@@ -180,7 +159,7 @@ void file_browse_screen_mouse_event(WINDOW *win, MEVENT *event, struct editor_st
         if(box_contains_point(state->file_browse.box,(struct pos){event->x,event->y})){
 
             
-
+        
 
         }
     }
@@ -205,8 +184,104 @@ void file_browse_screen_mouse_event(WINDOW *win, MEVENT *event, struct editor_st
 // ctxのマウスイベントでツリーの開閉・ファイル読込・境界のドラッグ開始・編集画面への移行を処理する。
 // 返り値: 常に0。イベントはgetmouseで取得済みとし、必要な再描画と構文情報更新を要求する。
 int filetree_mouse_event(struct editor_input_context *ctx){
-    MEVENT *ev = ctx->mouse_event;
+    MEVENT *ev = &ctx->mouse_event;
     struct editor_state *state = ctx->state;
+
+    //ファイルツリーの枠線をダブルクリックした場合にリサイズ処理に移る
+    if(state->file_tree_data.is_show == true){
+        //枠線のダブルクリック判定
+        //ダブルクリックかつボタンを離してい
+        if((ev->bstate & BUTTON1_PRESSED) && state->file_tree_data.is_grabed == false){
+            //枠線判定
+            if(state->file_tree_data.ft_box.pos.x + 
+                state->file_tree_data.ft_box.w == ev->x){
+
+                state->file_tree_data.
+                    outline_click_data.
+                        outline_click_count++;   
+                //クリックが1っ回目かの判定
+                if(state->file_tree_data.
+                        outline_click_data.outline_click_count == 1){
+                    //ダブルクリックリサイズが無効だった場合シングルクリックでリサイズを開始する
+                    if(FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE == false){
+                        state->file_tree_data.is_grabed = true;
+                    }
+                    else{
+                        struct timespec *tmp_click_time = 
+                            &state->file_tree_data.outline_click_data.
+                                                            first_click_time;
+                        //ダブルクリック判定一回目のクリックの時間取得
+                        // (2回目のクリックとの時間差でダブルクリックか判定する)
+                        timespec_get(tmp_click_time,CLOCK_MONOTONIC);
+                    }                    
+                }
+                else if(state->file_tree_data.outline_click_data.
+                                            outline_click_count == 2){
+                    
+                    struct timespec *first_click_time = 
+                        &state->file_tree_data.outline_click_data.first_click_time;
+                        
+                    struct timespec last_click_time;
+                    timespec_get(&last_click_time,CLOCK_MONOTONIC);
+        
+                    double click_interval = 
+                        comb_time_interval_ms(*first_click_time,last_click_time);
+                    //小数点以下切り捨て処理
+                    click_interval = trunc(click_interval);
+                    
+                    //クリック感覚が既定のダブルクリック間隔以内かの判定
+                    //間隔がダブルクリックの間隔以上なら初期化する
+                    if(click_interval < MOUSE_DOUBLE_CLICK_INTERVAL){
+                        state->file_tree_data.is_grabed = true;
+                        state->file_tree_data.outline_click_data.outline_click_count = 0;
+                    }
+                    else{
+                        state->file_tree_data.outline_click_data.outline_click_count = 0;
+                    }                        
+                }  
+            }
+            else if(state->file_tree_data.outline_click_data.outline_click_count > 0){
+                state->file_tree_data.outline_click_data.outline_click_count = 0;
+            }
+        }
+
+        if((ev->bstate & BUTTON1_RELEASED) && 
+            state->file_tree_data.is_grabed == true){
+            state->file_tree_data.is_grabed = false;
+        }
+    }
+
+    //ファイルツリーリサイズ処理
+    if(state->file_tree_data.is_grabed && ev->bstate & REPORT_MOUSE_POSITION){
+        // 溜まったマウスイベントを読み捨て、最新の座標をevへ取得する
+        wint_t chr;
+        int result;
+        nodelay(stdscr,true);
+        while((result = get_wch(&chr)) != ERR){
+            if(result != KEY_CODE_YES || chr != KEY_MOUSE){
+                unget_wch(chr);
+                break;
+            }
+            if(getmouse(ev) != OK || !(ev->bstate & REPORT_MOUSE_POSITION)){
+                break;
+            }
+        }
+        nodelay(stdscr,false);
+
+        int screen_width = getmaxx(ctx->win);
+        int new_ft_width = ev->x;
+
+        //ファイルツリー横幅制限
+        if(ev->x < FILETREE_DEFAULT_SIZE_W){
+            new_ft_width = FILETREE_DEFAULT_SIZE_W;
+        }
+        else if(screen_width < ev->x){
+            new_ft_width = screen_width;
+        }
+
+        change_file_tree_width(ctx,new_ft_width);
+    }
+
     //左クリック
     if(ev->bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED)){
         struct box ft_box = ctx->state->file_tree_data.ft_box;

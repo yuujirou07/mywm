@@ -320,6 +320,21 @@ void draw_box_inside_dir(struct editor_state *state,struct dir_entry *table){
     // 描き始めがpos.x+1なので、使える幅は内側幅から1引いた分。
     int max_len = state->file_browse.area.w - 3;
 
+    // パス入力中のテーブルはcheck_dir_mem()が入力パスの親から作るので、同じディレクトリを前に付ける。
+    const char *base_path = state->file_browse.path_name;
+    char input_dir[PATH_MAX];
+    if(get_file_browse_path_input_mode(&state->file_browse)){
+        struct dir_table now_path = {0};
+        now_open_path_name(&now_path,get);
+        char *last_slash = (now_path.path_name != NULL) ? strrchr(now_path.path_name,'/') : NULL;
+        if(last_slash != NULL){
+            size_t dir_len = (last_slash == now_path.path_name) ? 1 : (size_t)(last_slash - now_path.path_name);
+            memcpy(input_dir,now_path.path_name,dir_len);
+            input_dir[dir_len] = '\0';
+            base_path = input_dir;
+        }
+    }
+
     // now_logical_line以降の全件テーブルを、i番目の画面行へ対応付ける。
     for(int i = 0;i < state->file_browse.area.h;i++){
         mvaddstr(state->file_browse.area.pos.y + i, state->file_browse.area.pos.x,clear);
@@ -333,11 +348,12 @@ void draw_box_inside_dir(struct editor_state *state,struct dir_entry *table){
         int len = (int)strlen(entry->name);
 
         char entry_path[sizeof(state->file_browse.path_name) + sizeof(entry->name) + 1];
-        snprintf(entry_path,sizeof(entry_path),"%s%s%s",state->file_browse.path_name,
-            strcmp(state->file_browse.path_name,"/") == 0 ? "" : "/",entry->name);
+        snprintf(entry_path,sizeof(entry_path),"%s%s%s",base_path,
+            strcmp(base_path,"/") == 0 ? "" : "/",entry->name);
+        editor_log(entry_path, NULL, NULL, NULL, 0);
         const char *icon_code =
             get_file_ext_code(entry_path,&state->settings_data->icon_data);
-        
+      
         mvaddstr(draw_y,draw_x - 2,icon_code);
         if(len <= max_len){
             mvaddstr(draw_y, draw_x, entry->name);
@@ -1077,6 +1093,7 @@ static void draw_filetree_items(struct editor_input_context *ctx,
                                 file_tree_data *filetree_data,
                                 struct table *table,int table_num,
                                 int layer,int *file_h){
+                                    
     struct box box = filetree_data->ft_box;
 
     for(int i = 0;i < table_num;i++){
@@ -1130,7 +1147,9 @@ static int draw_filetree(struct editor_input_context *ctx,file_tree_data *filetr
     for(int y = box.pos.y;y < box.pos.y + box.h;y++){
         mvhline(y,box.pos.x,' ',box.w);
     }
+    //開発用
     filetree_data->ft_side = FT_LEFT;
+
     if(filetree_data->ft_side == FT_LEFT || filetree_data->ft_side == FT_RIGHT){
         int wall_pos_x = (filetree_data->ft_side == FT_LEFT)
             ?(box.pos.x + box.w):box.pos.x;
@@ -1138,9 +1157,6 @@ static int draw_filetree(struct editor_input_context *ctx,file_tree_data *filetr
         for(int i = box.pos.y;i < box.pos.y + box.h;i++){
             mvaddch(i,wall_pos_x,ACS_VLINE);
         }
-    }
-    else if(filetree_data->ft_side == FT_BOTTOM || filetree_data->ft_side == FT_TOP){
-        //未実装   
     }
 
     // 画面行は描画のたびに振り直す。-1のまま残った項目は画面外で、クリック判定に当たらない。

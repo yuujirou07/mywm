@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include <wchar.h>
 #include <wctype.h>
@@ -636,14 +637,13 @@ int editor_set_env_lang(struct editor_input_context *ctx,language lang){
 
 
 
-// ctxを0クリアし、stateとmouse_eventの借用先とキーマップ配列を設定する。
+// ctxを0クリアし、stateの借用先とキーマップ配列を設定する。
 // win・lsp_data・画面配置は値が決まってから呼び出し側が設定する。
-// 返り値: 成功0、キーマップ配列の確保失敗-1。stateとmouse_eventはctxより長く生きること。
-int init_input_context(struct editor_input_context *ctx,struct editor_state *state,MEVENT *mouse_event){
+// 返り値: 成功0、キーマップ配列の確保失敗-1。stateはctxより長く生きること。
+int init_input_context(struct editor_input_context *ctx,struct editor_state *state){
     memset(ctx,0,sizeof(*ctx));
     ctx->state       = state;
     state->input_ctx = ctx;
-    ctx->mouse_event = mouse_event;
 
     ctx->input_manager.key_maps.key_map_allocate_num = 16;
     ctx->input_manager.key_maps.key_mapp_list =
@@ -754,4 +754,10 @@ int SetCursorColor(struct editor_state *state,CURSOR_COLOR color){
     fputs(CURSOR_COLOR_ESC[color],stdout);
     fflush(stdout);
     return 0;
+}
+
+
+double comb_time_interval_ms(struct timespec t1,struct timespec t2){
+    return (double)((t2.tv_sec * 1000) - (t1.tv_sec * 1000)) + 
+        (((double)t2.tv_nsec / 1000000) - ((double)t1.tv_nsec / 1000000));
 }

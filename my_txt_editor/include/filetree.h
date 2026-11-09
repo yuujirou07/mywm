@@ -2,15 +2,17 @@
 #define FILETREE_H
 
 #include <stdbool.h>
+#include <time.h>
 #include"editor_types.h"
 
 #define FILETREE_DEFAULT_SIZE_W 10 // ファイルツリーの既定幅（端末セル数）。
+#define FILETREE_MIN_W 5
 
+//ファイルツリーのダブルクリックでのリサイズ設定falseならシングルっクリックでリサイズイベントが発生する
+#define FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE false
 
 // ファイルツリーを接続する画面端。
 typedef enum{
-    FT_TOP, // 画面上端。
-    FT_BOTTOM, // 画面下端。
     FT_LEFT, // 画面左端。
     FT_RIGHT, // 画面右端。
 }filetree_side;
@@ -26,6 +28,11 @@ typedef struct{
     int screen_y; // 直近の描画先となる画面y座標。非表示なら-1。
 }ft_path_open_check_data;
 
+typedef struct{
+    int outline_click_count;
+    struct timespec first_click_time;
+}ft_outline_click_data;
+
 // ファイルツリー画面の形状、ツリー本体、項目ごとの表示状態。
 typedef struct{
     struct box ft_search_box; // 検索欄として予約する画面上の矩形。
@@ -33,8 +40,10 @@ typedef struct{
     struct root_node *root_node; // create_tree()で確保し、close_tree()で解放するツリーの根。
     ft_path_open_check_data *open_check_data; // この構造体が所有する項目状態の動的配列。
     int open_count_num; // open_check_dataに格納済みの有効要素数。
+    int open_check_data_allocate_num; // open_check_dataの確保済み要素数。open_count_num以上。
     bool is_show; // ファイルツリーを表示中ならtrue。編集領域を右へ寄せる幅の計算に使う。
     bool is_grabed; // 枠線をマウスで掴み、幅を変更中ならtrue。
+    ft_outline_click_data outline_click_data;//枠線のクリック判定 ダブルクリックなどマウスでのサイズ変更イベントに使う
     filetree_side ft_side; // ファイルツリーを接続する画面端。
 }file_tree_data;
 
@@ -49,7 +58,6 @@ int set_filetree_box(file_tree_data *filetree_data,struct box filetree_box);
 int change_file_tree_width(struct editor_input_context *ctx,int width);
 void show_filetree(struct editor_input_context *ctx,struct box ft_box);
 void hide_filetree(struct editor_input_context *ctx);
-int filetree_mouse_event(struct editor_input_context *ctx);
 
 
 #endif

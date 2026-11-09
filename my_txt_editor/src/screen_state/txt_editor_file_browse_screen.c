@@ -1,6 +1,10 @@
 #include <dirent.h>
+#include <errno.h>
+#include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include <wchar.h>
 #include <wctype.h>
@@ -174,20 +178,22 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
         size_t path_len = wcslen(path);
 
         if(ch == KEY_BACKSPACE){
+            
             wchar_t  tmp_path[path_len + 1];
             memcpy(tmp_path,path,sizeof(wchar_t) * (path_len+1));
             char mb_path[PATH_MAX];
             if(path_len > 0){
                 tmp_path[path_len-1] = L'\0';
-
-                if(wcstombs(mb_path, tmp_path, sizeof(mb_path)) != (size_t)-1){
+                size_t char_path_len = 0;
+                if((char_path_len = wcstombs(mb_path, tmp_path, sizeof(mb_path))) != (size_t)-1){
+                    mb_path[char_path_len] = '\0';
                     struct dir_table now_path = {.path_name = mb_path};
                     now_open_path_name(&now_path,set);
                     state->render_flags |= RENDER_FILE_BROWSE;
                 }
             }
         }
-        if(input_result == OK && iswprint(ch)){
+        else if(input_result == OK && iswprint(ch)){
             wchar_t tmp_path[path_len + 2];
             memcpy(tmp_path,path,sizeof(wchar_t) * (path_len+1));
             tmp_path[path_len] = ch;
@@ -205,12 +211,21 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
             if(path == NULL)return true;
             char char_old_path[PATH_MAX];
             size_t converted = wcstombs(char_old_path,path,sizeof(char_old_path) - 1);
+            if(converted == (size_t)-1){
+                error_log("wcstombs argument error");
+                char *err = strerror(errno);
+                fputs(err,stderr);
+                return true;
+            }
+            char_old_path[converted] = '\0';
 
+            //現在入力されているパスが存在したら開く
             enum select_state path_state = get_path_state(char_old_path);
             if(path_state == file){
                 now_input_path_open(state,ctx);
                 return true;
             }
+            
 
             int selected_line = file_browse->select_line.now_line;
             if(selected_line < 0 || selected_line >= file_browse->dir_name_table_num)return true;
@@ -228,11 +243,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                 error_log("can not get open path name");
                 return true;
             }
-
-            if(converted == (size_t)-1){
-                return true;
-            }
-            char_old_path[converted] = '\0';
+        
             char *last_slash = strrchr(char_old_path,'/');
             if(last_slash != NULL){
                 *(last_slash+1) = '\0';
@@ -242,6 +253,9 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
             const char *separator = (candidate->d_type == DT_DIR) ? "/" : "";
             int path_size = snprintf(char_path,sizeof(char_path),"%s%s%s",
                 char_old_path,candidate->d_name,separator);
+
+            editor_log(char_path,NULL,NULL, NULL,0);
+
             if(path_size >= 0 && (size_t)path_size < sizeof(char_path)){
                 struct dir_table now_path = {
                     .path_name = char_path,
@@ -271,10 +285,12 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                 file_browse->dir_name_table_num = men_num;
                 file_browse->select_line.now_logical_line = 0;
                 
+                //入力文字列の更新時に、選択ラインを一番上に戻す
                 if((file_browse->select_line.now_line < 0 ||
                     file_browse->select_line.now_line >= men_num)){
                     set_file_select_line(state,file_browse->dir_name_table_num,0);
                 }
+
                 for(int i = 0; i < table_rows;i++){
                     if(i < men_num){
                         snprintf(file_browse->dir_name_table[i].name,
