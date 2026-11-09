@@ -343,7 +343,9 @@ int main(int argc, char *argv[])
         else if(lsp_start_server(&lsp, "clangd", lsp_argv) == -1){
             error_log_write("cant start lsp server :(");
         }
-        else if(lsp_send_initialize(lsp.to_server_fd,lsp.id_data.used_id_history[lsp.id_data.id_storage_counter++], getpid(), root_uri) == -1){
+        else if(lsp_send_initialize(lsp.to_server_fd,lsp.id_data.used_id_history[lsp.id_data.id_storage_counter++],
+                    getpid(),root_uri ) == -1){
+
             error_log_write("cant send lsp initialize :(");
             lsp_close_server(&lsp);
            
@@ -369,6 +371,7 @@ int main(int argc, char *argv[])
         }
         set_lsp_use_language(&lsp,state.settings_data->lsp.lsp_language);
     }
+    
 
     input_context.win = win;
     input_context.lsp_data = &lsp;
