@@ -14,7 +14,6 @@
 #include "editor_types.h"
 #include "filetree.h"
 #include "ftj.h"
-#include "my_cui_lib.h"
 #include "txt_editor.h"
 #include "txt_editor_syntax.h"
 
