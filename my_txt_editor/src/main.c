@@ -46,7 +46,7 @@ static void lsp_poll_events(int *epfd, struct lsp_process *lsp, int timeout_ms);
 int main(int argc, char *argv[])
 {
 
-    
+
     char startuptime_log_file_path_name[PATH_MAX] = {0};
 
     struct timespec startup_start_time;
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
         return EXIT_SUCCESS;
     }
 
-  
+    
 
     bool mylsp = false;
     //引数解析
