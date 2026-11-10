@@ -116,6 +116,14 @@ void load_custom_editor_settings(struct editor_settings *settings_data){
         settings_data->built_in_syntax = cJSON_IsTrue(built_in_syntax);
     }
 
+    cJSON *editor_scroll_sensitivity = cJSON_GetObjectItemCaseSensitive(
+        json_data,
+        SETTINGS_JSON_KEY_STR[JSON_OBJ_ROOT][ROOT_KEY_EDITOR_SCROLL_SENSITIVITY]
+        );
+    if(json_int_in_range(editor_scroll_sensitivity, 1, INT_MAX)){
+        settings_data->editor_scroll_sensitivity = editor_scroll_sensitivity->valueint;
+    }
+
     cJSON *auto_complete = cJSON_GetObjectItemCaseSensitive(json_data, SETTINGS_JSON_KEY_STR[JSON_OBJ_ROOT][ROOT_KEY_AUTO_COMPLETE]);
     if(auto_complete == NULL){
         auto_complete = cJSON_GetObjectItemCaseSensitive(editor, SETTINGS_JSON_KEY_STR[JSON_OBJ_EDITOR][EDITOR_KEY_AUTO_COMPLETE]);

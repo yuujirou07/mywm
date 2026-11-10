@@ -29,5 +29,6 @@
     "enabled":true,
     "language":"c",
     "root_src_path":"so_file/settings.so"
-  }
+  },
+  "editor_scroll_sensitivity":8
 }

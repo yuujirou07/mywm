@@ -1,5 +1,21 @@
 {
         "editor.tabSize": 8,
         "editor.insertSpaces": false,
-        "editor.detectIndentation": false
+        "editor.detectIndentation": false,
+		"editor.inlineSuggest.enabled": false,
+		"editor.suggest.enabled": true,
+		"editor.suggestOnTriggerCharacters": true,
+		"editor.acceptSuggestionOnEnter": "on",
+		"editor.quickSuggestions": {
+			"other": true,
+			"comments": true,
+			"strings": true
+		},
+		"editor.wordBasedSuggestions": "currentDocument",
+    	"clangd.arguments": [
+		"--compile-commands-dir=/home/yuujirou07/vscode_proj/mywm/my_txt_editor",
+		"--header-insertion=never",
+		"--clang-tidy",
+		"--enable-config"
+    	]
 }

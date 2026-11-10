@@ -27,6 +27,7 @@
 #define DEFAULT_LSP_USE true // LSP連携を有効にする既定値。
 #define DEFAULT_USE_ICON false // ファイル種別アイコンを表示する既定値。
 #define DEFAULT_BUILT_IN_SYNTAX true // 組込み構文着色を有効にする既定値。
+#define DEFAULT_EDITOR_SCROLL_SENSITIVITY 2 // マウスホイール1回あたりのスクロール行数の既定値。
 
 #define DEFAULT_AUTO_COMPLETE true // 自動補完を有効にする既定値。
 #define DEFAULT_AUTO_COMPLETE_WINDOW true // 補完候補ウィンドウを表示する既定値。
@@ -68,6 +69,7 @@ typedef enum{
     ROOT_KEY_SETTINGS_LANGUAGE = 5,
     ROOT_KEY_LSP = 6,
     ROOT_KEY_SETTINGS_PROGRAM = 7,
+    ROOT_KEY_EDITOR_SCROLL_SENSITIVITY = 8,
 }settings_root_key;
 
 typedef enum{
@@ -130,6 +132,7 @@ static const char *const SETTINGS_ROOT_KEY_STR[] = {
     [ROOT_KEY_SETTINGS_LANGUAGE] = "settings_language",
     [ROOT_KEY_LSP] = "lsp",
     [ROOT_KEY_SETTINGS_PROGRAM] = "editor_settings_program",
+    [ROOT_KEY_EDITOR_SCROLL_SENSITIVITY] = "editor_scroll_sensitivity",
 };
 
 static const char *const SETTINGS_BUFFER_KEY_STR[] = {
@@ -304,6 +307,7 @@ struct editor_settings{
     bool file_select_scene_lighting; // ファイルブラウザの選択行を反転表示するならtrue。
     bool use_icon; // ファイル種別アイコンを表示するならtrue。
     bool built_in_syntax; // 組込み構文着色を使うならtrue。
+    int editor_scroll_sensitivity; // マウスホイール1回あたりのスクロール行数。
     auto_complete_settings_data auto_complete_settings_data; // 自動補完の設定一式。
     key_log_settings key_log_settings;
     struct lsp_settings_data lsp; // LSP連携の設定一式。

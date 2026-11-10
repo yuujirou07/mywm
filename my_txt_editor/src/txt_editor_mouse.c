@@ -14,7 +14,6 @@
 #include "editor_types.h"
 #include "filetree.h"
 #include "ftj.h"
-#include "my_cui_lib.h"
 #include "txt_editor.h"
 #include "txt_editor_syntax.h"
 
@@ -82,15 +81,51 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
             }
         }
         if(is_cur_on_edit_screen){
-
-            //文字のスクロール処理
             
-            editor_scroll_logical_line(state,1);
-            // 構文情報は画面相対行で持つため、既存分を1行ずらし、新しく見える最下行だけ解析する。
-            if(state->settings_data->built_in_syntax){
-                scroll_syntax_pos_data(&ctx->syntax_data,-1,state->write_area.h);
-                update_line_syntax_data(ctx,state->write_area.h - 1);
-            }
+            wint_t chr;
+            MEVENT tmp_msev;
+
+            nodelay(stdscr,true);
+            //エディタースクロールスタック解消ループ処理
+            do{
+                int before_scr_start_num = state->scr.scr_start_num;
+                //文字のスクロール処理 
+                editor_scroll_logical_line(
+                    state,state->settings_data->editor_scroll_sensitivity);
+                int scrolled_num = state->scr.scr_start_num - before_scr_start_num;
+                // 構文情報は画面相対行で持つため、実際にスクロールした行数だけずらし、
+                // 新しく見える最下行からscrolled_num行分を解析する。
+                if(state->settings_data->built_in_syntax && scrolled_num > 0){
+                    scroll_syntax_pos_data(
+                        &ctx->syntax_data,-scrolled_num,state->write_area.h);
+                    int first_line = state->write_area.h - scrolled_num;
+                    if(first_line < 0)first_line = 0;
+                    for(int line = first_line;line < state->write_area.h;line++){
+                        update_line_syntax_data(ctx,line);
+                    }
+                }
+
+                if(get_wch(&chr) == ERR){
+                    break;
+                }
+
+
+                if(chr == KEY_MOUSE){
+                    if(getmouse(&tmp_msev) == OK && 
+                        !(tmp_msev.bstate & (BUTTON5_PRESSED | BUTTON5_CLICKED))){
+                        ungetmouse(&tmp_msev);
+                        break;
+                    }
+                }
+                else{
+                    unget_wch(chr);
+                    break;
+                }
+                
+
+            }while(1);
+
+            nodelay(stdscr,false);
         }
         
     //エディター画面上スクロール処理
@@ -107,45 +142,50 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
                 is_cur_on_edit_screen = false;
             }
         }
+
         if(is_cur_on_edit_screen){ 
-            wchar_t chr;
+            wint_t chr;
             
             nodelay(stdscr,true);
             MEVENT tmp_msev;
-            bool loop_enable = true;
+            //スクロール処理はスタックがたまるため一時的にノンブロッキングにして
+            //溜まっているスクロールスタックをループで処理する
             do{
-
-                editor_scroll_logical_line(state,-1);
-                // 下スクロールの逆。既存分を1行下げ、新しく見える最上行(0)だけ解析する。
-                if(state->settings_data->built_in_syntax){
-                    scroll_syntax_pos_data(&ctx->syntax_data,+1,state->write_area.h);
-                    update_line_syntax_data(ctx,0);
+                int before_scr_start_num = state->scr.scr_start_num;
+                editor_scroll_logical_line(
+                    state,-state->settings_data->editor_scroll_sensitivity);
+                int scrolled_num = before_scr_start_num - state->scr.scr_start_num;
+                // 下スクロールの逆。実際にスクロールした行数だけ既存分を下げ、
+                // 新しく見える最上行からscrolled_num行分を解析する。
+                if(state->settings_data->built_in_syntax && scrolled_num > 0){
+                    scroll_syntax_pos_data(
+                        &ctx->syntax_data,scrolled_num,state->write_area.h);
+                    int last_line = scrolled_num;
+                    if(last_line > state->write_area.h)last_line = state->write_area.h;
+                    for(int line = 0;line < last_line;line++){
+                        update_line_syntax_data(ctx,line);
+                    }
                 }
 
-                int rt = get_wch(&chr);
-                if(rt != OK){
-                    if(rt != ERR){
-                        unget_wch(chr);
-                    }
+                if(get_wch(&chr) == ERR){
                     break;
                 }
+                
                 if(chr == KEY_MOUSE){
-                    if(getmouse(&tmp_msev) != OK){
-                        loop_enable = false;
+                    if(getmouse(&tmp_msev) == OK && 
+                        !(tmp_msev.bstate & (BUTTON4_PRESSED | BUTTON4_CLICKED))){
+                        ungetmouse(&tmp_msev);
                         break;
                     }
-                    if(tmp_msev.bstate & BUTTON4_PRESSED){
-                        loop_enable = true;
-                    }
-                    else{
-                        loop_enable = false;
-                        break;
-                    }
-                }
+                }    
                 else{
+                    unget_wch(chr);
                     break;
                 }
-            }while(loop_enable);
+
+            }while(1);
+                
+            nodelay(stdscr,false);
         }
     }
     //マウスクリック処理

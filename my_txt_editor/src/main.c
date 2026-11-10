@@ -46,7 +46,9 @@ static void lsp_poll_events(int *epfd, struct lsp_process *lsp, int timeout_ms);
 int main(int argc, char *argv[])
 {
 
+
     char startuptime_log_file_path_name[PATH_MAX] = {0};
+    
 
     struct timespec startup_start_time;
     clock_gettime(CLOCK_MONOTONIC, &startup_start_time);
@@ -62,9 +64,7 @@ int main(int argc, char *argv[])
     if(set_log_file(EDITOR_LOG_DATA) != 0){
         return EXIT_SUCCESS;
     }
-
-  
-
+    
     bool mylsp = false;
     //引数解析
     if(argc > startuptime_log_file_argument_num){
@@ -345,7 +345,9 @@ int main(int argc, char *argv[])
         else if(lsp_start_server(&lsp, "clangd", lsp_argv) == -1){
             error_log_write("cant start lsp server :(");
         }
-        else if(lsp_send_initialize(lsp.to_server_fd,lsp.id_data.used_id_history[lsp.id_data.id_storage_counter++], getpid(), root_uri) == -1){
+        else if(lsp_send_initialize(lsp.to_server_fd,lsp.id_data.used_id_history[lsp.id_data.id_storage_counter++],
+                    getpid(),root_uri ) == -1){
+
             error_log_write("cant send lsp initialize :(");
             lsp_close_server(&lsp);
            
@@ -371,6 +373,7 @@ int main(int argc, char *argv[])
         }
         set_lsp_use_language(&lsp,state.settings_data->lsp.lsp_language);
     }
+    
 
     input_context.win = win;
     input_context.lsp_data = &lsp;

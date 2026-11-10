@@ -324,7 +324,7 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
         return -1;
     }
     snprintf(full_path,full_path_size,"%s%s",base_dir,dl_path);
-
+    editor_log(full_path,NULL,NULL,NULL,0);
     if(access(full_path,F_OK) != 0){
         free(full_path);
         error_log("dl path cannot access");

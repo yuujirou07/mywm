@@ -729,6 +729,7 @@ void load_default_editor_settings(struct editor_settings *settings_data){
     settings_data->lsp.lsp_use                  = DEFAULT_LSP_USE;
     settings_data->use_icon                     = DEFAULT_USE_ICON;
     settings_data->built_in_syntax              = DEFAULT_BUILT_IN_SYNTAX;
+    settings_data->editor_scroll_sensitivity    = DEFAULT_EDITOR_SCROLL_SENSITIVITY;
     settings_data->auto_complete_settings_data.auto_complete_enabled       = DEFAULT_AUTO_COMPLETE;
     settings_data->auto_complete_settings_data.auto_complete_window_enable = DEFAULT_AUTO_COMPLETE_WINDOW;
     settings_data->auto_complete_settings_data.auto_complete_window_size =

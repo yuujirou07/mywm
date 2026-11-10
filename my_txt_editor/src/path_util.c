@@ -14,6 +14,7 @@ char *editor_path_from_exe_dir(char *buf, size_t buf_size, const char *relative)
         return NULL;
     }
 
+
     char exe_path[PATH_MAX];
     ssize_t len = readlink(SELF_SIM_LINK, exe_path, sizeof(exe_path) - 1);
     if(len <= 0){
