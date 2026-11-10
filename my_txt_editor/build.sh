@@ -4,8 +4,8 @@ set -e
 
 echo argument is "$#"
 
-MAIN_SRC="src/main.c src/screen_state/txt_editor_state.c src/txt_editor_func.c src/txt_editor_draw.c src/txt_editor_file.c src/txt_editor_syntax.c src/editor_color.c src/txt_editor_mouse.c src/json_read.c src/editor_log.c src/kbd_input_log.c src/lsp_src/language_server_communication.c src/path_util.c src/settings_parse_src/editor_settings_parse.c src/settings_parse_src/settings_items_parse.c src/settings_parse_src/editor_icon_parse.c"
-MAIN_SRC="$MAIN_SRC src/screen_state/txt_editor_edit_screen.c src/screen_state/txt_editor_file_browse_screen.c src/screen_state/txt_editor_line_jump_screen.c src/screen_state/txt_editor_error_screen.c src/screen_state/txt_editor_make_file_screen.c src/screen_state/txt_editor_start_menu_screen.c src/screen_state/txt_editor_settings_screen.c src/screen_state/txt_editor_filetree_screen.c"
+MAIN_SRC="src/main.c src/screen_state/editor_state.c src/editor_func.c src/editor_draw.c src/editor_file.c src/editor_syntax.c src/editor_color.c src/editor_mouse.c src/json_read.c src/editor_log.c src/kbd_input_log.c src/lsp_src/language_server_communication.c src/path_util.c src/settings_parse_src/editor_settings_parse.c src/settings_parse_src/settings_items_parse.c src/settings_parse_src/editor_icon_parse.c"
+MAIN_SRC="$MAIN_SRC src/screen_state/editor_edit_screen.c src/screen_state/editor_file_browse_screen.c src/screen_state/editor_line_jump_screen.c src/screen_state/editor_error_screen.c src/screen_state/editor_make_file_screen.c src/screen_state/editor_start_menu_screen.c src/screen_state/editor_settings_screen.c src/screen_state/editor_filetree_screen.c"
 MAIN_SRC="$MAIN_SRC src/plugin_src/edit_input_complete.c"
 MAIN_SRC="$MAIN_SRC src/public_settings_src/c_settings_src.c/c_settings_settings.c "
 FTJ_SRC="src/ftj.c"

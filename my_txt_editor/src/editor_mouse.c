@@ -1,4 +1,4 @@
-#include "txt_editor_mouse.h"
+#include "editor_mouse.h"
 #include <bits/time.h>
 #include <math.h>
 #include <ncurses.h>
@@ -14,8 +14,8 @@
 #include "editor_types.h"
 #include "filetree.h"
 #include "ftj.h"
-#include "txt_editor.h"
-#include "txt_editor_syntax.h"
+#include "editor.h"
+#include "editor_syntax.h"
 
 // getmouseで取得したイベントをctxの現在画面へ振り分ける。dir_numはブラウザの表示項目数。
 // 返り値: なし。イベント取得失敗や未対応画面では何もしない。
@@ -32,7 +32,7 @@ void handle_mouse(struct editor_input_context *ctx,int dir_num) {
     screen_state scr_state = editor_get_screen_state(state);
 
     switch(scr_state){
-        case edit_screen:{
+        case edit_screen_mode:{
             int old_scr_start_num = state->scr.scr_start_num;
             editor_screen_mouse_event(ctx);
             if(old_scr_start_num != state->scr.scr_start_num){
@@ -41,11 +41,11 @@ void handle_mouse(struct editor_input_context *ctx,int dir_num) {
             }
             break;
         }
-        case file_browse_screen:{
+        case file_browse_screen_mode:{
             file_browse_screen_mouse_event(win,event,state,dir_num);
             break;
         }
-        case filetree_screen:{
+        case filetree_screen_mode:{
             filetree_mouse_event(ctx);
             break;
         }
@@ -76,7 +76,7 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
                 {(struct pos){state->write_area.x_start,state->write_area.y_start},
                     state->write_area.w,state->write_area.h};    
             if(!box_contains_point(tmp_write_area_box,(struct pos){event->x,event->y})){
-                editor_set_screen_state(state,filetree_screen);
+                editor_set_screen_state(state,filetree_screen_mode);
                 is_cur_on_edit_screen = false;
             }
         }
@@ -138,7 +138,7 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
                     state->write_area.w,state->write_area.h};    
 
             if(!box_contains_point(tmp_write_area_box,(struct pos){event->x,event->y})){
-                editor_set_screen_state(state,filetree_screen);
+                editor_set_screen_state(state,filetree_screen_mode);
                 is_cur_on_edit_screen = false;
             }
         }
@@ -196,7 +196,7 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
 
       
         if(box_contains_point(ctx->state->file_tree_data.ft_box,(struct pos){event->x,event->y})){
-            editor_set_screen_state(state,filetree_screen);
+            editor_set_screen_state(state,filetree_screen_mode);
             filetree_mouse_event(ctx);
             return;
         }
@@ -416,7 +416,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                     cur_logical_pos.y = *state->str.line;
                 }
                 editor_set_cursor(state,cur_logical_pos.x,cur_logical_pos.y);
-                editor_set_screen_state(state,edit_screen);
+                editor_set_screen_state(state,edit_screen_mode);
                 my_cur_set(state,true);
             }
         }
@@ -434,7 +434,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
             {(struct pos){state->write_area.x_start,state->write_area.y_start},
                 state->write_area.w,state->write_area.h};
         if(box_contains_point(tmp_write_area_box,(struct pos){ev->x,ev->y})){
-            editor_set_screen_state(state,edit_screen);
+            editor_set_screen_state(state,edit_screen_mode);
             my_cur_set(state,true);
         }
     }

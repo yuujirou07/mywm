@@ -9,9 +9,11 @@
 #include <wchar.h>
 #include <wctype.h>
 #include "editor_log.h"
-#include "txt_editor.h"
-#include "txt_editor_screen.h"
-#include "txt_editor_syntax.h"
+#include "editor.h"
+#include "editor_screen.h"
+#include "editor_syntax.h"
+#include "editor_color.h"
+#include "editor_icon.h"
 
 // ファイルブラウザ画面の移動・選択・復帰を処理する。
 // 引数: ctx=入力context(state->file_browseにファイル一覧・現在パスが入っている)、input_result=get_wch()の結果、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
@@ -62,8 +64,8 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
         if(state->settings_data->file_select_scene_lighting){
 
             if(ch == '\t') {
-                if(editor_get_screen_state_log(state,1) == start_menu_screen){
-                    editor_set_screen_state(state, start_menu_screen);
+                if(editor_get_screen_state_log(state,1) == start_menu_screen_mode){
+                    editor_set_screen_state(state, start_menu_screen_mode);
                     *ctx->start_menu_screen.open = true;
 
                     set_file_browse_path_input_mode(
@@ -72,7 +74,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                     );
                 }
                 else{
-                    editor_set_screen_state(state, edit_screen);
+                    editor_set_screen_state(state, edit_screen_mode);
                     restore_edit_screen(state);
                     set_file_browse_path_input_mode(file_browse,
                         false);
@@ -341,4 +343,208 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
     }
 
     return true;
+}
+
+// ファイルブラウザ上部に現在ディレクトリのパスを表示する。
+// 引数: file_browse_box=表示位置と幅、path_name=表示するパス文字列。 返り値: なし。
+void draw_now_path_name(struct box file_browse_box,char *path_name){
+    int x = file_browse_box.pos.x;
+    int y = file_browse_box.pos.y;
+    int w = file_browse_box.w;
+    if(w <= 1 || y < 2){
+        return;
+    }
+
+    mvaddch(y - 2, x, ACS_ULCORNER);
+    for (int i = 1; i < w - 1; i++)
+        mvaddch(y - 2, x + i, ACS_HLINE);
+    mvaddch(y - 2, x + w - 1, ACS_URCORNER);
+
+    mvaddch(y - 1, x, ACS_VLINE);
+    int inner_w = w - 2;
+    int len = (int)strlen(path_name);
+    if (len > inner_w && inner_w > 3) {
+        // 長いパスは先頭を"..."に置き換え、末尾側を残す(ファイル名側のほうが重要なため)。
+        // 残す先頭はなるべく'/'で区切り、ディレクトリ名が途中で切れないようにする。
+        addstr("...");
+        int diff = len - inner_w+strlen("...");
+        char *path_start_ptr = strchr(&path_name[diff],'/');
+        if(path_start_ptr == NULL){
+            path_start_ptr = &path_name[diff];
+        }
+        mvaddnstr(y - 1, x +4,path_start_ptr, inner_w - 3);
+
+    } else if(len > inner_w) {
+        mvaddnstr(y - 1, x + 1, path_name, inner_w);
+    } else {
+        mvprintw(y - 1, x + 1, "%-*s", inner_w, path_name);
+    }
+    mvaddch(y - 1, x + w - 1, ACS_VLINE);
+    mvaddch(y, x, ACS_LTEE);
+    mvaddch(y, x + w - 1, ACS_RTEE);
+}
+
+// load_dir_table()が作ったディレクトリエントリ一覧をファイルブラウザの内側へ描画する。
+// 引数: state=ファイルブラウザ領域、table=名前と種別を持つディレクトリエントリ一覧。 返り値: なし。
+void draw_box_inside_dir(struct editor_state *state,struct dir_entry *table){
+    
+    if(table == NULL || state->file_browse.area.w <= 0 || state->file_browse.area.h <= 0){return;}
+    char clear[state->file_browse.area.w + 1];
+    memset(clear,' ',state->file_browse.area.w * sizeof(char));
+    clear[state->file_browse.area.w] = '\0';
+
+    // エントリ名は幅に関係なく丸ごと保持しているため、はみ出す分はここで詰める。
+    // 描き始めがpos.x+1なので、使える幅は内側幅から1引いた分。
+    int max_len = state->file_browse.area.w - 3;
+
+    // パス入力中のテーブルはcheck_dir_mem()が入力パスの親から作るので、同じディレクトリを前に付ける。
+    const char *base_path = state->file_browse.path_name;
+    char input_dir[PATH_MAX];
+    if(get_file_browse_path_input_mode(&state->file_browse)){
+        struct dir_table now_path = {0};
+        now_open_path_name(&now_path,get);
+        char *last_slash = (now_path.path_name != NULL) ? strrchr(now_path.path_name,'/') : NULL;
+        if(last_slash != NULL){
+            size_t dir_len = (last_slash == now_path.path_name) ? 1 : (size_t)(last_slash - now_path.path_name);
+            memcpy(input_dir,now_path.path_name,dir_len);
+            input_dir[dir_len] = '\0';
+            base_path = input_dir;
+        }
+    }
+
+    // now_logical_line以降の全件テーブルを、i番目の画面行へ対応付ける。
+    for(int i = 0;i < state->file_browse.area.h;i++){
+        mvaddstr(state->file_browse.area.pos.y + i, state->file_browse.area.pos.x,clear);
+        if(max_len <= 0) continue;
+
+        struct dir_entry *entry = &table[state->file_browse.select_line.now_logical_line + i];
+        if(entry->name[0] == '\0') continue;
+
+        int draw_y = state->file_browse.area.pos.y + i;
+        int draw_x = state->file_browse.area.pos.x + 3;
+        int len = (int)strlen(entry->name);
+
+        char entry_path[sizeof(state->file_browse.path_name) + sizeof(entry->name) + 1];
+        snprintf(entry_path,sizeof(entry_path),"%s%s%s",base_path,
+            strcmp(base_path,"/") == 0 ? "" : "/",entry->name);
+        editor_log(entry_path, NULL, NULL, NULL, 0);
+        const char *icon_code =
+            get_file_ext_code(entry_path,&state->settings_data->icon_data);
+      
+        mvaddstr(draw_y,draw_x - 2,icon_code);
+        if(len <= max_len){
+            mvaddstr(draw_y, draw_x, entry->name);
+        }
+        else if(max_len > 3){
+            // 末尾を"..."にして省略したことが分かるようにする。
+            mvaddnstr(draw_y, draw_x, entry->name, max_len - 3);
+            mvaddstr(draw_y, draw_x + max_len - 3, "...");
+        }
+        else{
+            mvaddnstr(draw_y, draw_x, entry->name, max_len);
+        }
+    }
+}
+
+// stateのブラウザ選択行へ色ペアnumを適用し、前の選択行を通常色へ戻す。dir_numは表示項目数。
+// 返り値: なし。強調無効・幅不足・件数0以下・選択範囲外なら描かず、描画後は端末カーソルを復元する。
+void draw_select_dir_scene_color(struct editor_state *state,int dir_num,int num){
+    int cur_x;
+    int cur_y;
+    getyx(stdscr,cur_y,cur_x);
+    if(state->settings_data->file_select_scene_lighting == false)
+        return;
+
+    if(state->file_browse.area.w <= 0 || dir_num <= 0 ||
+       state->file_browse.select_line.now_line < 0 || state->file_browse.select_line.now_line >= dir_num){
+        return;
+    }
+    int lighting_line = state->file_browse.area.pos.y + state->file_browse.select_line.now_line;
+    mvchgat(lighting_line,state->file_browse.area.pos.x,state->file_browse.area.w,A_NORMAL,num,NULL);
+
+    if(state->file_browse.select_line.previous_line != state->file_browse.select_line.now_line){
+        int previous_line = state->file_browse.area.pos.y + state->file_browse.select_line.previous_line;
+        // 選択が移った前の行を通常の本文色へ戻す。
+        mvchgat(previous_line,state->file_browse.area.pos.x,state->file_browse.area.w,A_NORMAL,get_color_pair(state->input_ctx,COLOR_WHITE,COLOR_BLACK),NULL);
+    }
+    move(cur_y,cur_x);
+}
+
+// ファイルブラウザ全体の再描画を要求する。
+// 引数: state=描画要求の保存先。枠やパスはstate->file_browseから参照する。 返り値: なし。
+void show_file_browse(struct editor_state *state){
+    state->render_flags |= RENDER_FILE_BROWSE;
+}
+
+// stateのブラウザ選択行をlineへ更新し、dir_num件の範囲へ丸めて強調表示を再描画要求する。
+// 返り値: なし。dir_numが0以下、または強調表示が無効なら変更しない。
+void set_file_select_line(struct editor_state *state,int dir_num,int line){
+    if(dir_num <= 0 || state->settings_data->file_select_scene_lighting == false){
+        return;
+    }
+    if(line < 0){
+        line = 0;
+    }
+    if(line >= dir_num){
+        line = dir_num - 1;
+    }
+    
+    file_select_line_update(&state->file_browse.select_line, line);
+    state->render_flags |= RENDER_SELECT_DIR_SCENE_COLOR;
+}
+
+// ファイルブラウザのパス入力枠を描画する。
+// 引数: search_box=枠線を含む描画領域、win=描画先ウィンドウ。 返り値: なし。winがNULLなら何もしない。
+static void draw_search_box(struct box search_box,WINDOW *win){
+    if(win == NULL)return;
+    draw_box(search_box,win);
+    mvaddch(search_box.pos.y,search_box.pos.x,ACS_LTEE);
+    mvaddch(search_box.pos.y,search_box.pos.x + search_box.w -1,ACS_RTEE);
+}
+
+// ファイルブラウザの枠・パス・一覧・選択行と、パス入力中はサーチボックスを描画する。
+// 引数: ctx=状態と描画先を持つ入力context。 返り値: なし。
+void draw_file_browse(struct editor_input_context *ctx){
+    struct editor_state *state = ctx->state;
+    WINDOW *win = ctx->win;
+    //ブラウザ画面を後ろのコードが見えないように消す
+    set_clear_box(&state->clear_box_data,state->file_browse.box);
+    clear_box(&state->clear_box_data);
+    draw_box(state->file_browse.box, win);
+    draw_now_path_name(state->file_browse.box,
+                       state->file_browse.path_name);
+    draw_box_inside_dir(state, state->file_browse.dir_name_table);
+    draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,get_color_pair(ctx,COLOR_BLACK,COLOR_WHITE));
+
+    //サーチボックスの描画とサーチボックス内のパス描画
+    if(get_file_browse_path_input_mode(&state->file_browse)){
+        my_cur_set(state,true);
+
+        struct box search_box = state->file_browse.search_box;
+        draw_search_box(search_box,ctx->win);
+
+        int cur_line = search_box.pos.y + 1;
+        int col = search_box.pos.x + 1;
+
+        const wchar_t *path = now_open_path_name(NULL,get);
+        //マウスカーソル分を確保するため両サイド合わせて-3する
+        int show_path_size = search_box.w - 3;
+        // 入力欄に収まらない長いパスは、入力中の末尾が見えるよう後ろから表示幅分だけ残す。
+        // 全角はセル幅2なので文字数ではなくwcwidthの合計で数える。
+        size_t path_start = wcslen(path);
+        int path_width = 0;
+        while(path_start > 0){
+            int char_width = wcwidth(path[path_start - 1]);
+            if(char_width < 0 || path_width + char_width > show_path_size)break;
+            path_width += char_width;
+            path_start--;
+        }
+
+        mvhline(cur_line,col,' ',show_path_size);
+        mvaddwstr(cur_line,col,&path[path_start]);
+        int x;
+        int y;
+        getyx(ctx->win,y,x);
+        cur_pos_push((struct pos){x,y},state);
+    }
 }

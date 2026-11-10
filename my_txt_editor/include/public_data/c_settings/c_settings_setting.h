@@ -17,7 +17,8 @@ typedef enum{
     FILE_SEARCH_MODE = 1,
     FILE_TREE_MODE   = 2,
     HOME_SCREEN_MODE = 3,
-    UNKNOWN_MODE = 4,
+    COMMANDS_MODE = 4,
+    UNKNOWN_MODE = 5,
 }MY_TXT_EDITOR_SCREEN_MODE;
 
 typedef enum{
@@ -41,6 +42,7 @@ typedef MY_TXT_EDITOR_RESULT (*SET_TEXT_CURSOR_COL)(const MY_TXT_EDITOR_API *,in
 
 typedef MY_TXT_EDITOR_RESULT (*INPUT_CHAR)(const MY_TXT_EDITOR_API *api,wchar_t chr);
 typedef MY_TXT_EDITOR_RESULT (*UNDO_TEXT_INPUT)(const MY_TXT_EDITOR_API *api,size_t n);
+typedef MY_TXT_EDITOR_RESULT (*REQUEST_CHANGE_SCREEN_MODE)(const MY_TXT_EDITOR_API *api,MY_TXT_EDITOR_SCREEN_MODE mode);
 
 struct MY_TXT_EDITOR_API{
     void * userdata;
@@ -53,6 +55,7 @@ struct MY_TXT_EDITOR_API{
     SET_TEXT_CURSOR_COL set_text_cursor_col;
     INPUT_CHAR input_char;
     UNDO_TEXT_INPUT undo_text_input;
+    REQUEST_CHANGE_SCREEN_MODE request_change_screen_mode;
 };
 
 

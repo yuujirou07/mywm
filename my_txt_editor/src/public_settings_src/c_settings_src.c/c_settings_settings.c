@@ -20,9 +20,9 @@
 #include "kbd_input_log.h"
 #include "path_util.h"
 #include "public_data/c_settings/c_settings_setting.h"
-#include"txt_editor.h"
+#include"editor.h"
 #include"string.h"
-#include "txt_editor_screen.h"
+#include "editor_screen.h"
 
 static MY_TXT_EDITOR_RESULT api_save_file(void *userdata);
 static void *load_current_settings_obj_c_file(struct editor_input_context *ctx);
@@ -34,6 +34,7 @@ static MY_TXT_EDITOR_RESULT set_text_cursor_row(const MY_TXT_EDITOR_API *api,int
 static MY_TXT_EDITOR_RESULT input_char(const MY_TXT_EDITOR_API *api,wchar_t chr);
 static MY_TXT_EDITOR_RESULT set_text_cursor_col(const MY_TXT_EDITOR_API *api,int col);
 static MY_TXT_EDITOR_RESULT undo_text_input(const MY_TXT_EDITOR_API *api,size_t n);
+static MY_TXT_EDITOR_RESULT request_change_edior_screen_mode(const MY_TXT_EDITOR_API *api,MY_TXT_EDITOR_SCREEN_MODE mode);
 
 static int is_user_event_key(wchar_t chr);
 
@@ -49,6 +50,7 @@ void connect_api_mem_data(MY_TXT_EDITOR_API *const api,struct editor_input_conte
     api->input_char = input_char;
     api->set_text_cursor_col = set_text_cursor_col;
     api->undo_text_input = undo_text_input;
+    api->request_change_screen_mode = request_change_edior_screen_mode;
     return;
 }
 
@@ -60,7 +62,7 @@ static MY_TXT_EDITOR_RESULT api_save_file(void *userdata){
         return API_ERR_NULL;
     }
     //編集画面しか機能しないようにする
-    if(editor_get_screen_state(tmp_ctx->state) != edit_screen){
+    if(editor_get_screen_state(tmp_ctx->state) != edit_screen_mode){
         return API_ERR_WRONG_MODE;
     }
     file_save_motion(tmp_ctx);
@@ -225,7 +227,6 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
     void *handle = dlopen(obj_path,RTLD_NOW | RTLD_GLOBAL);
     if(handle == NULL){
         error_log("can not load settings library");
-        
     }
     return handle;
 }
@@ -419,7 +420,7 @@ static MY_TXT_EDITOR_RESULT set_text_cursor_row(const MY_TXT_EDITOR_API *api,int
         return API_ERR_INVALID_ARG;
     }
 
-    if(editor_get_screen_state(state) != edit_screen){
+    if(editor_get_screen_state(state) != edit_screen_mode){
         return API_ERR_WRONG_MODE;
     }
 
@@ -458,7 +459,7 @@ static MY_TXT_EDITOR_RESULT input_char(const MY_TXT_EDITOR_API *api,wchar_t chr)
         return API_ERR_INVALID_ARG;
     }
 
-    if(editor_get_screen_state(state) != edit_screen){
+    if(editor_get_screen_state(state) != edit_screen_mode){
         return API_ERR_INVALID_ARG;
     }
 
@@ -507,5 +508,25 @@ static MY_TXT_EDITOR_RESULT undo_text_input(const MY_TXT_EDITOR_API *api,size_t 
         
 
     
+    return API_OK;
+}
+
+
+
+static MY_TXT_EDITOR_RESULT request_change_edior_screen_mode(
+        const MY_TXT_EDITOR_API *api,MY_TXT_EDITOR_SCREEN_MODE mode){
+    if(api == NULL || mode == UNKNOWN_MODE){
+        return API_ERR_INVALID_ARG;
+    }
+
+    struct editor_input_context *ctx = api->userdata;
+    if(ctx == NULL){
+        return API_ERR_INVALID_ARG;
+    }
+    
+    screen_state combed_state = 
+        comb_my_txt_editor_screen_mode_To_screen_state(mode);
+    editor_set_screen_state(ctx->state,combed_state);
+
     return API_OK;
 }

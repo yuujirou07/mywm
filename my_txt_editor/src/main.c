@@ -28,12 +28,12 @@
 #include "ftj.h"
 #include "kbd_input_log.h"
 #include "lsp_src/language_server_communication.h"
-#include "txt_editor.h"
-#include "txt_editor_screen.h"
+#include "editor.h"
+#include "editor_screen.h"
 #include"editor_log.h"
 #include"path_util.h"
-#include "txt_editor_icon.h"
-#include"txt_editor_syntax.h"
+#include "editor_icon.h"
+#include"editor_syntax.h"
 #include"input_complete.h"
 #include"editor_color.h"
 
@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
     
 
 
-    editor_set_screen_state(&state, state.settings_data->show_start_menu ? start_menu_screen : edit_screen);
+    editor_set_screen_state(&state, state.settings_data->show_start_menu ? start_menu_screen_mode : edit_screen_mode);
     // 一覧テーブルは各エントリの名前と種別を保持する。
     // 行数は表示できる件数分だけ確保し、幅の変化では作り直さない。
     state.file_browse.dir_name_table_rows = (state.file_browse.area.h > 0)
@@ -458,10 +458,10 @@ int main(int argc, char *argv[])
         }
 
         if(open_start_menu && start_menu != NULL){
-            editor_set_screen_state(&state, start_menu_screen);
+            editor_set_screen_state(&state, start_menu_screen_mode);
         }
 
-        if(editor_get_screen_state(&state) == start_menu_screen){
+        if(editor_get_screen_state(&state) == start_menu_screen_mode){
             running = editor_handle_screen_input(&input_context, OK, 0);
             if(running == false)break;
             continue;
@@ -481,7 +481,7 @@ int main(int argc, char *argv[])
                     state.render_flags |= RENDER_EDIT_COMPLETE_WINDOW;
                 }
                 //編集画面以外では描画しない
-                if(editor_get_screen_state(&state) != edit_screen){
+                if(editor_get_screen_state(&state) != edit_screen_mode){
                    state.render_flags &= ~RENDER_EDIT_COMPLETE_WINDOW;
                 }
             }
@@ -502,8 +502,8 @@ int main(int argc, char *argv[])
         //画面更新元(この関数外では画面を更新しない)
         update_screen(&input_context);
         
-        if(editor_get_screen_state(&state) == edit_screen || 
-            editor_get_screen_state(&state) == filetree_screen){
+        if(editor_get_screen_state(&state) == edit_screen_mode || 
+            editor_get_screen_state(&state) == filetree_screen_mode){
                 
             if(state.settings_data->built_in_syntax){
                 apply_syntax_color(&input_context,input_context.syntax_data);

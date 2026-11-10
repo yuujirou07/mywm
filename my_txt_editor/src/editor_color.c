@@ -4,7 +4,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#include"txt_editor.h"
+#include"editor.h"
 #include"editor_color.h"
 
 int init_curses_color(struct editor_input_context *ctx){

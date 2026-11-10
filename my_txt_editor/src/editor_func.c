@@ -14,9 +14,9 @@
 #include "editor_log.h"
 #include "filetree.h"
 #include "input_complete.h"
-#include "txt_editor.h"
-#include "txt_editor_screen.h"
-#include"txt_editor_syntax.h"
+#include "editor.h"
+#include "editor_screen.h"
+#include"editor_syntax.h"
 #include"editor_color.h"
 #include"editor_types.h"
 
@@ -615,6 +615,7 @@ int cur_pos_push(struct pos pos, struct editor_state *state){
 // 引数: state=反映する座標を持つエディタ状態。 返り値: 常に0。move()の失敗は呼び出し元へ通知しない。
 int set_cur_pos(struct editor_state *state){
     move(state->cursor.show_cur_pos_queue.y,state->cursor.show_cur_pos_queue.x);
+    state->cursor.screen_pos = state->cursor.show_cur_pos_queue;
     return 0;
 }
 
@@ -723,7 +724,7 @@ int get_write_screen_pos_chr(struct editor_state *state,struct pos pos,char *chr
 
 int SetCursorModeScreen(struct editor_state *state,screen_state screen_state){
     switch(screen_state){
-        case edit_screen:
+        case edit_screen_mode:
             SetCursorMode(state,CURSOR_INPUT_MODE);
             SetCursorColor(state,CURSOR_COLOR_WHITE);
             break;

@@ -1,7 +1,7 @@
 #include "start_menu.h"
 #include "editor_color.h"
-#include "txt_editor.h"
-#include "txt_editor_screen.h"
+#include "editor.h"
+#include "editor_screen.h"
 
 // start menu pluginを実行し、選択結果に対応する画面へ遷移する。
 // 引数: ctx=pluginと各遷移先の状態を持つcontext、ch=dispatcherとの共通形式用で未使用。 返り値: 入力ループを続けるならtrue、pluginが終了を要求したらfalse。
@@ -34,7 +34,7 @@ bool handle_start_menu_input(struct editor_input_context *ctx, wint_t ch){
         return false;
     }
     else if(start_menu_result == select_folder){
-        editor_set_screen_state(state, file_browse_screen);
+        editor_set_screen_state(state, file_browse_screen_mode);
         my_cur_set(state,false);
 
         struct box clear_area;
@@ -50,7 +50,7 @@ bool handle_start_menu_input(struct editor_input_context *ctx, wint_t ch){
         return true;
     }
     else if(start_menu_result == new_file){
-        editor_set_screen_state(state, edit_screen);
+        editor_set_screen_state(state, edit_screen_mode);
         my_cur_set(state,true);
         clear();
         state->scr.scr_start_num = 0;
@@ -62,7 +62,7 @@ bool handle_start_menu_input(struct editor_input_context *ctx, wint_t ch){
         return true;
     }
     else if(start_menu_result == settings){
-        editor_set_screen_state(state,setting_screen);
+        editor_set_screen_state(state,setting_screen_mode);
         my_cur_set(state,false);
 
         //項目数と項目名の長さに合わせて枠を決め、画面の中央へ置く。
@@ -75,7 +75,7 @@ bool handle_start_menu_input(struct editor_input_context *ctx, wint_t ch){
         return true;
     }
 
-    editor_set_screen_state(state, edit_screen);
+    editor_set_screen_state(state, edit_screen_mode);
     my_cur_set(state,true);
     return true;
 }

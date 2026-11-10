@@ -1,27 +1,30 @@
-#include "txt_editor_screen.h"
+#include "editor_types.h"
+#include "editor_screen.h"
+#include "editor_commands.h"
 
 // 現在のscreen_stateに応じて入力処理を各state関数へ振り分ける。
 // 引数: ctx=描画対象や共有状態をまとめた入力context、input_result=get_wch()の結果、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue、終了要求ならfalse。
 bool editor_handle_screen_input(struct editor_input_context *ctx, int input_result, wint_t ch){
     switch (editor_get_screen_state(ctx->state)){
-        case start_menu_screen:
+        case start_menu_screen_mode:
             return handle_start_menu_input(ctx, ch);
-        case edit_screen:
+        case edit_screen_mode:
             return handle_edit_screen_input(ctx, input_result, ch);
-        case file_browse_screen:
+        case file_browse_screen_mode:
             return handle_file_browse_screen_input(ctx, input_result, ch);
         case line_jump_mode:
             return handle_line_jump_mode_input(ctx, ch);
-        case error_screen:
+        case error_screen_mode:
             return handle_error_screen_input(ctx, ch);
         case ask_make_file_mode:
             return handle_ask_make_file_mode_input(ctx, input_result, ch);
-        case setting_screen:
+        case setting_screen_mode:
             return handle_settings_screen_input(ctx,ch,input_result);
-        case filetree_screen:
+        case filetree_screen_mode:
             return handle_filetree_screen_input(ctx,ch,input_result);
-            return true;
-        case screen_state_log_error:
+        case editor_command_mode:
+            return handle_command_mode(ctx,ch,input_result);
+        case screen_state_log_error_mode:
             return true;
     }
     return true;
@@ -69,7 +72,7 @@ static void redraw_edit_screen(struct editor_state *state){
 // ファイルブラウザやジャンプ入力から編集画面へ戻す。
 // 引数: state=復帰させる状態。 返り値: なし。
 void restore_edit_screen(struct editor_state *state){
-    editor_set_screen_state(state, edit_screen);
+    editor_set_screen_state(state, edit_screen_mode);
     my_cur_set(state,true);
     redraw_edit_screen(state);
     // 編集位置はstate->cursorに残っているため、退避しておいた画面座標は要らない。
@@ -139,7 +142,7 @@ int update_screen_ratio(struct editor_input_context *ctx){
 
     enum screen_state now_state = editor_get_screen_state(ctx->state);
     switch(now_state){
-        case file_browse_screen: {
+        case file_browse_screen_mode: {
             // 枠を作り直すと縮小時に古い枠が残る。start menu側のロゴを消さないよう、
             // clear()ではなく「前の枠+上のパス表示2行」の範囲だけを消去予約する。
             struct box old_box = state->file_browse.box;
@@ -175,15 +178,15 @@ int update_screen_ratio(struct editor_input_context *ctx){
             state->render_flags |= RENDER_FILE_DATA;
             state->render_flags |= RENDER_LINE_JUMP;
             break;
-        case error_screen:
+        case error_screen_mode:
             // エラー文言を保持していないため描き直せない。表示位置の基準になる
             // file_browse.areaだけ新サイズへ合わせ、戻ったときにずれないようにする。
             resize_file_browser(state);
             break;
-        case start_menu_screen:
+        case start_menu_screen_mode:
             // start menu pluginが次のループで新しい画面サイズを見て描き直す
             break;
-        case setting_screen: {
+        case setting_screen_mode: {
             //枠の大きさは項目の内容で決まる。縮小時に古い枠が残らないよう、
             //前の枠の範囲だけを消去予約してから作り直す。
             struct box old_box = state->settings_screen_data.box;
@@ -203,7 +206,7 @@ int update_screen_ratio(struct editor_input_context *ctx){
             state->render_flags |= RENDER_SETTINGS;
             break;
         }
-        case filetree_screen:
+        case filetree_screen_mode:
             // ツリーの枠を新しい画面幅の比率で作り直し、編集領域の左端も作り直す。
             // show_filetree()が編集画面ごと描き直しを要求するので、
             // リサイズで残る古い枠は先に消しておく。
@@ -211,7 +214,7 @@ int update_screen_ratio(struct editor_input_context *ctx){
             show_filetree(ctx,state->file_tree_data.ft_box);
             editor_sync_cursor(state);
             break;
-        case edit_screen:
+        case edit_screen_mode:
         default: {
             // 高さが縮むとカーソル行が編集領域の外へ出るため、はみ出したときだけ
             // 表示開始行を取り直す。収まっているならスクロール位置は動かさない。

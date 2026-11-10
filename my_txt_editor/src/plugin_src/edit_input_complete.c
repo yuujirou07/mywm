@@ -8,7 +8,7 @@
 #include "editor_types.h"
 #include "editor_log.h"
 #include"input_complete.h"
-#include"txt_editor.h"
+#include"editor.h"
 
 
 // ctxの設定値で補完状態を初期化し、候補ポインタ配列と各文字列領域をstateへ確保する。

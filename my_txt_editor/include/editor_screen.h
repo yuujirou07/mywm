@@ -2,7 +2,7 @@
 #define TXT_EDITOR_SCREEN_H
 
 #include "editor_types.h"
-#include "txt_editor.h"
+#include "editor.h"
 
 
 bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result, wint_t ch);

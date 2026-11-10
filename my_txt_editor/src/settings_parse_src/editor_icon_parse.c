@@ -12,9 +12,9 @@
 #include<stdlib.h>
 #include"editor_log.h"
 #include "path_util.h"
-#include"txt_editor.h"
+#include"editor.h"
 #include"json_read.h"
-#include "txt_editor_icon.h"
+#include "editor_icon.h"
 
 
 // 対応表を解放し、未読み込み状態へ戻す。

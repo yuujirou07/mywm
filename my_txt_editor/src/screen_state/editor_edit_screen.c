@@ -9,9 +9,11 @@
 #include "editor_types.h"
 #include "filetree.h"
 #include "input_complete.h"
-#include "txt_editor.h"
-#include "txt_editor_syntax.h"
-#include "txt_editor_screen.h"
+#include "editor.h"
+#include "editor_color.h"
+#include "editor_syntax.h"
+#include "editor_screen.h"
+#include "editor_commands.h"
 
 static void send_lsp_did_change(struct editor_input_context *ctx);
 
@@ -43,7 +45,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
     }
     else if (ch == CTRL('f')) {
         my_cur_set(state,false);
-        editor_set_screen_state(state, file_browse_screen);
+        editor_set_screen_state(state, file_browse_screen_mode);
         state->render_flags |= RENDER_FILE_BROWSE;
         return true;
     }
@@ -52,7 +54,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
         return true;
     }
     else if(ch == CTRL('n')){
-        editor_set_screen_state(state,filetree_screen);
+        editor_set_screen_state(state,filetree_screen_mode);
         // 編集領域をツリーの幅だけ右へ寄せる。
         int x;
         int y;
@@ -62,9 +64,10 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
         show_filetree(ctx,tmp_ft_box);
     }
     else if(ch == CTRL('u')){
-        
+        editor_set_screen_state(state,editor_command_mode);
+        cursor_set_command_mode_position(state);
 
-
+        return true;
     }
     //デバッグ用
     else if(ch == CTRL(' ')){
@@ -221,4 +224,29 @@ int editor_input_str(struct editor_state *state,wchar_t *str){
         handle_char_input(stdscr,str[i],state);
     }
     return 0;
+}
+
+// stateの行番号と、有効な区切り線・ステータスバーを描画する。
+// start_pos/end_posは画面座標の区切り線端点、winは下位描画関数へ渡す。返り値: なし。
+void draw_edit_screen_base(struct editor_state *state,WINDOW *win,struct pos start_pos,struct pos end_pos){
+    draw_line_numbers(state);
+    if(state->settings_data->draw_split_line){
+        draw_line(start_pos,end_pos,win,all_draw_mode);
+    }
+    if(state->settings_data->show_status_bar){
+        // draw_status_bar_path()はステータスバー行を丸ごと塗り直すため、
+        // 行ステータスより先に描かないと"N/M"が消える。
+        draw_status_bar_line(state,*state->status_bar,win);
+        draw_status_bar_path(state,win);
+        draw_line_status(state,win);
+    }
+}
+
+// 読み込んだファイル内容のうち、現在画面に見える範囲を描画する。
+// 引数: state=表示開始行・書き込み領域・読み込み済み文字バッファ。 返り値: なし。
+void draw_file_data(struct editor_state *state){
+    for(int i = 0; i < state->write_area.h; i++){
+        int line = state->scr.scr_start_num + i;
+        draw_editor_buffer_line(state, line, i);
+    }
 }

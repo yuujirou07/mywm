@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include<cjson/cJSON.h>
 #include "lsp_src/language_server_communication.h"
-#include "txt_editor.h"
+#include "editor.h"
 #include "editor_log.h"
 
 #define LSP_INVALID_FD (-1) // 言語サーバーとのパイプが未接続であることを表す値。

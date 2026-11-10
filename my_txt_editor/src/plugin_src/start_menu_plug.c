@@ -7,7 +7,7 @@
 #include"ascii_art_comb.h"
 #include"start_menu.h"
 #include"path_util.h"
-#include"txt_editor.h"
+#include"editor.h"
 
 struct option_data{
         char *option_name;

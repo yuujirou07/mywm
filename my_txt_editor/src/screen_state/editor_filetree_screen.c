@@ -5,8 +5,9 @@
 #include "editor_log.h"
 #include "filetree.h"
 #include "ftj.h"
-#include "txt_editor.h"
-#include "txt_editor_screen.h"
+#include "editor.h"
+#include "editor_color.h"
+#include "editor_screen.h"
 
 
 
@@ -208,5 +209,89 @@ int change_file_tree_width(struct editor_input_context *ctx,int width){
     }
     tmp_ft_data->ft_box.w = width;
     show_filetree(ctx,tmp_ft_data->ft_box);
+    return 0;
+}
+
+// ctx/filetree_dataのtable_num件のtableを再帰描画し、開いた子も表示する。layerは深さ、*file_hは次の相対行。
+// 返り値: なし。*file_hと各項目の画面行を更新し、枠の下端・項目情報の確保失敗で打ち切る。
+static void draw_filetree_items(struct editor_input_context *ctx,
+                                file_tree_data *filetree_data,
+                                struct table *table,int table_num,
+                                int layer,int *file_h){
+                                    
+    struct box box = filetree_data->ft_box;
+
+    for(int i = 0;i < table_num;i++){
+        if(*file_h >= box.h - 1)return;
+
+        ft_path_open_check_data *item_data =
+            get_filetree_item_data(filetree_data,&table[i]);
+        if(item_data == NULL)return;
+
+        int y = box.pos.y + *file_h;
+        int x = box.pos.x + 1 + layer * 2;
+        item_data->indent_num = layer;
+        item_data->screen_y = y;
+
+        if(table[i].s_data.d_type == DT_DIR && x < box.pos.x + box.w){
+            mvaddstr(y,x,item_data->is_open ? "\u2304" : ">");
+        }
+
+        const char *ext_icon_code = get_file_ext_code(table[i].absolute_path,
+            &ctx->state->settings_data->icon_data);
+        if(x + 1 < box.pos.x + box.w){
+            mvaddnstr(y,x + 1,ext_icon_code,box.pos.x + box.w - x - 1);
+        }
+
+        int name_x = x + 3;
+        int name_len = box.pos.x + box.w - name_x;
+        if(name_len > 0){
+            mvaddnstr(y,name_x,table[i].s_data.d_name,name_len);
+        }
+        (*file_h)++;
+
+        if(table[i].s_data.d_type == DT_DIR && item_data->is_open){
+            if(load_child_dir(&table[i]) == 0){
+                draw_filetree_items(ctx,filetree_data,table[i].c_table,
+                                    table[i].c_table_num,layer + 1,file_h);
+            }
+        }
+    }
+}
+
+// ctxの状態を使ってfiletree_dataの左側境界と開いている項目を標準画面へ描き、項目の画面行を更新する。
+// 返り値: 常に0。枠が小さい、またはルート未設定なら描画しない。
+int draw_filetree(struct editor_input_context *ctx,file_tree_data *filetree_data){
+    struct box box = filetree_data->ft_box;
+
+    if(box.w <= 2 || box.h <= 2 || filetree_data->root_node == NULL){
+        return 0;
+    }
+
+    // ツリーは編集画面の上に重ねるため、移動前の境界線も含めて消す。
+    for(int y = box.pos.y;y < box.pos.y + box.h;y++){
+        mvhline(y,box.pos.x,' ',box.w);
+    }
+    //開発用
+    filetree_data->ft_side = FT_LEFT;
+
+    if(filetree_data->ft_side == FT_LEFT || filetree_data->ft_side == FT_RIGHT){
+        int wall_pos_x = (filetree_data->ft_side == FT_LEFT)
+            ?(box.pos.x + box.w):box.pos.x;
+        
+        for(int i = box.pos.y;i < box.pos.y + box.h;i++){
+            mvaddch(i,wall_pos_x,ACS_VLINE);
+        }
+    }
+
+    // 画面行は描画のたびに振り直す。-1のまま残った項目は画面外で、クリック判定に当たらない。
+    for(int i = 0;i < filetree_data->open_count_num;i++){
+        filetree_data->open_check_data[i].screen_y = -1;
+    }
+
+    int file_h = 1;
+    draw_filetree_items(ctx,filetree_data,filetree_data->root_node->c_table,
+                        filetree_data->root_node->c_table_num,0,&file_h);
+    
     return 0;
 }

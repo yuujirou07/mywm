@@ -35,7 +35,7 @@ void input_func(const MY_TXT_EDITOR_API *api){
         is_first = 1;
         return;
     }
-
+    
     ST_time time2 = ST_gettime_msec();
 
     double d = ST_getdifftime_msec(time,time2);

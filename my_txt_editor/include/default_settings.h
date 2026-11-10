@@ -1,7 +1,7 @@
 #ifndef DEFALT_SETTINGS_H
 #define DEFALT_SETTINGS_H
 
-#include "txt_editor_icon.h"
+#include "editor_icon.h"
 #include "input_complete.h"
 #include<ncurses.h>
 #include<editor_types.h>
@@ -27,7 +27,7 @@
 #define DEFAULT_LSP_USE true // LSP連携を有効にする既定値。
 #define DEFAULT_USE_ICON false // ファイル種別アイコンを表示する既定値。
 #define DEFAULT_BUILT_IN_SYNTAX true // 組込み構文着色を有効にする既定値。
-#define DEFAULT_EDITOR_SCROLL_SENSITIVITY 2 // マウスホイール1回あたりのスクロール行数の既定値。
+#define DEFAULT_EDITOR_SCROLL_SENSITIVITY 1 // マウスホイール1回あたりのスクロール行数の既定値。
 
 #define DEFAULT_AUTO_COMPLETE true // 自動補完を有効にする既定値。
 #define DEFAULT_AUTO_COMPLETE_WINDOW true // 補完候補ウィンドウを表示する既定値。

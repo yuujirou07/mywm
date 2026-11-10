@@ -8,8 +8,8 @@
 #include <wctype.h>
 #include<wchar.h>
 
-#include"txt_editor.h"
-#include"txt_editor_syntax.h"
+#include"editor.h"
+#include"editor_syntax.h"
 #include"editor_color.h"
 
 // Dark Modernの256色近似。

@@ -17,8 +17,8 @@
 #include "start_menu.h"
 #include"filetree.h"
 #include"input_complete.h"
-#include "txt_editor_syntax.h"
-#include "txt_editor_mouse.h"
+#include "editor_syntax.h"
+#include "editor_mouse.h"
 #include "public_data/c_settings/c_settings_setting.h"
 
 
@@ -64,6 +64,7 @@ enum render_flags {
     RENDER_MAKE_FILE = 1 << 12,     // 新規ファイル作成ダイアログを更新する。
     RENDER_SETTINGS = 1 << 13,      //設定ファイルを描画する
     RENDER_EDIT_COMPLETE_WINDOW = 1 << 14,//入力補完ウィンドウの描画
+    RENDER_COMMAND_MODE = 1 << 15 //コマンドモード
 };
 
 
@@ -282,7 +283,7 @@ static inline enum screen_state editor_get_screen_state_log(struct editor_state 
                                                                 int history_offset){
     if(history_offset < 0 ||
        history_offset >= state->screen_log.screen_state_log_counter){
-        return screen_state_log_error;
+        return screen_state_log_error_mode;
     }
 
     int log_index = state->screen_log.screen_state_log_counter - history_offset - 1;
@@ -681,7 +682,7 @@ enum line_mode {
     fix_scr_line_damage, // スクロールで破損した罫線だけを補修する。
 };
 
-// txt_editor_draw.c
+// editor_draw.c
 void draw_editor_buffer_line(struct editor_state *state, int line, int write_y);
 void draw_line_numbers(struct editor_state *state);
 void draw_line(struct pos start_pos,struct pos end_pos,WINDOW *win,enum line_mode mode);
@@ -703,6 +704,8 @@ void draw_line_status(struct editor_state *state,WINDOW *win);
 void update_screen(struct editor_input_context *ctx);
 void request_clear_box(struct editor_state *state, struct box box);
 void draw_line_jump(struct editor_state *state);
+void draw_make_file_dialog(struct editor_input_context *ctx);
+void draw_file_browse(struct editor_input_context *ctx);
 int set_clear_box(struct clear_box_data *clear_box_data,struct box box);
 int clear_status_bar_outline(struct editor_state *state);
 int clear_box_area(struct editor_input_context *ctx,struct box b);
@@ -711,7 +714,7 @@ int draw_editor_complete_word_box(struct editor_input_context *ctx);
 int draw_edit_complete_world(struct editor_state *state);
 int redraw_write_area_line_str(struct editor_state *state,uint16_t line,uint16_t size);
 
-// txt_editor_file.c
+// editor_file.c
 int load_dir_table(struct editor_state *state,struct dir_entry **table,int *table_rows,char *path_name,int start_num,int *dir_num,int *table_num);
 void load_file(struct editor_state *state,struct dir_entry *table,int table_num,char *path_name,struct file_browse_select_state *select_state);
 bool editor_alloc_text_buffer(struct editor_state *state, int line_count, long total_capacity);
@@ -734,7 +737,7 @@ enum select_state get_path_state(const char *path);
 int now_input_path_open(struct editor_state *state,struct editor_input_context *ctx);
 int file_browser_show_mem_start_num(int start_num,enum flags flags);
 
-// txt_editor_func.c
+// editor_func.c
 void resize_file_browser(struct editor_state *state);
 void handle_resize(WINDOW *win, struct editor_input_context *ctx);
 void handle_backspace(struct editor_input_context *ctx);
@@ -757,7 +760,7 @@ language get_env_language();
 
 double comb_time_interval_ms(struct timespec t1,struct timespec t2);
 
-// screen_state/txt_editor_edit_screen.c
+// screen_state/editor_edit_screen.c
 int editor_input_str(struct editor_state *state,wchar_t *str);
 
 // main.c

@@ -6,7 +6,7 @@
 
 
 
-#include"txt_editor.h"
+#include"editor.h"
 
 
 int init_curses_color(struct editor_input_context *ctx);

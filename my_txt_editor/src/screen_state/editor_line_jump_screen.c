@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
-#include "txt_editor_syntax.h"
-#include "txt_editor_screen.h"
+#include "editor_syntax.h"
+#include "editor_screen.h"
+#include "editor_color.h"
 
 // 行ジャンプ入力中の数字入力・確定・キャンセルを処理する。
 // 引数: ctx=ジャンプ後の再描画に必要なcontext、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
@@ -39,7 +40,7 @@ bool handle_line_jump_mode_input(struct editor_input_context *ctx, wint_t ch){
         move_view_to_line(state, n - 1, 0);
         my_cur_set(state,true);
         reset_jump_mode(state);
-        editor_set_screen_state(state, edit_screen);
+        editor_set_screen_state(state, edit_screen_mode);
         if(state->settings_data->built_in_syntax){
             set_syntax_data(&ctx->syntax_data,ctx);
         }
@@ -52,4 +53,25 @@ bool handle_line_jump_mode_input(struct editor_input_context *ctx, wint_t ch){
 void reset_jump_mode(struct editor_state *state){
     memset(state->jump_mode_data.jump_line_num, 0, sizeof(state->jump_mode_data.jump_line_num));
     state->jump_mode_data.jump_line_num_counter = 0;
+}
+
+// 行ジャンプの入力欄と入力済み行番号を描画する。
+// 引数: state=入力値・ステータスバー配置・カーソル反映待ち位置を持つ状態。 返り値: なし。
+void draw_line_jump(struct editor_state *state){
+    struct pos prompt_pos = {state->write_area.x_start - 1,
+                             state->write_area.y_start};
+
+    if(state->settings_data->show_status_bar){
+        prompt_pos.y = (state->settings_data->bar_side_state == top)
+            ? state->status_bar->pos.y - 1 : state->status_bar->pos.y;
+        prompt_pos.x = state->status_bar->pos.x;
+    }
+    mvhline(prompt_pos.y, prompt_pos.x + 1, ' ',
+            strlen("JMP_LINE ") + JUMP_LINE_NUM_DIGITS);
+    mvaddstr(prompt_pos.y, prompt_pos.x + 1, "JMP_LINE ");
+    mvaddnstr(prompt_pos.y, prompt_pos.x + 1 + (int)strlen("JMP_LINE "),
+                state->jump_mode_data.jump_line_num,
+                state->jump_mode_data.jump_line_num_counter);
+    cur_pos_push((struct pos){prompt_pos.x + 1 + (int)strlen("JMP_LINE ") +
+                 state->jump_mode_data.jump_line_num_counter,prompt_pos.y},state);
 }

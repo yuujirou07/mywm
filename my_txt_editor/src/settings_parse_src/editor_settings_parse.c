@@ -10,7 +10,7 @@
 #include "input_complete.h"
 #include "json_read.h"
 #include "path_util.h"
-#include "txt_editor.h"
+#include "editor.h"
 
 // itemがmin以上max以下で、小数部分のないJSON数値ならtrueを返す。
 // 返り値: NULL・数値以外・範囲外・小数ならfalse。itemは変更しない。

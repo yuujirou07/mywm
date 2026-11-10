@@ -8,7 +8,7 @@
 #include <wchar.h>
 #include "editor_types.h"
 #include "editor_log.h"
-#include "txt_editor.h"
+#include "editor.h"
 
 FILE *key_log_file = NULL;
 

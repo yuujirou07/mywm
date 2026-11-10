@@ -38,15 +38,16 @@ enum flags{
 
 // 現在表示している画面・入力モード。
 enum screen_state{
-    edit_screen,        // 通常の編集画面。
-    file_browse_screen, // ファイルブラウザ画面。
-    filetree_screen,    // ファイルツリー画面。
-    start_menu_screen,  // start menu pluginの画面。
-    error_screen,       // エラー表示画面。
+    edit_screen_mode,        // 通常の編集画面。
+    file_browse_screen_mode, // ファイルブラウザ画面。
+    filetree_screen_mode,    // ファイルツリー画面。
+    start_menu_screen_mode,  // start menu pluginの画面。
+    error_screen_mode,       // エラー表示画面。
     line_jump_mode,     // 行ジャンプ番号入力中。
     ask_make_file_mode, // 新規ファイル作成確認中。
-    setting_screen,     // 設定画面。
-    screen_state_log_error, // 指定された履歴位置が範囲外。
+    setting_screen_mode,     // 設定画面。
+    editor_command_mode,           //コマンド入力モード
+    screen_state_log_error_mode, // 指定された履歴位置が範囲外。
 };
 
 typedef enum screen_state screen_state;
