@@ -124,6 +124,7 @@ int main(int argc, char *argv[])
     if(state.settings_data->built_in_syntax){
         init_syntax_colors();
     }
+    
 
     state.scr.scr_start_num = 0;
 
