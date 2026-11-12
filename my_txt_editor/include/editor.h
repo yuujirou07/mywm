@@ -10,6 +10,7 @@
 #include <dirent.h>
 #include <limits.h>
 #include"default_settings.h"
+#include "editor_commands.h"
 #include "kbd_input_log.h"
 #include"lsp_src/language_server_communication.h"
 #include "editor_types.h"
@@ -269,7 +270,8 @@ struct editor_state {
     struct jump_mode           jump_mode_data; // 行ジャンプ入力状態。
     struct clear_box_data      clear_box_data; // 次回消去する矩形領域。
     struct screen_state_log    screen_log; // 現在状態を末尾に持つ画面遷移履歴。
-    settings_screen_data       settings_screen_data; // 設定画面の項目、選択、入力状態。
+    settings_screen_data       settings_screen_data; // 設定画面の項目、選択、入力状
+    editor_command_mode_data   command_mode_data;//コマンドモードデータ      
     file_tree_data             file_tree_data; // ファイルツリーの形状、所有ツリー、開閉状態。
     edit_input_complete_data   edit_input_complete_data;//入力補完データ
     key_bord_data              key_bord_data; //入力関連データ

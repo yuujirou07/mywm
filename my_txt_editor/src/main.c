@@ -24,6 +24,7 @@
 #include "c_settings.h"
 #include "ascii_art_comb.h"
 #include "default_settings.h"
+#include "editor_commands.h"
 #include "editor_types.h"
 #include "ftj.h"
 #include "kbd_input_log.h"
@@ -403,7 +404,11 @@ int main(int argc, char *argv[])
     input_context.state->key_bord_data.Key_log_data.key_count  = 0;
     input_context.state->key_bord_data.Key_log_data.key_log  = NULL;
 
-    
+    if(init_command_mode(&state) != 0){
+        error_log("command mode init error");
+        wrp_stderr_puts("command mode init error");
+        return 0;
+    }
 
     if(KL_open_key_log_file(KEY_EVENT_LOG_PATH) != 0){
     

@@ -375,10 +375,7 @@ void draw_line_status(struct editor_state *state,WINDOW *win){
 void update_screen(struct editor_input_context *ctx){
     unsigned int flags = ctx->state->render_flags;
     struct editor_state *state = ctx->state;
-    WINDOW *win = ctx->win;
-
-    // 各描画でカーソルが動くため、先にカーソル位置を確定させて描画後に反映させる。
-    editor_sync_cursor(state);
+    WINDOW *win = ctx->win;    
 
     if(flags & RENDER_ALL){
         
@@ -435,7 +432,8 @@ void update_screen(struct editor_input_context *ctx){
         }
         if(flags & RENDER_LINE_JUMP){
            draw_line_jump(state);
-        }
+           
+        } 
         if(flags & RENDER_MAKE_FILE){
             draw_make_file_dialog(ctx);
         }
@@ -448,6 +446,7 @@ void update_screen(struct editor_input_context *ctx){
                  
         }
     }
+
     set_cur_pos(state);
     ctx->state->render_flags = RENDER_NONE;
 }
