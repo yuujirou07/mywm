@@ -164,6 +164,11 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
     if(ch == KEY_MOUSE){
         handle_mouse(ctx,0);
     }
+    if(CTRL('u')){
+        editor_set_screen_state(state,editor_command_mode);
+        cursor_set_command_mode_position(state);
+        return true;
+    }
 
     if(ch == '>' || ch == '<' || ch == KEY_LEFT || ch == KEY_RIGHT){
         int size_fiff = (ch == '<')?-1:(ch == KEY_LEFT)?-1:1;

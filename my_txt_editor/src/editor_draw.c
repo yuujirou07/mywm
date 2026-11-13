@@ -11,6 +11,7 @@
 
 
 
+#include "editor_commands.h"
 #include "editor_types.h"
 #include "filetree.h"
 #include "input_complete.h"
@@ -443,7 +444,7 @@ void update_screen(struct editor_input_context *ctx){
 
         }
         if(flags & RENDER_COMMAND_MODE){
-                 
+            draw_command_str(ctx);
         }
     }
 
