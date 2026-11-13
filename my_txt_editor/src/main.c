@@ -10,15 +10,15 @@
 #include <sys/syscall.h>   // SYS_getdents64
 #include <sys/types.h>     // uint64_t など
 #include <dirent.h>
-#include<dlfcn.h>
-#include<time.h>
+#include <dlfcn.h>
+#include <time.h>
 #include <wchar.h>
 #include <wctype.h>
-#include<dirent.h>
+#include <dirent.h>
 #include <libgen.h>
 #include <limits.h>
-#include<unistd.h>
-#include<sys/epoll.h>
+#include <unistd.h>
+#include <sys/epoll.h>
 
 
 #include "c_settings.h"

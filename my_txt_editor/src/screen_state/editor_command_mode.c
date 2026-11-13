@@ -37,10 +37,12 @@ bool handle_command_mode(struct editor_input_context *ctx,wchar_t chr,int input_
         return false;
     }
     
+    struct editor_state *state = ctx->state;
 
     if(input_result == OK && iswalnum(chr)){
-        struct *command_str_data tmp_cmd_str_data = 
+        command_str_data *tmp_cmd_str_data =  &state->command_mode_data.command_str_data;
 
+        
 
     }
 
