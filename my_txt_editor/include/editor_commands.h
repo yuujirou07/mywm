@@ -21,8 +21,21 @@ typedef struct{
     wchar_t command_str[256];
     size_t command_str_len;
 }command_str_data;
+
+typedef struct{
+    wchar_t command[256];
+}command_data;
+
+typedef struct{
+    command_data *command_list;
+    size_t command_num;
+    size_t command_allocate_num;
+}command_list_data;
+
+
 typedef struct{
     command_str_data command_str_data;
+    command_list_data command_list_data;
 }editor_command_mode_data;
 
 int init_command_mode(struct editor_state *editor_state);

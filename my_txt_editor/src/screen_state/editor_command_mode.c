@@ -15,11 +15,24 @@
 #include <ncurses.h>
 #include <stddef.h>
 #include <wchar.h>
+#include<stdlib.h>
 
 
 int init_command_mode(struct editor_state *state){
     state->command_mode_data.command_str_data.command_str[0] = L'\0';
     state->command_mode_data.command_str_data.command_str_len = 0;
+
+    state->command_mode_data.command_list_data.command_allocate_num = 32;
+    state->command_mode_data.command_list_data.command_num = 0;
+
+    state->command_mode_data.command_list_data.command_list 
+        = malloc(
+            sizeof(command_data) * 
+                state->command_mode_data.
+                    command_list_data.
+                        command_allocate_num);
+    
+    
     return 0;
 }
 
@@ -68,6 +81,9 @@ bool handle_command_mode(struct editor_input_context *ctx,wchar_t chr,int input_
             
             backspace_command_str(ctx);
         }
+        else if(chr == KEY_ENTER){
+            
+        }
     }
 
   
@@ -109,7 +125,7 @@ int backspace_command_str(struct editor_input_context *ctx){
         &state->command_mode_data.command_str_data;
 
     //配列外参照ガード
-    if(command_str_data->command_str_len - 1 < 0){
+    if(command_str_data->command_str_len < 1){
         return 0;
     }
 

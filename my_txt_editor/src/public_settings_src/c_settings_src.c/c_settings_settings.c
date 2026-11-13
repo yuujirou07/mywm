@@ -35,6 +35,8 @@ static MY_TXT_EDITOR_RESULT input_char(const MY_TXT_EDITOR_API *api,wchar_t chr)
 static MY_TXT_EDITOR_RESULT set_text_cursor_col(const MY_TXT_EDITOR_API *api,int col);
 static MY_TXT_EDITOR_RESULT undo_text_input(const MY_TXT_EDITOR_API *api,size_t n);
 static MY_TXT_EDITOR_RESULT request_change_edior_screen_mode(const MY_TXT_EDITOR_API *api,MY_TXT_EDITOR_SCREEN_MODE mode);
+static MY_TXT_EDITOR_RESULT load_settings_src_file(const MY_TXT_EDITOR_API *api,const wchar_t *src_path);
+
 
 static int is_user_event_key(wchar_t chr);
 
@@ -51,6 +53,7 @@ void connect_api_mem_data(MY_TXT_EDITOR_API *const api,struct editor_input_conte
     api->set_text_cursor_col = set_text_cursor_col;
     api->undo_text_input = undo_text_input;
     api->request_change_screen_mode = request_change_edior_screen_mode;
+    api->load_settings_src_file = load_settings_src_file;
     return;
 }
 
@@ -529,4 +532,24 @@ static MY_TXT_EDITOR_RESULT request_change_edior_screen_mode(
     editor_set_screen_state(ctx->state,combed_state);
 
     return API_OK;
+}
+
+
+
+static MY_TXT_EDITOR_RESULT load_settings_src_file(const MY_TXT_EDITOR_API *api,const wchar_t *src_path){
+
+    struct editor_input_context *ctx = api->userdata;
+
+    size_t wchr_len = wcslen(src_path);
+
+    char combed_path[wchr_len + 1];
+
+    size_t combed_len = wcstombs(combed_path,src_path,wchr_len + 1);
+    if(combed_len == (size_t)(-1)){
+        return API_ERR_INVALID_ARG;
+    }
+
+    access(combed_path,)
+
+
 }

@@ -12,6 +12,9 @@
 #define KEY_MAPPING_MAX_NUM 512
 
 
+
+
+
 typedef enum{
     EDIT_MODE = 0,
     FILE_SEARCH_MODE = 1,
@@ -43,6 +46,7 @@ typedef MY_TXT_EDITOR_RESULT (*SET_TEXT_CURSOR_COL)(const MY_TXT_EDITOR_API *,in
 typedef MY_TXT_EDITOR_RESULT (*INPUT_CHAR)(const MY_TXT_EDITOR_API *api,wchar_t chr);
 typedef MY_TXT_EDITOR_RESULT (*UNDO_TEXT_INPUT)(const MY_TXT_EDITOR_API *api,size_t n);
 typedef MY_TXT_EDITOR_RESULT (*REQUEST_CHANGE_SCREEN_MODE)(const MY_TXT_EDITOR_API *api,MY_TXT_EDITOR_SCREEN_MODE mode);
+typedef MY_TXT_EDITOR_RESULT (*LOAD_SETTINGS_SRC_FILE)(const MY_TXT_EDITOR_API *api,const wchar_t *src_path);
 
 struct MY_TXT_EDITOR_API{
     void * userdata;
@@ -56,6 +60,8 @@ struct MY_TXT_EDITOR_API{
     INPUT_CHAR input_char;
     UNDO_TEXT_INPUT undo_text_input;
     REQUEST_CHANGE_SCREEN_MODE request_change_screen_mode;
+    LOAD_SETTINGS_SRC_FILE load_settings_src_file;
+
 };
 
 
