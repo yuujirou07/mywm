@@ -6,8 +6,7 @@
 
 
 #include"public_data/c_settings/c_settings_setting.h"
-#include"/home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/settings_libs/include/settings_helper.h"
-
+#include"/home/yuujirou07/vscode_proj/mywm/my_txt_editor/editor_settings/settings_libs/include/settings_helper.h"
 
 // 有効なapiを受け取り、設定キーマップの終了処理としてexit(0)を呼ぶ。
 // 返り値: 戻らない。エディタ側の通常の終了処理は経由しない。
