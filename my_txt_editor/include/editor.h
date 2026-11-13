@@ -390,12 +390,22 @@ typedef struct{
     key_event_list_data key_events; // ユーザーが登録した入力イベントの一覧。
 }editor_input_manager;
 
+typedef struct{
+    void **dl_handles_list;
+    size_t dl_handles_list_num;
+    size_t dl_handles_list_allocate_num;
+}DL_handle_data;
+
+typedef struct{
+    char **loading_dl_lib;
+    size_t now_loading_lib_num;
+    size_t now_loading_lib_allocate_num;
+}DL_load_path_data;
+
 // 設定プログラム(共有ライブラリ)の読込状態。パス配列とハンドル配列は同じ添字で対応する。
 typedef struct{
-    char **loading_dynamic_lib; // 読み込むライブラリの絶対パス配列。各要素はこの構造体が所有し、destroy_dl_path()が解放する。
-    int now_loading_lib_num; // 登録済みのパス数。
-    int now_loading_lib_allocate_num; // パス配列へ確保済みの要素数。
-    void **dl_handles; // dlopenしたライブラリのハンドル配列。loading_dynamic_libと同じ添字で対応する。未確保ならNULL、終了時に各要素をdlcloseして配列をfreeする。
+  DL_load_path_data dl_load_path_data;
+  DL_handle_data    dl_handle_data;
 }loading_dl_data;
 
 

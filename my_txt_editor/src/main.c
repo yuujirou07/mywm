@@ -591,6 +591,9 @@ int main(int argc, char *argv[])
     free(input_context.input_manager.key_maps.key_mapp_list);
     free(input_context.color_list.col_id_data);
     destroy_dl_path(&input_context);
+    destoroy_key_input_event_handle(&input_context);
+    destory_command_mode(&state);
+
     if(epfd >= 0)
         close(epfd);
     lsp_close_server(&lsp);

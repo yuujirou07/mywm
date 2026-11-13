@@ -9275,3 +9275,171 @@
  LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 10:51:24 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 348
  LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
  LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 10:51:24 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 348
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:21:33 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 387
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/build.sh DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/my_cui_lib_doc.md DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.cache DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/build DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.gitignore DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/log_data DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/. DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/test_build DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.. DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/tests DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.git DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/my_txt_editor_settings_folder DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/Makefile DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/compile_commands.json DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/ftj_temp DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/include DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/build.sh DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/my_cui_lib_doc.md DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.cache DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/build DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.gitignore DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/log_data DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/. DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/test_build DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.. DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/tests DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.git DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/my_txt_editor_settings_folder DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/Makefile DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/compile_commands.json DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/ftj_temp DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/include DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/test_build DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/tests DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/build.sh DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/my_txt_editor_settings_folder DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/compile_commands.json DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/ DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_draw.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/json_read.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_log.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_syntax.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/. DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/main.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/settings_parse_src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/.. DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/lsp_src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_func.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/path_util.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_file.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/public_settings_src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/plugin_src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/screen_state DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_color.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/kbd_input_log.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_mouse.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/ftj.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/my_cui_lib_linux.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/main.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/my_cui_lib_linux.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_mouse.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/main.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/main.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:24:45 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 387
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:36:29 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 403
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:36:29 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 403
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:36:29 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 403
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:36:29 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 403
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:36:29 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 403
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:36:29 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 403
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:36:29 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 403
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:36:29 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 403
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:36:29 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 403
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:36:29 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 403
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:36:29 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 403
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 13 2026 TIME: 14:36:29 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 403
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/build.sh DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/my_cui_lib_doc.md DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.cache DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/build DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.gitignore DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/log_data DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/. DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/test_build DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.. DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/tests DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.git DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/my_txt_editor_settings_folder DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/Makefile DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/compile_commands.json DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/ftj_temp DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/include DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/build.sh DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/my_cui_lib_doc.md DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.cache DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/build DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.gitignore DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/log_data DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/. DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/test_build DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.. DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/tests DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.git DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/my_txt_editor_settings_folder DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/Makefile DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/compile_commands.json DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/ftj_temp DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/include DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/test_build DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/tests DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/build.sh DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/editor_settings DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/my_txt_editor_settings_folder DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/compile_commands.json DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/ DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_draw.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/json_read.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_log.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_syntax.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/. DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/main.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/settings_parse_src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/.. DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/lsp_src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_func.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/path_util.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_file.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/public_settings_src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/plugin_src DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/screen_state DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_color.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/kbd_input_log.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_mouse.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/ftj.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/my_cui_lib_linux.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/main.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/my_cui_lib_linux.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/editor_mouse.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/main.c DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src/main.c DATE: unknown TIME: unknown FILE: unknown LINE: 0

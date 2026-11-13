@@ -133,7 +133,23 @@ void init_settings_src(MY_TXT_EDITOR_API *const api,struct editor_input_context 
         dlclose(handle);
         return;
     }
-    ctx->dl_data.loading_dynamic_lib[ctx->dl_data.now_loading_lib_num++] = handle;
+    //ハンドル配列が満杯ならパス配列と同じ確保数まで広げる
+    DL_handle_data *handle_data = &ctx->dl_data.dl_handle_data;
+    if(handle_data->dl_handles_list_allocate_num <= handle_data->dl_handles_list_num){
+        size_t new_allocate_num = ctx->dl_data.dl_load_path_data.now_loading_lib_allocate_num;
+        if(new_allocate_num <= handle_data->dl_handles_list_num){
+            new_allocate_num = handle_data->dl_handles_list_num + 1;
+        }
+        void **tmp_handles = realloc(handle_data->dl_handles_list,sizeof(void *) * new_allocate_num);
+        if(tmp_handles == NULL){
+            error_log_write("realloc error");
+            dlclose(handle);
+            return;
+        }
+        handle_data->dl_handles_list = tmp_handles;
+        handle_data->dl_handles_list_allocate_num = new_allocate_num;
+    }
+    handle_data->dl_handles_list[handle_data->dl_handles_list_num++] = handle;
     settings_init(api);
     return;
 }
@@ -207,19 +223,33 @@ static MY_TXT_EDITOR_RESULT add_key_input_event_handle(void *userdata,wchar_t ch
     return API_OK;
 }
 
-// ctxのハンドル格納余地を確認し、editor_settings/so_file/settings.soをdlopenする。
-// 返り値: 読込ハンドル、格納余地不足・パス不正・読込失敗はNULL。成功したハンドルは呼び出し側がdlcloseする。
+int destoroy_key_input_event_handle(struct editor_input_context *ctx){
+    if(ctx == NULL){
+        return -1;
+    }
+
+    if(ctx->input_manager.key_events.key_event_data != NULL && 
+            ctx->input_manager.key_events.key_map_allocate_num > 0){
+        free(ctx->input_manager.key_events.key_event_data);
+    }    
+
+    
+
+    return 0;
+}
+
+
+// add_dl_pathで登録したパスのうち、まだハンドルを持たない次の添字(=ハンドル件数)のものをdlopenする。
+// 返り値: 読込ハンドル、未登録・パス不正・読込失敗はNULL。成功したハンドルは呼び出し側がdlcloseする。
 static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
-    if(ctx->dl_data.loading_dynamic_lib == NULL ||
-        ctx->dl_data.now_loading_lib_num > ctx->dl_data.now_loading_lib_allocate_num){
-        error_log("can not store settings library");
+    size_t idx = ctx->dl_data.dl_handle_data.dl_handles_list_num;
+    if(ctx->dl_data.dl_load_path_data.loading_dl_lib == NULL ||
+        idx >= ctx->dl_data.dl_load_path_data.now_loading_lib_num){
+        error_log("no settings library path to load");
         return NULL;
     }
-    char obj_path[PATH_MAX];
-    if(editor_path_from_exe_dir(obj_path, sizeof(obj_path),SETTINGS_SO_PATH) == NULL){
-        error_log("can not found settings obj file");
-        return NULL;
-    }
+
+    const char *obj_path = ctx->dl_data.dl_load_path_data.loading_dl_lib[idx];
 
     struct stat st;
     if(stat(obj_path, &st) != 0 || !S_ISREG(st.st_mode)){
@@ -294,65 +324,88 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
     }
 
     //初期化malloc
-    if(ctx->dl_data.loading_dynamic_lib == NULL){
+    if(ctx->dl_data.dl_load_path_data.loading_dl_lib == NULL){
 
-        ctx->dl_data.now_loading_lib_allocate_num = 32;
-        ctx->dl_data.now_loading_lib_num = 0;
-        ctx->dl_data.loading_dynamic_lib = malloc(sizeof(char *) * ctx->dl_data.now_loading_lib_allocate_num);
-        if(ctx->dl_data.loading_dynamic_lib == NULL){
+        ctx->dl_data.dl_load_path_data.now_loading_lib_allocate_num = 32;
+        ctx->dl_data.dl_load_path_data.now_loading_lib_num = 0;
+        ctx->dl_data.dl_load_path_data.loading_dl_lib = malloc(sizeof(char *) * ctx->dl_data.dl_load_path_data.now_loading_lib_allocate_num);
+        if(ctx->dl_data.dl_load_path_data.loading_dl_lib == NULL){
             wrp_stderr_puts("malloc error");
             return -1;
         }
     }
-    else if(ctx->dl_data.now_loading_lib_allocate_num <= ctx->dl_data.now_loading_lib_num){
-        char **tmp_dl_path = realloc(ctx->dl_data.loading_dynamic_lib,sizeof(char *) * ctx->dl_data.now_loading_lib_num * 2);
+    else if(ctx->dl_data.dl_load_path_data.now_loading_lib_allocate_num <= ctx->dl_data.dl_load_path_data.now_loading_lib_num){
+        char **tmp_dl_path = realloc(ctx->dl_data.dl_load_path_data.loading_dl_lib,sizeof(char *) * ctx->dl_data.dl_load_path_data.now_loading_lib_num * 2);
         if(tmp_dl_path == NULL){
             wrp_stderr_puts("realloc error");
             return -1;
         }
-        ctx->dl_data.loading_dynamic_lib = tmp_dl_path;
-        ctx->dl_data.now_loading_lib_allocate_num = ctx->dl_data.now_loading_lib_num * 2;
+        ctx->dl_data.dl_load_path_data.loading_dl_lib = tmp_dl_path;
+        ctx->dl_data.dl_load_path_data.now_loading_lib_allocate_num = ctx->dl_data.dl_load_path_data.now_loading_lib_num * 2;
     }
 
-    // 基準ディレクトリはPATH_MAXで必ず収まるので固定配列で取り、結合後の文字列だけ必要な長さで確保する
-    char base_dir[PATH_MAX];
-    if(editor_path_from_exe_dir(base_dir,sizeof(base_dir),EDITOR_SETTINGS_DIR) == NULL){
-        wrp_stderr_puts("can not get settings dir");
-        return -1;
+
+    //絶対パス判定
+    //先頭が'/'なら絶対パスとして扱う
+    if(dl_path[0] == '/'){
+        if(access(dl_path,F_OK | R_OK) != 0){
+            return -1;
+        }
+
+        struct stat dl_path_state;
+        if(stat(dl_path,&dl_path_state) != 0){
+            return -1;
+        }
+
+        if(!S_ISREG(dl_path_state.st_mode)){
+            return -1;
+        }
+        ctx->dl_data.dl_load_path_data.loading_dl_lib[ctx->dl_data.dl_load_path_data.now_loading_lib_num] = strdup(dl_path);
+        ctx->dl_data.dl_load_path_data.now_loading_lib_num++;
     }
-    
-    size_t full_path_size = strlen(base_dir) + strlen(dl_path) + 1;
-    char *full_path = malloc(full_path_size);
-    if(full_path == NULL){
-        wrp_stderr_puts("malloc error");
-        return -1;
+    //相対パスの処理
+    else{
+
+        // 基準ディレクトリはPATH_MAXで必ず収まるので固定配列で取り、結合後の文字列だけ必要な長さで確保する
+        char base_dir[PATH_MAX];
+        if(editor_path_from_exe_dir(base_dir,sizeof(base_dir),EDITOR_SETTINGS_DIR) == NULL){
+            wrp_stderr_puts("can not get settings dir");
+            return -1;
+        }
+        
+        size_t full_path_size = strlen(base_dir) + strlen(dl_path) + 1;
+        char *full_path = malloc(full_path_size);
+        if(full_path == NULL){
+            wrp_stderr_puts("malloc error");
+            return -1;
+        }
+        snprintf(full_path,full_path_size,"%s%s",base_dir,dl_path);
+        editor_log(full_path,NULL,NULL,NULL,0);
+        if(access(full_path,F_OK) != 0){
+            free(full_path);
+            error_log("dl path cannot access");
+            return -1;
+        }
+
+        //editor_log_msgメッセージ作成
+        const char log_msg[] = "DL Path Add SUCCESS: ";
+        size_t log_msg_len   = strlen(log_msg);
+        size_t full_path_len = strlen(full_path);
+        size_t jointed_msg_len = log_msg_len + full_path_len + 1;
+
+        char editor_msg[jointed_msg_len];
+        editor_msg[0] = '\0';
+
+        memcpy(editor_msg,log_msg,log_msg_len);
+        memcpy(editor_msg + log_msg_len,full_path,full_path_len);
+
+        editor_msg[log_msg_len + full_path_len] = '\0';
+        editor_log_msg(editor_msg);
+
+        //dl path追加
+        ctx->dl_data.dl_load_path_data.loading_dl_lib[ctx->dl_data.dl_load_path_data.now_loading_lib_num] = full_path;
+        ctx->dl_data.dl_load_path_data.now_loading_lib_num++;
     }
-    snprintf(full_path,full_path_size,"%s%s",base_dir,dl_path);
-    editor_log(full_path,NULL,NULL,NULL,0);
-    if(access(full_path,F_OK) != 0){
-        free(full_path);
-        error_log("dl path cannot access");
-        return -1;
-    }
-
-    //editor_log_msgメッセージ作成
-    const char log_msg[] = "DL Path Add SUCCESS: ";
-    size_t log_msg_len   = strlen(log_msg);
-    size_t full_path_len = strlen(full_path);
-    size_t jointed_msg_len = log_msg_len + full_path_len + 1;
-
-    char editor_msg[jointed_msg_len];
-    editor_msg[0] = '\0';
-
-    memcpy(editor_msg,log_msg,log_msg_len);
-    memcpy(editor_msg + log_msg_len,full_path,full_path_len);
-
-    editor_msg[log_msg_len + full_path_len] = '\0';
-    editor_log_msg(editor_msg);
-
-    //dl path追加
-    ctx->dl_data.loading_dynamic_lib[ctx->dl_data.now_loading_lib_num] = full_path;
-    ctx->dl_data.now_loading_lib_num++;
     return 0;
 }
 
@@ -364,13 +417,21 @@ int destroy_dl_path(struct editor_input_context *ctx){
         return -1;
     }
 
-    for(int i = 0;i < ctx->dl_data.now_loading_lib_num;i++){
-        free(ctx->dl_data.loading_dynamic_lib[i]);
+    for(size_t i = 0;i < ctx->dl_data.dl_load_path_data.now_loading_lib_num;i++){
+        free(ctx->dl_data.dl_load_path_data.loading_dl_lib[i]);
     }
-    free(ctx->dl_data.loading_dynamic_lib);
-    ctx->dl_data.loading_dynamic_lib = NULL;
-    ctx->dl_data.now_loading_lib_num = 0;
-    ctx->dl_data.now_loading_lib_allocate_num = 0;
+    free(ctx->dl_data.dl_load_path_data.loading_dl_lib);
+    ctx->dl_data.dl_load_path_data.loading_dl_lib = NULL;
+    ctx->dl_data.dl_load_path_data.now_loading_lib_num = 0;
+    ctx->dl_data.dl_load_path_data.now_loading_lib_allocate_num = 0;
+
+    for(size_t i = 0;i < ctx->dl_data.dl_handle_data.dl_handles_list_num;i++){
+        dlclose(ctx->dl_data.dl_handle_data.dl_handles_list[i]);
+    }
+    free(ctx->dl_data.dl_handle_data.dl_handles_list);
+    ctx->dl_data.dl_handle_data.dl_handles_list = NULL;
+    ctx->dl_data.dl_handle_data.dl_handles_list_num = 0;
+    ctx->dl_data.dl_handle_data.dl_handles_list_allocate_num = 0;
 
     return 0;
 }
@@ -540,6 +601,7 @@ static MY_TXT_EDITOR_RESULT load_settings_src_file(const MY_TXT_EDITOR_API *api,
 
     struct editor_input_context *ctx = api->userdata;
 
+
     size_t wchr_len = wcslen(src_path);
 
     char combed_path[wchr_len + 1];
@@ -548,8 +610,59 @@ static MY_TXT_EDITOR_RESULT load_settings_src_file(const MY_TXT_EDITOR_API *api,
     if(combed_len == (size_t)(-1)){
         return API_ERR_INVALID_ARG;
     }
+    
+    if(add_dl_path(ctx,combed_path) != 0){
+        return API_ERR_INVALID_ARG;
+    }
 
-    access(combed_path,)
+    void *tmp_handle = 
+        dlopen(combed_path,RTLD_GLOBAL | RTLD_GLOBAL);    
+    
+    if(tmp_handle == NULL){
+        error_log("dlopen NULL error");
+        return API_ERR_INVALID_ARG;
+    }
+
+    if(add_dl_handle_ptr(
+        tmp_handle,
+            &ctx->dl_data.dl_handle_data) != 0){
+
+        return API_ERR_INVALID_ARG;
+    }
+
+    return API_OK;
+}
 
 
+
+int add_dl_handle_ptr(void **dl_handle_ptr,DL_handle_data *handle_data){
+    if(*dl_handle_ptr == NULL || handle_data == NULL){
+        return -1;
+    }
+
+    //dl handle配列拡張処理
+    if(handle_data->dl_handles_list_allocate_num <= 
+                    handle_data->dl_handles_list_num){
+        
+        void **tmp_handle_list 
+            = realloc(
+                handle_data->dl_handles_list,
+                handle_data->dl_handles_list_num * 2
+                );
+
+        if(tmp_handle_list == NULL){
+            return -1;
+        }
+
+        handle_data->dl_handles_list_allocate_num = 
+                    handle_data->dl_handles_list_num * 2;
+        handle_data->dl_handles_list = tmp_handle_list;
+
+    }
+    
+    handle_data->
+        dl_handles_list[handle_data->dl_handles_list_num] = *dl_handle_ptr;
+
+    handle_data->dl_handles_list_num++;
+    return 0;
 }

@@ -36,6 +36,19 @@ int init_command_mode(struct editor_state *state){
     return 0;
 }
 
+int destory_command_mode(struct editor_state *state){
+    if(state == NULL){
+        return -1;
+    }
+
+    editor_command_mode_data *cmd_data = &state->command_mode_data;
+    free(cmd_data->command_list_data.command_list);
+
+
+
+    return 0;
+}
+
 
 
 

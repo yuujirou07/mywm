@@ -52,4 +52,6 @@ int clear_command_str(struct editor_input_context *ctx);
 
 int backspace_command_str(struct editor_input_context *ctx);
 
+int destory_command_mode(struct editor_state *state);
+
 #endif

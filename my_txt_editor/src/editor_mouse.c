@@ -424,7 +424,8 @@ int filetree_mouse_event(struct editor_input_context *ctx){
     //ファイルツリーの枠線を右クリックするとファイルツリーサイズを変更する
     if(ev->bstate & BUTTON1_DOUBLE_CLICKED ){
         //枠線クリック判定
-        if(state->file_tree_data.ft_box.pos.x + state->file_tree_data.ft_box.w == ev->x){
+        if(state->file_tree_data.ft_box.pos.x + 
+                state->file_tree_data.ft_box.w == ev->x){
             state->file_tree_data.is_grabed = true;
         }
     }
@@ -433,9 +434,17 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         struct box tmp_write_area_box = 
             {(struct pos){state->write_area.x_start,state->write_area.y_start},
                 state->write_area.w,state->write_area.h};
+        //編集画面内クリック判定
         if(box_contains_point(tmp_write_area_box,(struct pos){ev->x,ev->y})){
             editor_set_screen_state(state,edit_screen_mode);
             my_cur_set(state,true);
+        }
+        //ファイルツリーのボックス内クリック判定
+        else if(box_contains_point(
+            state->file_tree_data.ft_box,
+                (struct pos){ev->x,ev->y})){
+            
+
         }
     }
     return 0;
