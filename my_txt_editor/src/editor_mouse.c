@@ -439,7 +439,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
 }
 
 
-
+//マウス座標がファイルツリーの枠線の上にあるかの判定
 static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev){
     return (state->file_tree_data.ft_box.pos.x + state->file_tree_data.ft_box.w == ev->x);
 }
