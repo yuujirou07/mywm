@@ -18,6 +18,8 @@
 #include<stdlib.h>
 
 
+// コマンドモードのデータを初期化する。コマンド文字列を空にし、
+// コマンドリストを初期容量(32件)で確保する。成功時は0を返す。
 int init_command_mode(struct editor_state *state){
     state->command_mode_data.command_str_data.command_str[0] = L'\0';
     state->command_mode_data.command_str_data.command_str_len = 0;
@@ -36,6 +38,8 @@ int init_command_mode(struct editor_state *state){
     return 0;
 }
 
+// init_command_mode()で確保したコマンドリストのメモリを解放する。
+// stateがNULLの場合は-1、成功時は0を返す。
 int destory_command_mode(struct editor_state *state){
     if(state == NULL){
         return -1;
