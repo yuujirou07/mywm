@@ -266,40 +266,37 @@ void file_browse_screen_mouse_event(WINDOW *win, MEVENT *event, struct editor_st
 int filetree_mouse_event(struct editor_input_context *ctx){
     MEVENT *ev = &ctx->mouse_event;
     struct editor_state *state = ctx->state;
-
+    
     //ファイルツリーの枠線をダブルクリックした場合にリサイズ処理に移る
     if(state->file_tree_data.is_show == true){
         //枠線のダブルクリック判定
         //ダブルクリックかつボタンを離してい
         if((ev->bstate & BUTTON1_PRESSED) && state->file_tree_data.is_grabed == false){
+            ft_outline_click_data *tmp_outline_click_data = &state->file_tree_data.outline_click_data;
+            file_tree_data *tmo_ft_data = &state->file_tree_data;
             //枠線判定
-            if(state->file_tree_data.ft_box.pos.x + 
-                state->file_tree_data.ft_box.w == ev->x){
+            if(tmo_ft_data->ft_box.pos.x + tmo_ft_data->ft_box.w == ev->x){
 
-                state->file_tree_data.
-                    outline_click_data.
-                        outline_click_count++;   
+                tmp_outline_click_data->outline_click_count++;   
                 //クリックが1っ回目かの判定
-                if(state->file_tree_data.
-                        outline_click_data.outline_click_count == 1){
+                if(tmp_outline_click_data->outline_click_count == 1){
                     //ダブルクリックリサイズが無効だった場合シングルクリックでリサイズを開始する
                     if(FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE == false){
-                        state->file_tree_data.is_grabed = true;
+                        tmo_ft_data->is_grabed = true;
                     }
                     else{
                         struct timespec *tmp_click_time = 
-                            &state->file_tree_data.outline_click_data.
-                                                            first_click_time;
+                            &tmp_outline_click_data->first_click_time;
+
                         //ダブルクリック判定一回目のクリックの時間取得
                         // (2回目のクリックとの時間差でダブルクリックか判定する)
                         timespec_get(tmp_click_time,CLOCK_MONOTONIC);
                     }                    
                 }
-                else if(state->file_tree_data.outline_click_data.
-                                            outline_click_count == 2){
+                else if(tmp_outline_click_data->outline_click_count == 2){
                     
                     struct timespec *first_click_time = 
-                        &state->file_tree_data.outline_click_data.first_click_time;
+                        &tmp_outline_click_data->first_click_time;
                         
                     struct timespec last_click_time;
                     timespec_get(&last_click_time,CLOCK_MONOTONIC);
@@ -313,15 +310,12 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                     //間隔がダブルクリックの間隔以上なら初期化する
                     if(click_interval < MOUSE_DOUBLE_CLICK_INTERVAL){
                         state->file_tree_data.is_grabed = true;
-                        state->file_tree_data.outline_click_data.outline_click_count = 0;
                     }
-                    else{
-                        state->file_tree_data.outline_click_data.outline_click_count = 0;
-                    }                        
+                    tmp_outline_click_data->outline_click_count = 0;                     
                 }  
             }
-            else if(state->file_tree_data.outline_click_data.outline_click_count > 0){
-                state->file_tree_data.outline_click_data.outline_click_count = 0;
+            else if(tmp_outline_click_data->outline_click_count > 0){
+                tmp_outline_click_data->outline_click_count = 0;
             }
         }
 
@@ -449,6 +443,8 @@ int filetree_mouse_event(struct editor_input_context *ctx){
     }
     return 0;
 }
+
+
 
 // 指定座標がボックスの範囲内か判定する。
 // 引数: b=画面座標と幅・高さを持つボックス、p=判定する画面座標。 返り値: pが左上から右下の境界を含む範囲内ならtrue、それ以外はfalse。
