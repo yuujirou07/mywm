@@ -1,5 +1,4 @@
 #include "editor_mouse.h"
-#include <bits/time.h>
 #include <math.h>
 #include <ncurses.h>
 #include <stdbool.h>
@@ -25,7 +24,7 @@ static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev);
 
 static bool is_within_double_click(struct timespec st);
 static double get_time_elapsed_MS(struct timespec time);
-static int file_tree_outline_click_process(struct editor_state *state,MEVENT *ev); 
+static int file_tree_outline_first_click_process(struct editor_state *state); 
 
 // getmouseで取得したイベントをctxの現在画面へ振り分ける。dir_numはブラウザの表示項目数。
 // 返り値: なし。イベント取得失敗や未対応画面では何もしない。
@@ -282,7 +281,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         file_tree_data *tmp_ft_data = &state->file_tree_data;
         //枠線のダブルクリック判定
         //ダブルクリックかつボタンを離しているか
-        if((ev->bstate & BUTTON1_PRESSED) && tmp_ft_data->is_grabed == false){
+        if((ev->bstate & (BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED)) && tmp_ft_data->is_grabed == false){
             ft_outline_click_data *tmp_outline_click_data =
                         &state->file_tree_data.outline_click_data;
             //枠線判定
@@ -290,14 +289,14 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                 tmp_outline_click_data->outline_click_count++;   
                 //クリックが1っ回目かの判定
                 if(tmp_outline_click_data->outline_click_count == 1){
-                    file_tree_outline_click_process(state,ev);
+                    file_tree_outline_first_click_process(state);
                 }
                 //二回目のクリックで決めたダブルクリックの
                 // 間隔内で2回クリックされているかの判定をし、
                 //間隔内であればリサイズシグナルをtrueにする
                 else if(tmp_outline_click_data->outline_click_count == 2){
                     struct timespec st_time = tmp_outline_click_data->first_click_time;
-                   tmp_ft_data->is_grabed = is_within_double_click(st_time);
+                    tmp_ft_data->is_grabed = is_within_double_click(st_time);
                     tmp_outline_click_data->outline_click_count = 0;                     
                 }  
             }
@@ -434,8 +433,6 @@ int filetree_mouse_event(struct editor_input_context *ctx){
 
 static bool is_within_double_click(struct timespec st){
     //st_timeから関数実行時までの時間差取得
-    //クリック感覚が既定のダブルクリック間隔以内かの判定
-    //間隔がダブルクリックの間隔以上なら初期化する
     return (trunc(get_time_elapsed_MS(st)) < MOUSE_DOUBLE_CLICK_INTERVAL);
 }
 
@@ -444,7 +441,7 @@ static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev){
     return (state->file_tree_data.ft_box.pos.x + state->file_tree_data.ft_box.w == ev->x);
 }
 
-static int file_tree_outline_click_process(struct editor_state *state,MEVENT *ev){
+static int file_tree_outline_first_click_process(struct editor_state *state){
     //ダブルクリックリサイズが無効だった場合シングルクリックでリサイズを開始する
     if(FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE == false){
         state->file_tree_data.is_grabed = true;
