@@ -281,7 +281,9 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         file_tree_data *tmp_ft_data = &state->file_tree_data;
         //枠線のダブルクリック判定
         //ダブルクリックかつボタンを離しているか
-        if((ev->bstate & (BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED)) && tmp_ft_data->is_grabed == false){
+        if((ev->bstate & (BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED)) &&
+                                            tmp_ft_data->is_grabed == false){
+
             ft_outline_click_data *tmp_outline_click_data =
                         &state->file_tree_data.outline_click_data;
             //枠線判定
@@ -313,7 +315,9 @@ int filetree_mouse_event(struct editor_input_context *ctx){
     }
 
     //ファイルツリーリサイズ処理
-    if(state->file_tree_data.is_grabed && ev->bstate & REPORT_MOUSE_POSITION){
+    if(state->file_tree_data.is_grabed && 
+        ev->bstate & REPORT_MOUSE_POSITION){
+
         // 溜まったマウスイベントを読み捨て、最新の座標をevへ取得する
         wint_t chr;
         int result;
@@ -323,13 +327,14 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                 unget_wch(chr);
                 break;
             }
-            if(getmouse(ev) != OK || !(ev->bstate & REPORT_MOUSE_POSITION)){
+            if(getmouse(ev) != OK || 
+                !(ev->bstate & REPORT_MOUSE_POSITION)){
                 break;
             }
         }
         nodelay(stdscr,false);
 
-        int screen_width = getmaxx(ctx->win);
+        const int screen_width = getmaxx(ctx->win);
         int new_ft_width = ev->x;
 
         //ファイルツリー横幅制限
@@ -339,7 +344,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         else if(screen_width < ev->x){
             new_ft_width = screen_width;
         }
-
+        
         change_file_tree_width(ctx,new_ft_width);
     }
 
