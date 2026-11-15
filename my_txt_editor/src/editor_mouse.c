@@ -281,7 +281,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         file_tree_data *tmp_ft_data = &state->file_tree_data;
         //枠線のダブルクリック判定
         //ダブルクリックかつボタンを離しているか
-        if((ev->bstate & (BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED)) &&
+        if((ev->bstate & (BUTTON1_PRESSED|BUTTON1_DOUBLE_CLICKED)) &&
                                             tmp_ft_data->is_grabed == false){
 
             ft_outline_click_data *tmp_outline_click_data =
@@ -344,7 +344,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         else if(screen_width < ev->x){
             new_ft_width = screen_width;
         }
-        
+
         change_file_tree_width(ctx,new_ft_width);
     }
 
