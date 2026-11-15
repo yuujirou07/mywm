@@ -17,6 +17,13 @@
 #include "editor.h"
 #include "editor_syntax.h"
 
+
+
+
+
+static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev);
+
+
 // getmouseで取得したイベントをctxの現在画面へ振り分ける。dir_numはブラウザの表示項目数。
 // 返り値: なし。イベント取得失敗や未対応画面では何もしない。
 void handle_mouse(struct editor_input_context *ctx,int dir_num) {
@@ -276,8 +283,8 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         if((ev->bstate & BUTTON1_PRESSED) && state->file_tree_data.is_grabed == false){
             ft_outline_click_data *tmp_outline_click_data = &state->file_tree_data.outline_click_data;
             //枠線判定
-            if(tmp_ft_data->ft_box.pos.x + tmp_ft_data->ft_box.w == ev->x){
-
+            bool is_on_outline = file_tree_is_on_outline(state,ev);
+            if(is_on_outline == true){
                 tmp_outline_click_data->outline_click_count++;   
                 //クリックが1っ回目かの判定
                 if(tmp_outline_click_data->outline_click_count == 1){
@@ -447,11 +454,8 @@ int filetree_mouse_event(struct editor_input_context *ctx){
 
 
 
-int file_tree_outline_click_process(struct editor_state *state,MEVENT *ev){
-
-
-
-
+static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev){
+    return (state->file_tree_data.ft_box.pos.x + state->file_tree_data.ft_box.w == ev->x);
 }
 
 
