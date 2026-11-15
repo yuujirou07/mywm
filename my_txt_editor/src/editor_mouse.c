@@ -278,10 +278,9 @@ int filetree_mouse_event(struct editor_input_context *ctx){
     
     //ファイルツリーの枠線をダブルクリックした場合にリサイズ処理に移る
     if(state->file_tree_data.is_show == true){
-        
         file_tree_data *tmp_ft_data = &state->file_tree_data;
         //枠線のダブルクリック判定
-        //ダブルクリックかつボタンを離してい
+        //ダブルクリックかつボタンを離しているか
         if((ev->bstate & BUTTON1_PRESSED) && state->file_tree_data.is_grabed == false){
             ft_outline_click_data *tmp_outline_click_data = &state->file_tree_data.outline_click_data;
             //枠線判定
@@ -294,7 +293,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                     file_tree_outline_click_process(state,ev);
                 }
                 else if(tmp_outline_click_data->outline_click_count == 2){
-
+                    
                     struct timespec st_time = 
                         state->file_tree_data.outline_click_data.first_click_time;
                     //st_timeから関数実行時までの時間差取得
@@ -316,6 +315,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         }
         if((ev->bstate & BUTTON1_RELEASED) && tmp_ft_data->is_grabed == true){
             tmp_ft_data->is_grabed = false;
+            tmp_ft_data->outline_click_data.outline_click_count = 0;
         }
     }
 
