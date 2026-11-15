@@ -395,8 +395,10 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         }
     }
     //スクロール判定
-    else if(ev->bstate == BUTTON5_PRESSED || ev->bstate == BUTTON4_PRESSED){
-        struct box tmp_write_area_box = comb_write_possible_area_to_box(state->write_area);
+    else if(ev->bstate & (BUTTON5_PRESSED | BUTTON4_PRESSED)){
+        struct box tmp_write_area_box = 
+            comb_write_possible_area_to_box(state->write_area);
+
         //編集画面内クリック判定
         if(box_contains_point(tmp_write_area_box,(struct pos){ev->x,ev->y})){
             editor_set_screen_state(state,edit_screen_mode);
@@ -406,8 +408,10 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         else if(box_contains_point(
             state->file_tree_data.ft_box,
             (struct pos){ev->x,ev->y})){
-            
-
+                
+            if(ev->bstate & BUTTON5_CLICKED){
+                
+            }
         }
     }
     return 0;
