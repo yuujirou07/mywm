@@ -458,6 +458,23 @@ static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev){
     return (state->file_tree_data.ft_box.pos.x + state->file_tree_data.ft_box.w == ev->x);
 }
 
+static int file_tree_outline_click_prosecc(struct editor_state *state,MEVENT *ev){
+
+    //ダブルクリックリサイズが無効だった場合シングルクリックでリサイズを開始する
+    if(FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE == false){
+        state->file_tree_data.is_grabed = true;
+    }
+    else{
+        struct timespec *tmp_click_time = 
+            &state->file_tree_data.outline_click_data.first_click_time;
+
+        //ダブルクリック判定一回目のクリックの時間取得
+        // (2回目のクリックとの時間差でダブルクリックか判定する)
+        timespec_get(tmp_click_time,CLOCK_MONOTONIC);
+    } 
+
+}
+
 
 // 指定座標がボックスの範囲内か判定する。
 // 引数: b=画面座標と幅・高さを持つボックス、p=判定する画面座標。 返り値: pが左上から右下の境界を含む範囲内ならtrue、それ以外はfalse。
