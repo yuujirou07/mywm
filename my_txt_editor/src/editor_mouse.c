@@ -282,7 +282,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         file_tree_data *tmp_ft_data = &state->file_tree_data;
         //枠線のダブルクリック判定
         //ダブルクリックかつボタンを離しているか
-        if((ev->bstate & BUTTON1_PRESSED) && state->file_tree_data.is_grabed == false){
+        if((ev->bstate & BUTTON1_PRESSED) && tmp_ft_data->is_grabed == false){
             ft_outline_click_data *tmp_outline_click_data =
                         &state->file_tree_data.outline_click_data;
             //枠線判定
@@ -290,7 +290,6 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                 tmp_outline_click_data->outline_click_count++;   
                 //クリックが1っ回目かの判定
                 if(tmp_outline_click_data->outline_click_count == 1){
-                    //ダブルクリックリサイズが無効だった場合シングルクリックでリサイズを開始する
                     file_tree_outline_click_process(state,ev);
                 }
                 //二回目のクリックで決めたダブルクリックの
@@ -302,6 +301,8 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                     tmp_outline_click_data->outline_click_count = 0;                     
                 }  
             }
+            //ファイルツリーの枠線外をクリックしていれば
+            // 枠線クリックカウントを0に初期化する
             else if(tmp_outline_click_data->outline_click_count > 0){
                 tmp_outline_click_data->outline_click_count = 0;
             }
