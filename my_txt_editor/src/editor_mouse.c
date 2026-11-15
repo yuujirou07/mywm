@@ -452,7 +452,6 @@ static int file_tree_outline_click_process(struct editor_state *state,MEVENT *ev
     else{
         struct timespec *tmp_click_time = 
             &state->file_tree_data.outline_click_data.first_click_time;
-
         //ダブルクリック判定一回目のクリックの時間取得
         // (2回目のクリックとの時間差でダブルクリックか判定する)
         clock_gettime(CLOCK_MONOTONIC,tmp_click_time);
@@ -462,7 +461,7 @@ static int file_tree_outline_click_process(struct editor_state *state,MEVENT *ev
 
 static double get_time_elapsed_MS(struct timespec time){
     struct timespec last_click_time;
-    timespec_get(&last_click_time,TIME_UTC);
+    clock_gettime(CLOCK_MONOTONIC,&last_click_time);
     //ダブルクリックのミリ秒の差取得
     return comb_time_interval_ms(time,last_click_time);
 }
