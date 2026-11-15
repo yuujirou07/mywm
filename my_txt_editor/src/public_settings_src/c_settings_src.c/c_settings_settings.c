@@ -656,6 +656,7 @@ int add_dl_handle_ptr(void **dl_handle_ptr,DL_handle_data *handle_data){
 
         handle_data->dl_handles_list_allocate_num = 
                     handle_data->dl_handles_list_num * 2;
+                    
         handle_data->dl_handles_list = tmp_handle_list;
 
     }
