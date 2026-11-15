@@ -77,6 +77,8 @@ ft_path_open_check_data *get_filetree_item_data(file_tree_data *file_tree,
     new_data[new_count - 1].is_open = false;
     new_data[new_count - 1].indent_num = 0;
     new_data[new_count - 1].screen_y = -1;
+    new_data[new_count - 1].drawing_data_num = 0;
+    new_data[new_count - 1].draw_file_member_start_num = 0;
     return &new_data[new_count - 1];
 }
 
@@ -223,6 +225,7 @@ static void draw_filetree_items(struct editor_input_context *ctx,
     struct box box = filetree_data->ft_box;
 
     for(int i = 0;i < table_num;i++){
+        //ファイルツリー外描画ガード
         if(*file_h >= box.h - 1)return;
         //現在のレイヤーのi番目のテーブルのデータを取得する
         ft_path_open_check_data *item_data =
@@ -258,7 +261,7 @@ static void draw_filetree_items(struct editor_input_context *ctx,
         if(name_len > 0){
             mvaddnstr(y,name_x,table[i].s_data.d_name,name_len);
         }
-        
+
         //表示されているデータの個数カウント
         filetree_data->open_check_data->drawing_data_num = (*file_h)++;
 

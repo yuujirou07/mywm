@@ -27,6 +27,7 @@ typedef struct{
     int indent_num; // ルート直下を0とするツリー階層。
     int screen_y; // 直近の描画先となる画面y座標。非表示なら-1。
     int drawing_data_num;//ファイルツリーに表示しているメンバ数
+    int draw_file_member_start_num;
 }ft_path_open_check_data;
 
 typedef struct{
