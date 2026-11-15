@@ -293,7 +293,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                     file_tree_outline_click_process(state,ev);
                 }
                 else if(tmp_outline_click_data->outline_click_count == 2){
-                    
+
                     struct timespec st_time = 
                         state->file_tree_data.outline_click_data.first_click_time;
                     //st_timeから関数実行時までの時間差取得
@@ -438,6 +438,19 @@ int filetree_mouse_event(struct editor_input_context *ctx){
     return 0;
 }
 
+static bool is_within_double_click(struct timespec st){
+    //st_timeから関数実行時までの時間差取得
+    double click_interval = get_time_elapsed_MS(st);
+    //小数点以下切り捨て処理
+    click_interval = trunc(click_interval);
+    bool tmp_is_grabed = false; 
+    //クリック感覚が既定のダブルクリック間隔以内かの判定
+    //間隔がダブルクリックの間隔以上なら初期化する
+    if(click_interval < MOUSE_DOUBLE_CLICK_INTERVAL){
+        tmp_is_grabed = true;
+    }           
+    return tmp_is_grabed;
+}
 
 //マウス座標がファイルツリーの枠線の上にあるかの判定
 static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev){
