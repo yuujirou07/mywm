@@ -465,6 +465,15 @@ static int file_tree_outline_click_process(struct editor_state *state,MEVENT *ev
     return 0;
 }
 
+static double get_time_elapsed_MS(struct timespec time){
+    
+    struct timespec last_click_time;
+    timespec_get(&last_click_time,CLOCK_MONOTONIC);
+
+    //ダブルクリックのミリ秒の差取得
+    return comb_time_interval_ms(time,last_click_time);
+}
+
 
 // 指定座標がボックスの範囲内か判定する。
 // 引数: b=画面座標と幅・高さを持つボックス、p=判定する画面座標。 返り値: pが左上から右下の境界を含む範囲内ならtrue、それ以外はfalse。
