@@ -257,7 +257,7 @@ static void draw_filetree_items(struct editor_input_context *ctx,
         if(name_len > 0){
             mvaddnstr(y,name_x,table[i].s_data.d_name,name_len);
         }
-        
+
         (*file_h)++;
 
         if(table[i].s_data.d_type == DT_DIR && item_data->is_open){
