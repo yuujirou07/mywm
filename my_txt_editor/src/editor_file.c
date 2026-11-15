@@ -833,6 +833,7 @@ const wchar_t *now_open_path_name(struct dir_table *path,enum flags flags){
     return wide_path;
 }
 
+
 // 現在パスの末尾名を含むディレクトリエントリを最大size件収集する。
 // 引数: dir_table=結果の格納先配列、size=配列の要素数。0以下は無効。 返り値: 格納した件数。引数不正、文字変換、ディレクトリオープン失敗時は-1。
 int check_dir_mem(struct dir_table *dir_table,int size){
