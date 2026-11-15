@@ -301,7 +301,8 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                         
                     struct timespec last_click_time;
                     timespec_get(&last_click_time,CLOCK_MONOTONIC);
-        
+
+                    //ダブルクリックのミリ秒の差取得
                     double click_interval = 
                         comb_time_interval_ms(*first_click_time,last_click_time);
                     //小数点以下切り捨て処理
@@ -444,6 +445,14 @@ int filetree_mouse_event(struct editor_input_context *ctx){
     return 0;
 }
 
+
+
+int file_tree_outline_click_process(struct editor_state *state,MEVENT *ev){
+
+
+
+
+}
 
 
 // 指定座標がボックスの範囲内か判定する。
