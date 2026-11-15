@@ -269,20 +269,21 @@ int filetree_mouse_event(struct editor_input_context *ctx){
     
     //ファイルツリーの枠線をダブルクリックした場合にリサイズ処理に移る
     if(state->file_tree_data.is_show == true){
+        
+        file_tree_data *tmp_ft_data = &state->file_tree_data;
         //枠線のダブルクリック判定
         //ダブルクリックかつボタンを離してい
         if((ev->bstate & BUTTON1_PRESSED) && state->file_tree_data.is_grabed == false){
             ft_outline_click_data *tmp_outline_click_data = &state->file_tree_data.outline_click_data;
-            file_tree_data *tmo_ft_data = &state->file_tree_data;
             //枠線判定
-            if(tmo_ft_data->ft_box.pos.x + tmo_ft_data->ft_box.w == ev->x){
+            if(tmp_ft_data->ft_box.pos.x + tmp_ft_data->ft_box.w == ev->x){
 
                 tmp_outline_click_data->outline_click_count++;   
                 //クリックが1っ回目かの判定
                 if(tmp_outline_click_data->outline_click_count == 1){
                     //ダブルクリックリサイズが無効だった場合シングルクリックでリサイズを開始する
                     if(FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE == false){
-                        tmo_ft_data->is_grabed = true;
+                        tmp_ft_data->is_grabed = true;
                     }
                     else{
                         struct timespec *tmp_click_time = 
@@ -309,7 +310,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                     //クリック感覚が既定のダブルクリック間隔以内かの判定
                     //間隔がダブルクリックの間隔以上なら初期化する
                     if(click_interval < MOUSE_DOUBLE_CLICK_INTERVAL){
-                        state->file_tree_data.is_grabed = true;
+                        tmp_ft_data->is_grabed = true;
                     }
                     tmp_outline_click_data->outline_click_count = 0;                     
                 }  
@@ -319,9 +320,8 @@ int filetree_mouse_event(struct editor_input_context *ctx){
             }
         }
 
-        if((ev->bstate & BUTTON1_RELEASED) && 
-            state->file_tree_data.is_grabed == true){
-            state->file_tree_data.is_grabed = false;
+        if((ev->bstate & BUTTON1_RELEASED) && tmp_ft_data->is_grabed == true){
+            tmp_ft_data->is_grabed = false;
         }
     }
 
