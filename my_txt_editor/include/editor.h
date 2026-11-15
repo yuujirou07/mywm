@@ -495,6 +495,10 @@ static inline int editor_line_cap(struct editor_state *state, int line){
     return (state->str.line_cap[line] > 0) ? state->str.line_cap[line] : 0;
 }
 
+static struct box create_box(struct pos pos,int w,int h){
+    return (struct box){pos,w,h};
+}
+
 // stateの論理行lineに対応するセル配列先頭への借用ポインタを返す。
 // 不正な行・未確保・不正なオフセットはNULL。返値は解放せず、本文の再確保後は取得し直す。
 static inline wint_t *editor_line_cells(struct editor_state *state, int line){

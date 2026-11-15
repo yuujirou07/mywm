@@ -397,10 +397,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                 //カーソル論理座標
                 struct pos cur_logical_pos = 
                     editor_pos_to_buffer_pos(state,write_area_cur_pos);
-                //表示されている行数内に収める
-                if(*state->str.line <= cur_logical_pos.y){
-                    cur_logical_pos.y = *state->str.line;
-                }
+
                 editor_set_cursor(state,cur_logical_pos.x,cur_logical_pos.y);
                 editor_set_screen_state(state,edit_screen_mode);
                 my_cur_set(state,true);
@@ -489,11 +486,11 @@ struct pos editor_mouse_to_buffer_pos(struct editor_state *state,
             state->write_area.h};
     struct pos tmp_pos = (struct pos){-1,-1};  
     if(screen_pos_to_box_pos(write_area,mouse_pos,&tmp_pos)){
-        error_log("error");
         return tmp_pos;
     }
     return tmp_pos;  
 }
+
 
 // 画面座標p1をb1左上からの相対座標へ変換して非NULLのrp1へ格納する。右下境界も範囲に含む。
 // 返り値: 成功false、範囲外true。失敗時は*rp1を変更しない。
@@ -508,5 +505,5 @@ bool screen_pos_to_box_pos(struct box b1,struct pos p1,struct pos *rp1){
 struct pos editor_pos_to_buffer_pos(
                 struct editor_state *state,
                 struct pos editor_pos){
-    return(struct pos){state->scr.scr_start_num + editor_pos.y,editor_pos.x};
+    return(struct pos){editor_pos.x,state->scr.scr_start_num + editor_pos.y};
 }
