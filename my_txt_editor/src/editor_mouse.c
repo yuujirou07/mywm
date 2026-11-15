@@ -24,7 +24,8 @@ static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev);
 
 static bool is_within_double_click(struct timespec st);
 static double get_time_elapsed_MS(struct timespec time);
-static int file_tree_outline_first_click_process(struct editor_state *state); 
+static int file_tree_outline_first_click_process(struct editor_state *state);
+static bool editor_click_move_cursor(struct editor_state *state, const MEVENT *ev);
 
 // getmouseで取得したイベントをctxの現在画面へ振り分ける。dir_numはブラウザの表示項目数。
 // 返り値: なし。イベント取得失敗や未対応画面では何もしない。
@@ -382,21 +383,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
             }
         }
         else{
-            struct box tmp_write_area_box = 
-                {(struct pos){state->write_area.x_start,state->write_area.y_start},
-                    state->write_area.w,state->write_area.h};
-
-            if(box_contains_point(tmp_write_area_box,(struct pos){ev->x,ev->y})){
-                struct pos write_area_cur_pos = 
-                    editor_mouse_to_buffer_pos(state,(struct pos){ev->x,ev->y});
-                //カーソル論理座標
-                struct pos cur_logical_pos = 
-                    editor_pos_to_buffer_pos(state,write_area_cur_pos);
-
-                editor_set_cursor(state,cur_logical_pos.x,cur_logical_pos.y);
-                editor_set_screen_state(state,edit_screen_mode);
-                my_cur_set(state,true);
-            }
+            editor_click_move_cursor(state,ev);
         }
     }
     //ファイルツリーの枠線を右クリックするとファイルツリーサイズを変更する
@@ -432,6 +419,26 @@ static bool is_within_double_click(struct timespec st){
 }
 
 //マウス座標がファイルツリーの枠線の上にあるかの判定
+// 編集領域内のクリックなら、その位置へ論理カーソルを移して編集画面に切り替える。
+// 返り値: 移動したらtrue、編集領域外ならfalse。行・列の範囲への丸めはeditor_set_cursorが行う。
+static bool editor_click_move_cursor(struct editor_state *state, const MEVENT *ev){
+    struct pos mouse_pos = {ev->x,ev->y};
+    //editor_mouse_to_buffer_posは領域外でエラーログを出すため先に範囲判定する
+    struct box write_area_box = comb_write_possible_area_to_box(state->write_area);
+    if(!box_contains_point(write_area_box,mouse_pos)){
+        return false;
+    }
+
+    struct pos rel_pos = editor_mouse_to_buffer_pos(state,mouse_pos);
+
+    //論理座標 (注意: x=行、y=列の順で返る)
+    struct pos logical_pos = editor_pos_to_buffer_pos(state,rel_pos);
+    editor_set_cursor(state,logical_pos.x,logical_pos.y);
+    editor_set_screen_state(state,edit_screen_mode);
+    my_cur_set(state,true);
+    return true;
+}
+
 static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev){
     return (state->file_tree_data.ft_box.pos.x + state->file_tree_data.ft_box.w == ev->x);
 }
