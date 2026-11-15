@@ -283,24 +283,22 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         //枠線のダブルクリック判定
         //ダブルクリックかつボタンを離しているか
         if((ev->bstate & BUTTON1_PRESSED) && state->file_tree_data.is_grabed == false){
-            ft_outline_click_data *tmp_outline_click_data = &state->file_tree_data.outline_click_data;
+            ft_outline_click_data *tmp_outline_click_data =
+                        &state->file_tree_data.outline_click_data;
             //枠線判定
-            bool is_on_outline = file_tree_is_on_outline(state,ev);
-            if(is_on_outline == true){
+            if(file_tree_is_on_outline(state,ev) == true){
                 tmp_outline_click_data->outline_click_count++;   
                 //クリックが1っ回目かの判定
                 if(tmp_outline_click_data->outline_click_count == 1){
                     //ダブルクリックリサイズが無効だった場合シングルクリックでリサイズを開始する
                     file_tree_outline_click_process(state,ev);
                 }
+                //二回目のクリックで決めたダブルクリックの
+                // 間隔内で2回クリックされているかの判定をし、
+                //間隔内であればリサイズシグナルをtrueにする
                 else if(tmp_outline_click_data->outline_click_count == 2){
-                    struct timespec st_time = 
-                        state->file_tree_data.
-                            outline_click_data.first_click_time;
-                    bool is_double_click = is_within_double_click(st_time);
-                    if(is_double_click){
-                        tmp_ft_data->is_grabed = true;
-                    }
+                    struct timespec st_time = tmp_outline_click_data->first_click_time;
+                   tmp_ft_data->is_grabed = is_within_double_click(st_time);
                     tmp_outline_click_data->outline_click_count = 0;                     
                 }  
             }
