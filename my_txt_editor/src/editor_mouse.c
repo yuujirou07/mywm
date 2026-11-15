@@ -81,9 +81,7 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
         //ファイルツリーが表示されている場合
         // スクロール時のマウスポインターがファイルツリー上にあるか判断する
         if(state->file_tree_data.is_show){
-            struct box tmp_write_area_box = 
-                {(struct pos){state->write_area.x_start,state->write_area.y_start},
-                    state->write_area.w,state->write_area.h};    
+            struct box tmp_write_area_box = comb_write_possible_area_to_box(state->write_area);
             if(!box_contains_point(tmp_write_area_box,(struct pos){event->x,event->y})){
                 editor_set_screen_state(state,filetree_screen_mode);
                 is_cur_on_edit_screen = false;
@@ -141,11 +139,8 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
     }else if ((event->bstate & BUTTON4_PRESSED) && state->scr.scr_start_num > 0) {
         bool is_cur_on_edit_screen = true;
          if(state->file_tree_data.is_show){
-
             struct box tmp_write_area_box = 
-                {(struct pos){state->write_area.x_start,state->write_area.y_start},
-                    state->write_area.w,state->write_area.h};    
-
+                comb_write_possible_area_to_box(state->write_area);
             if(!box_contains_point(tmp_write_area_box,(struct pos){event->x,event->y})){
                 editor_set_screen_state(state,filetree_screen_mode);
                 is_cur_on_edit_screen = false;
@@ -414,9 +409,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
     }
     //スクロール判定
     else if(ev->bstate == BUTTON5_PRESSED || ev->bstate == BUTTON4_PRESSED){
-        struct box tmp_write_area_box = 
-            {(struct pos){state->write_area.x_start,state->write_area.y_start},
-                state->write_area.w,state->write_area.h};
+        struct box tmp_write_area_box = comb_write_possible_area_to_box(state->write_area);
         //編集画面内クリック判定
         if(box_contains_point(tmp_write_area_box,(struct pos){ev->x,ev->y})){
             editor_set_screen_state(state,edit_screen_mode);
@@ -479,13 +472,18 @@ bool box_contains_point(struct box b,struct pos p){
 // 引数: state=編集領域の画面上の位置と大きさ、mouse_pos=変換する画面座標。 返り値: 編集領域内なら領域左上を(0,0)とする座標、範囲外なら(-1,-1)。 スクロール開始行は加算しない。
 struct pos editor_mouse_to_buffer_pos(struct editor_state *state,
                                     struct pos mouse_pos){
-    struct box write_area = 
-        (struct box){(struct pos){state->write_area.x_start,
-            state->write_area.y_start},
-            state->write_area.w,
-            state->write_area.h};
+
+    struct write_possible_area write_area = state->write_area;
+    struct box write_area_box = 
+        create_box(
+            write_area.x_start,
+            write_area.y_start,
+            write_area.w,
+            write_area.h
+        );                        
+
     struct pos tmp_pos = (struct pos){-1,-1};  
-    if(screen_pos_to_box_pos(write_area,mouse_pos,&tmp_pos)){
+    if(screen_pos_to_box_pos(write_area_box,mouse_pos,&tmp_pos)){
         return tmp_pos;
     }
     return tmp_pos;  
