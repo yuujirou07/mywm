@@ -238,8 +238,14 @@ static void draw_filetree_items(struct editor_input_context *ctx,
             mvaddstr(y,x,item_data->is_open ? "\u2304" : ">");
         }
 
-        const char *ext_icon_code = get_file_ext_code(table[i].absolute_path,
-            &ctx->state->settings_data->icon_data);
+        //パスをstatで確認しファイルやディレクトリの
+        //アイコンを返す
+        const char *ext_icon_code 
+            = get_file_ext_code(
+                table[i].absolute_path,
+                &ctx->state->settings_data->icon_data
+            );
+
         if(x + 1 < box.pos.x + box.w){
             mvaddnstr(y,x + 1,ext_icon_code,box.pos.x + box.w - x - 1);
         }
