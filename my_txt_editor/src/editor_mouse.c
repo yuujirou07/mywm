@@ -23,6 +23,7 @@
 
 static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev);
 
+static double get_time_elapsed_MS(struct timespec time);
 static int file_tree_outline_click_process(struct editor_state *state,MEVENT *ev); 
 
 // getmouseで取得したイベントをctxの現在画面へ振り分ける。dir_numはブラウザの表示項目数。
@@ -293,16 +294,11 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                     file_tree_outline_click_process(state,ev);
                 }
                 else if(tmp_outline_click_data->outline_click_count == 2){
-                    
-                    struct timespec *first_click_time = 
-                        &tmp_outline_click_data->first_click_time;
-                        
-                    struct timespec last_click_time;
-                    timespec_get(&last_click_time,CLOCK_MONOTONIC);
 
-                    //ダブルクリックのミリ秒の差取得
-                    double click_interval = 
-                        comb_time_interval_ms(*first_click_time,last_click_time);
+                    struct timespec st_time = 
+                        state->file_tree_data.outline_click_data.first_click_time;
+                    //st_timeから関数実行時までの時間差取得
+                    double click_interval = get_time_elapsed_MS(st_time);
                     //小数点以下切り捨て処理
                     click_interval = trunc(click_interval);
                     
@@ -318,7 +314,6 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                 tmp_outline_click_data->outline_click_count = 0;
             }
         }
-
         if((ev->bstate & BUTTON1_RELEASED) && tmp_ft_data->is_grabed == true){
             tmp_ft_data->is_grabed = false;
         }
@@ -466,10 +461,8 @@ static int file_tree_outline_click_process(struct editor_state *state,MEVENT *ev
 }
 
 static double get_time_elapsed_MS(struct timespec time){
-    
     struct timespec last_click_time;
     timespec_get(&last_click_time,CLOCK_MONOTONIC);
-
     //ダブルクリックのミリ秒の差取得
     return comb_time_interval_ms(time,last_click_time);
 }
