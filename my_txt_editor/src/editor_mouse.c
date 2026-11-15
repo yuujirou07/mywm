@@ -405,7 +405,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         //ファイルツリーのボックス内クリック判定
         else if(box_contains_point(
             state->file_tree_data.ft_box,
-                (struct pos){ev->x,ev->y})){
+            (struct pos){ev->x,ev->y})){
             
 
         }
