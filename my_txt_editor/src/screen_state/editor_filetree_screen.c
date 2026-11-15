@@ -231,6 +231,7 @@ static void draw_filetree_items(struct editor_input_context *ctx,
 
         const int y = box.pos.y + *file_h;
         const int x = box.pos.x + 1 + layer * 2;
+        
         item_data->indent_num = layer;
         item_data->screen_y = y;
         
