@@ -410,10 +410,10 @@ int filetree_mouse_event(struct editor_input_context *ctx){
             (struct pos){ev->x,ev->y})){
 
 
-                
+
             //手前へのスクロールイベント
             if(ev->bstate & BUTTON5_CLICKED){
-
+                state->file_tree_data.open_check_data->draw_file_member_start_num++;
             }
         }
     }
