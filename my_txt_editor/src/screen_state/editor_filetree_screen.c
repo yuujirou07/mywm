@@ -233,7 +233,9 @@ static void draw_filetree_items(struct editor_input_context *ctx,
         const int x = box.pos.x + 1 + layer * 2;
         item_data->indent_num = layer;
         item_data->screen_y = y;
-
+        
+        //ディレクトリか判定し、そのディレクトリの開閉状態を判断し、
+        //閉じているアイコンか開いているアイコンを表示する
         if(table[i].s_data.d_type == DT_DIR && x < box.pos.x + box.w){
             mvaddstr(y,x,item_data->is_open ? "\u2304" : ">");
         }
@@ -255,6 +257,7 @@ static void draw_filetree_items(struct editor_input_context *ctx,
         if(name_len > 0){
             mvaddnstr(y,name_x,table[i].s_data.d_name,name_len);
         }
+        
         (*file_h)++;
 
         if(table[i].s_data.d_type == DT_DIR && item_data->is_open){
