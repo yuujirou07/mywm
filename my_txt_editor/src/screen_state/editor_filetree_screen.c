@@ -231,7 +231,7 @@ static void draw_filetree_items(struct editor_input_context *ctx,
 
         const int y = box.pos.y + *file_h;
         const int x = box.pos.x + 1 + layer * 2;
-        
+
         item_data->indent_num = layer;
         item_data->screen_y = y;
         
@@ -258,8 +258,9 @@ static void draw_filetree_items(struct editor_input_context *ctx,
         if(name_len > 0){
             mvaddnstr(y,name_x,table[i].s_data.d_name,name_len);
         }
-
-        (*file_h)++;
+        
+        //表示されているデータの個数カウント
+        filetree_data->open_check_data->drawing_data_num = (*file_h)++;
 
         if(table[i].s_data.d_type == DT_DIR && item_data->is_open){
             if(load_child_dir(&table[i]) == 0){
