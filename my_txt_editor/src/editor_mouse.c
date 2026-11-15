@@ -23,6 +23,7 @@
 
 static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev);
 
+static int file_tree_outline_click_process(struct editor_state *state,MEVENT *ev); 
 
 // getmouseで取得したイベントをctxの現在画面へ振り分ける。dir_numはブラウザの表示項目数。
 // 返り値: なし。イベント取得失敗や未対応画面では何もしない。
@@ -289,17 +290,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
                 //クリックが1っ回目かの判定
                 if(tmp_outline_click_data->outline_click_count == 1){
                     //ダブルクリックリサイズが無効だった場合シングルクリックでリサイズを開始する
-                    if(FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE == false){
-                        tmp_ft_data->is_grabed = true;
-                    }
-                    else{
-                        struct timespec *tmp_click_time = 
-                            &tmp_outline_click_data->first_click_time;
-
-                        //ダブルクリック判定一回目のクリックの時間取得
-                        // (2回目のクリックとの時間差でダブルクリックか判定する)
-                        timespec_get(tmp_click_time,CLOCK_MONOTONIC);
-                    }                    
+                    file_tree_outline_click_process(state,ev);
                 }
                 else if(tmp_outline_click_data->outline_click_count == 2){
                     
@@ -458,8 +449,7 @@ static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev){
     return (state->file_tree_data.ft_box.pos.x + state->file_tree_data.ft_box.w == ev->x);
 }
 
-static int file_tree_outline_click_prosecc(struct editor_state *state,MEVENT *ev){
-
+static int file_tree_outline_click_process(struct editor_state *state,MEVENT *ev){
     //ダブルクリックリサイズが無効だった場合シングルクリックでリサイズを開始する
     if(FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE == false){
         state->file_tree_data.is_grabed = true;
@@ -472,7 +462,7 @@ static int file_tree_outline_click_prosecc(struct editor_state *state,MEVENT *ev
         // (2回目のクリックとの時間差でダブルクリックか判定する)
         timespec_get(tmp_click_time,CLOCK_MONOTONIC);
     } 
-
+    return 0;
 }
 
 
