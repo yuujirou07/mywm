@@ -519,6 +519,7 @@ int main(int argc, char *argv[])
 
         refresh();
 
+
         if(is_cur_hide){
             my_cur_set(&state,true);
         }
