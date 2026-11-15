@@ -495,7 +495,7 @@ static inline int editor_line_cap(struct editor_state *state, int line){
     return (state->str.line_cap[line] > 0) ? state->str.line_cap[line] : 0;
 }
 
-static struct box create_box(struct pos pos,int w,int h){
+static inline struct box create_box(struct pos pos,int w,int h){
     return (struct box){pos,w,h};
 }
 
