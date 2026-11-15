@@ -224,13 +224,13 @@ static void draw_filetree_items(struct editor_input_context *ctx,
 
     for(int i = 0;i < table_num;i++){
         if(*file_h >= box.h - 1)return;
-
+        //現在のレイヤーのi番目のテーブルのデータを取得する
         ft_path_open_check_data *item_data =
             get_filetree_item_data(filetree_data,&table[i]);
         if(item_data == NULL)return;
 
-        int y = box.pos.y + *file_h;
-        int x = box.pos.x + 1 + layer * 2;
+        const int y = box.pos.y + *file_h;
+        const int x = box.pos.x + 1 + layer * 2;
         item_data->indent_num = layer;
         item_data->screen_y = y;
 

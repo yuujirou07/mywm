@@ -408,9 +408,12 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         else if(box_contains_point(
             state->file_tree_data.ft_box,
             (struct pos){ev->x,ev->y})){
+
+
                 
+            //手前へのスクロールイベント
             if(ev->bstate & BUTTON5_CLICKED){
-                
+
             }
         }
     }
