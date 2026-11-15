@@ -19,7 +19,6 @@ int init_curses_color(struct editor_input_context *ctx){
         return 0;
     }
     
-
     ctx->color_list.col_id_data = malloc(sizeof(color_id_data) * SUPPORT_COLOR_NUM);
     if(ctx->color_list.col_id_data == NULL){
         return 0;
