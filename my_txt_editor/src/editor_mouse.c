@@ -352,9 +352,9 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         ft_box.w--;
         // ファイルツリー内クリック時の処理
         if(box_contains_point(ft_box,(struct pos){ev->x,ev->y})){
-            for(int i = 0;i < state->file_tree_data.open_count_num;i++){
-                ft_path_open_check_data *item =
-                    &state->file_tree_data.open_check_data[i];
+            for(int i = 0;i < state->file_tree_data.item_view_count_num;i++){
+                ft_item_view_data *item =
+                    &state->file_tree_data.item_view_data[i];
                 if(item->screen_y != ev->y)continue;
 
                 enum select_state path_state =
@@ -386,7 +386,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
             editor_click_move_cursor(state,ev);
         }
     }
-    //ファイルツリーの枠線を右クリックするとファイルツリーサイズを変更する
+    //ファイルツリーの枠線をダブルクリックするとファイルツリーサイズを変更する
     if(ev->bstate & BUTTON1_DOUBLE_CLICKED ){
         //枠線クリック判定
         if(state->file_tree_data.ft_box.pos.x + 
@@ -399,12 +399,12 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         struct box tmp_write_area_box = 
             comb_write_possible_area_to_box(state->write_area);
 
-        //編集画面内クリック判定
+        //編集画面内でのスクロール
         if(box_contains_point(tmp_write_area_box,(struct pos){ev->x,ev->y})){
             editor_set_screen_state(state,edit_screen_mode);
             my_cur_set(state,true);
         }
-        //ファイルツリーのボックス内クリック判定
+        //ファイルツリー内でのスクロール
         else if(box_contains_point(
             state->file_tree_data.ft_box,
             (struct pos){ev->x,ev->y})){
@@ -413,7 +413,7 @@ int filetree_mouse_event(struct editor_input_context *ctx){
 
             //手前へのスクロールイベント
             if(ev->bstate & BUTTON5_CLICKED){
-                state->file_tree_data.open_check_data->draw_file_member_start_num++;
+                state->file_tree_data.draw_file_member_start_num++;
             }
         }
     }
@@ -425,7 +425,6 @@ static bool is_within_double_click(struct timespec st){
     return (trunc(get_time_elapsed_MS(st)) < MOUSE_DOUBLE_CLICK_INTERVAL);
 }
 
-//マウス座標がファイルツリーの枠線の上にあるかの判定
 // 編集領域内のクリックなら、その位置へ論理カーソルを移して編集画面に切り替える。
 // 返り値: 移動したらtrue、編集領域外ならfalse。行・列の範囲への丸めはeditor_set_cursorが行う。
 static bool editor_click_move_cursor(struct editor_state *state, const MEVENT *ev){
@@ -446,6 +445,7 @@ static bool editor_click_move_cursor(struct editor_state *state, const MEVENT *e
     return true;
 }
 
+//マウス座標がファイルツリーの枠線の上にあるかの判定
 static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev){
     return (state->file_tree_data.ft_box.pos.x + state->file_tree_data.ft_box.w == ev->x);
 }

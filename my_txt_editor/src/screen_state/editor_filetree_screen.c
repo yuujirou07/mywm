@@ -1,10 +1,14 @@
 
+#include <dirent.h>
 #include <ncurses.h>
+#include <stdbool.h>
 #include<stdlib.h>
 #include<string.h>
+#include<assert.h>
+#include <sys/stat.h>
 
 
-
+#include "editor_icon.h"
 #include "editor_types.h"
 #include "editor_log.h"
 #include "filetree.h"
@@ -15,8 +19,8 @@
 
 static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer);
 
-// pathを起点とするツリーと直下項目の開閉状態を、未確保のfile_treeへ作成する。
-// 返り値: 成功0、作成・確保失敗-1。成功後は呼び出し側でroot_nodeをclose_treeし、open_check_dataをfreeする。
+// pathを起点とするツリーと直下項目の表示状態を、未確保のfile_treeへ作成する。
+// 返り値: 成功0、作成・確保失敗-1。成功後は呼び出し側でroot_nodeをclose_treeし、item_view_dataをfreeする。
 int get_root_file_tree_data(file_tree_data *file_tree,char *path){
     file_tree->root_node = create_tree(path);
     if(file_tree->root_node == NULL){
@@ -24,68 +28,68 @@ int get_root_file_tree_data(file_tree_data *file_tree,char *path){
         return -1;
     }
     int mem_num = file_tree->root_node->c_table_num;
-    file_tree->open_check_data = NULL;
-    file_tree->open_count_num = 0;
-    file_tree->open_check_data_allocate_num = 0;
+    file_tree->item_view_data = NULL;
+    file_tree->item_view_count_num = 0;
+    file_tree->item_view_data_allocate_num = 0;
     file_tree->is_grabed = false;
+    file_tree->drawing_data_num = 0;
+    file_tree->draw_file_member_start_num = 0;
     if(mem_num == 0)return 0;
 
-    file_tree->open_check_data = malloc(sizeof(ft_path_open_check_data) * mem_num);
-    if(file_tree->open_check_data == NULL){
+    file_tree->item_view_data = malloc(sizeof(ft_item_view_data) * mem_num);
+    if(file_tree->item_view_data == NULL){
         close_tree(file_tree->root_node);
         file_tree->root_node = NULL;
         return -1;
     }
-    file_tree->open_count_num = mem_num;
-    file_tree->open_check_data_allocate_num = mem_num;
+    file_tree->item_view_count_num = mem_num;
+    file_tree->item_view_data_allocate_num = mem_num;
 
     for(int i = 0;i < mem_num;i++){
-        file_tree->open_check_data[i].table_ptr = &file_tree->root_node->c_table[i];
-        file_tree->open_check_data[i].is_open = false;
-        file_tree->open_check_data[i].indent_num = 0;
-        file_tree->open_check_data[i].screen_y = -1;
-        file_tree->open_check_data[i].scree_x = -1;
+        file_tree->item_view_data[i].table_ptr = &file_tree->root_node->c_table[i];
+        file_tree->item_view_data[i].is_open = false;
+        file_tree->item_view_data[i].layer = 0;
+        file_tree->item_view_data[i].screen_y = -1;
+        file_tree->item_view_data[i].screen_x = -1;
     }
 
     return 0;
 }
 
-// file_treeからtable_ptrの開閉情報を探し、なければ配列を拡張して閉じた状態で追加する。
+// file_treeからtable_ptrの表示状態を探し、なければ配列を拡張して閉じた状態で追加する。
 // 返り値: 内部要素の借用ポインタ、確保失敗NULL。後の追加で再確保されると以前の返値は無効になり得る。
-ft_path_open_check_data *get_filetree_item_data(file_tree_data *file_tree,
+ft_item_view_data *get_filetree_item_data(file_tree_data *file_tree,
                                                 struct table *table_ptr){
 
-    for(int i = 0;i < file_tree->open_count_num;i++){
-        if(file_tree->open_check_data[i].table_ptr == table_ptr){
-            return &file_tree->open_check_data[i];
+    for(int i = 0;i < file_tree->item_view_count_num;i++){
+        if(file_tree->item_view_data[i].table_ptr == table_ptr){
+            return &file_tree->item_view_data[i];
         }
     }
 
-    int new_count = file_tree->open_count_num + 1;
-    ft_path_open_check_data *new_data = file_tree->open_check_data;
+    int new_count = file_tree->item_view_count_num + 1;
+    ft_item_view_data *new_data = file_tree->item_view_data;
 
     // 確保数が足りないときだけ2倍に拡張する(確保数0からは1にする)。
-    if(file_tree->open_check_data_allocate_num < new_count){
+    if(file_tree->item_view_data_allocate_num < new_count){
 
-        int new_allocate_num = (file_tree->open_check_data_allocate_num > 0)
-            ?file_tree->open_check_data_allocate_num * 2 : 1;
+        int new_allocate_num = (file_tree->item_view_data_allocate_num > 0)
+            ?file_tree->item_view_data_allocate_num * 2 : 1;
 
-        new_data = realloc(file_tree->open_check_data,
-            sizeof(ft_path_open_check_data) * new_allocate_num);
+        new_data = realloc(file_tree->item_view_data,
+            sizeof(ft_item_view_data) * new_allocate_num);
             
         if(new_data == NULL)return NULL;
-        file_tree->open_check_data_allocate_num = new_allocate_num;
+        file_tree->item_view_data_allocate_num = new_allocate_num;
     }
 
-    file_tree->open_check_data = new_data;
-    file_tree->open_count_num = new_count;
+    file_tree->item_view_data = new_data;
+    file_tree->item_view_count_num = new_count;
     new_data[new_count - 1].table_ptr = table_ptr;
     new_data[new_count - 1].is_open = false;
-    new_data[new_count - 1].indent_num = 0;
+    new_data[new_count - 1].layer = 0;
     new_data[new_count - 1].screen_y = -1;
-    new_data[new_count - 1].scree_x = -1;
-    new_data[new_count - 1].drawing_data_num = 0;
-    new_data[new_count - 1].draw_file_member_start_num = 0;
+    new_data[new_count - 1].screen_x = -1;
     return &new_data[new_count - 1];
 }
 
@@ -222,8 +226,8 @@ int change_file_tree_width(struct editor_input_context *ctx,int width){
     return 0;
 }
 
-// ctx/filetree_dataのtable_num件のtableを再帰描画し、開いた子も表示する。layerは深さ、*file_hは次の相対行。
-// 返り値: なし。*file_hと各項目の画面行を更新し、枠の下端・項目情報の確保失敗で打ち切る。
+// filetree_dataのtable_num件のtableに表示座標と階層を再帰的に割り当てる(描画はしない)。layerは深さ、*file_hは次の相対行。
+// 返り値: なし。*file_h・各項目の画面座標・drawing_data_numを更新し、枠の下端・項目情報の確保失敗で打ち切る。
 static void ft_update_filetree_data(struct editor_input_context *ctx,
                                 file_tree_data *filetree_data,
                                 struct table *table,int table_num,
@@ -235,24 +239,22 @@ static void ft_update_filetree_data(struct editor_input_context *ctx,
         //ファイルツリー外描画ガード
         if(*file_h >= box.h - 1)return;
         //現在のレイヤーのi番目のテーブルのデータを取得する
-        ft_path_open_check_data *item_data =
+        ft_item_view_data *item_data =
             get_filetree_item_data(filetree_data,&table[i]);
         if(item_data == NULL)return;
 
-        //名前を表示するファイルツリーのy座標
-        //要素の名前を表示する際のx座標
-        //ファイルツリー内のiの要素の名前を描画する座標を返す
+        // i番目の要素の名前を描く画面座標
         struct pos item_name_pos = ft_get_item_name_pos(box,*file_h,layer);
         
         
         //取得した名前の座標をitemに代入する
-        item_data->indent_num = layer;
+        item_data->layer = layer;
         item_data->screen_y = item_name_pos.y;
-        item_data->scree_x = item_name_pos.x;
+        item_data->screen_x = item_name_pos.x;
         
 
         //表示されているデータの個数カウント
-        filetree_data->open_check_data->drawing_data_num = (*file_h)++;
+        filetree_data->drawing_data_num = (*file_h)++;
 
         //iの要素がディレクトリかつ、is_openで展開判定になっていたら
         //i番目のテーブルにそのディレクトリ内の要素のデータをつける
@@ -267,7 +269,7 @@ static void ft_update_filetree_data(struct editor_input_context *ctx,
 
 
 
-// ctxの状態を使ってfiletree_dataの左側境界と開いている項目を標準画面へ描き、項目の画面行を更新する。
+// filetree_dataの枠内を消して境界線を描き、項目の画面座標を振り直してからft_draw_filetree_dataで項目を描く。
 // 返り値: 常に0。枠が小さい、またはルート未設定なら描画しない。
 int draw_filetree(struct editor_input_context *ctx,file_tree_data *filetree_data){
     struct box box = filetree_data->ft_box;
@@ -295,9 +297,9 @@ int draw_filetree(struct editor_input_context *ctx,file_tree_data *filetree_data
     }
     
     // 画面行は描画のたびに振り直す。-1のまま残った項目は画面外で、クリック判定に当たらない。
-    for(int i = 0;i < filetree_data->open_count_num;i++){
-        filetree_data->open_check_data[i].screen_y = -1;
-        filetree_data->open_check_data[i].scree_x = -1;
+    for(int i = 0;i < filetree_data->item_view_count_num;i++){
+        filetree_data->item_view_data[i].screen_y = -1;
+        filetree_data->item_view_data[i].screen_x = -1;
     }
 
     int file_h = 1;
@@ -324,39 +326,100 @@ static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer){
 
 
 int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_tree_data){
-    struct editor_state *state = ctx->state;
     
-    int draw_item_num = file_tree_data->open_count_num;
+    (void)ctx;
 
-    //ファイルツリー内に表示する要素数を決める
-    draw_item_num = (draw_item_num > (state->file_tree_data.ft_box.h))
-        ?state->file_tree_data.ft_box.h:draw_item_num;
+   
+    struct box ft_box = file_tree_data->ft_box;
 
-    struct box ft_box = state->file_tree_data.ft_box;
+    //アイテムの表示数制限
+    int item_view_num = (ft_box.h - 1 < file_tree_data->item_view_count_num)
+        ?ft_box.h - 1:file_tree_data->item_view_count_num;
 
-    
-    char *tmp_abs_path_list[draw_item_num];
-    memset(tmp_abs_path_list,NULL,draw_item_num * sizeof(char *));
 
-    
     int i = 0;
-    while(i < draw_item_num){
-        ft_path_open_check_data *tmp_open_check_data = &file_tree_data->open_check_data[i];
-        //ファイルツリーの横幅内に名前表示を抑えるガード
-        int draw_name_len = (ft_box.w - 1) - file_tree_data->open_check_data[i].scree_x;
-        if(draw_name_len <= 0){
-            continue;
+    while(i < item_view_num){
+        ft_item_view_data *tmp_view_data = &file_tree_data->item_view_data[i];
+        int name_len_max = (ft_box.w - 1) - (tmp_view_data->screen_x);
+
+        const char *ext_icon = 
+            get_file_ext_code(
+                tmp_view_data->table_ptr->absolute_path,
+                &ctx->state->settings_data->icon_data
+            );
+
+        if(tmp_view_data->table_ptr->s_data.d_type == DT_DIR){
+            
+            const char *dir_open_state_icon;
+            if(tmp_view_data->is_open){
+                dir_open_state_icon = FILE_TREE_ICON_OPEN;
+            }
+            else{
+                dir_open_state_icon = FILE_TREE_ICON_CLOSE;
+            }
+            
+            mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x - 1,dir_open_state_icon);
         }
-        
+
+        mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x,ext_icon);
+
         mvaddnstr(
-            ft_box.pos.y + i,
-            ft_box.pos.x + 1,
-            tmp_open_check_data->table_ptr->s_data.d_name,
-            draw_name_len
+            tmp_view_data->screen_y,
+            tmp_view_data->screen_x + 1,
+            tmp_view_data->table_ptr->s_data.d_name,
+            name_len_max
         );
         i++;
     }
 
-
+    
     return 0;
 }
+
+
+int ft_get_same_layer_item_view_data(file_tree_data *file_tree_data,int layer,
+                                    ft_item_view_data ***item_view_data,int *item_view_num){
+    if(layer < 0 || file_tree_data == NULL || 
+        item_view_data == NULL || item_view_num == NULL){
+        return -1;
+    }
+
+
+    //仮配列
+    ft_item_view_data *tmp_item_view_data_list[file_tree_data->item_view_count_num];
+    int tmp_item_view_data_count = 0;
+
+    for(int i = file_tree_data->draw_file_member_start_num;i < file_tree_data->item_view_count_num;i++){
+        ft_item_view_data *tmp_item_view_data = &file_tree_data->item_view_data[i];
+
+        if(tmp_item_view_data->layer == layer){
+            tmp_item_view_data_list[tmp_item_view_data_count] = tmp_item_view_data;
+            tmp_item_view_data_count++;
+        }
+    }
+    
+    if(tmp_item_view_data_count <= 0){
+        *item_view_num = 0;
+        *item_view_data = NULL;
+        return 0;
+    }
+
+    ft_item_view_data **layer_item_view_data = malloc(sizeof(ft_item_view_data *) * tmp_item_view_data_count);
+    if(layer_item_view_data == NULL){
+        *item_view_num = 0;
+        *item_view_data = NULL;
+        error_log("malloc error");
+        return -1;
+    }
+
+    
+    for(int i = 0;i < tmp_item_view_data_count;i++){
+        layer_item_view_data[i] = tmp_item_view_data_list[i];
+    }
+
+    *item_view_data = layer_item_view_data;
+    *item_view_num = tmp_item_view_data_count;
+
+    return tmp_item_view_data_count;
+}
+

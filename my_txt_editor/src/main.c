@@ -565,9 +565,9 @@ int main(int argc, char *argv[])
     }
 
 
-    if(state.file_tree_data.open_check_data != NULL){
-        free(state.file_tree_data.open_check_data);
-        state.file_tree_data.open_check_data = NULL;
+    if(state.file_tree_data.item_view_data != NULL){
+        free(state.file_tree_data.item_view_data);
+        state.file_tree_data.item_view_data = NULL;
     }
     if(state.edit_input_complete_data.word_data.world_allocate_num > 0){
         for(int i = 0;i < state.edit_input_complete_data.word_data.world_allocate_num;i++){

@@ -59,5 +59,13 @@ enum screen_state{
 
 typedef enum screen_state screen_state;
 
+// ファイルブラウザで判定した項目種別。
+enum select_state{
+    file,  // 通常ファイル。
+    folder,// ディレクトリ。
+    unkown,// 種別を判定できない項目。
+    error, // stat等の判定処理に失敗した状態。
+};
+
 
 #endif

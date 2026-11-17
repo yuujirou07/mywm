@@ -8,7 +8,9 @@
 #include <wchar.h>
 #include <wctype.h>
 #include <dirent.h>
-#include <limits.h>
+
+
+
 #include"default_settings.h"
 #include "editor_commands.h"
 #include "kbd_input_log.h"
@@ -111,16 +113,6 @@ struct file_data{
     long    file_total_str_size;  //ファイル内の合計文字数
     bool    is_open_file;         // ファイルを開いて編集しているならtrue。
 };
-
-// ファイルブラウザで判定した項目種別。
-enum select_state{
-    file,  // 通常ファイル。
-    folder,// ディレクトリ。
-    unkown,// 種別を判定できない項目。
-    error, // stat等の判定処理に失敗した状態。
-};
-
-
 
 
 
@@ -272,7 +264,7 @@ struct editor_state {
     struct screen_state_log    screen_log; // 現在状態を末尾に持つ画面遷移履歴。
     settings_screen_data       settings_screen_data; // 設定画面の項目、選択、入力状
     editor_command_mode_data   command_mode_data;//コマンドモードデータ      
-    file_tree_data             file_tree_data; // ファイルツリーの形状、所有ツリー、開閉状態。
+    file_tree_data             file_tree_data; // ファイルツリーの形状、所有ツリー、項目の表示状態。
     edit_input_complete_data   edit_input_complete_data;//入力補完データ
     key_bord_data              key_bord_data; //入力関連データ
     int                        render_flags; // update_screen()へ渡す再描画要求。
@@ -695,89 +687,9 @@ static inline bool editor_move_cursor_line(struct editor_state *state, int delta
     return true;
 }
 
-// 罫線を全体描画するか、スクロールで欠けた部分だけ補修するかを指定する。
-enum line_mode {
-    all_draw_mode, // 始点から終点まで罫線を描き直す。
-    fix_scr_line_damage, // スクロールで破損した罫線だけを補修する。
-};
-
-// editor_draw.c
-void draw_editor_buffer_line(struct editor_state *state, int line, int write_y);
-void draw_line_numbers(struct editor_state *state);
-void draw_line(struct pos start_pos,struct pos end_pos,enum line_mode mode);
-void draw_box(struct box box);
-void request_draw_box(struct editor_state *state,struct box box);
-void draw_now_path_name(struct box file_browse_box,char *path_name);
-void draw_edit_screen_base(struct editor_state *state,WINDOW *win,struct pos start_pos,struct pos end_pos);
-void draw_box_inside_dir(struct editor_state *state,struct dir_entry *table);
-void draw_select_dir_scene_color(struct editor_state *state,int dir_num,int num);
-void show_file_browse(struct editor_state *state);
-void set_file_select_line(struct editor_state *state,int dir_num,int line);
-void editor_screen_move_line(struct editor_input_context *ctx,int num);
-void editor_error_screen(struct editor_state *state,char *error_comment);
-void draw_file_data(struct editor_state *state);
-void draw_status_bar_line(struct editor_state *state,struct box status_bar);
-void draw_status_bar_path(struct editor_state *state);
-void clear_box(struct clear_box_data *clear_box);
-void draw_line_status(struct editor_state *state,WINDOW *win);
-void update_screen(struct editor_input_context *ctx);
-void request_clear_box(struct editor_state *state, struct box box);
-void draw_line_jump(struct editor_state *state);
-void draw_make_file_dialog(struct editor_input_context *ctx);
-void draw_file_browse(struct editor_input_context *ctx);
-int set_clear_box(struct clear_box_data *clear_box_data,struct box box);
-int clear_status_bar_outline(struct editor_state *state);
-int clear_box_area(struct editor_input_context *ctx,struct box b);
-struct box complete_box_screen(struct editor_state *state);
-int draw_editor_complete_word_box(struct editor_input_context *ctx);
-int draw_edit_complete_world(struct editor_state *state);
-int redraw_write_area_line_str(struct editor_state *state,uint16_t line,uint16_t size);
-
-// editor_file.c
-int load_dir_table(struct editor_state *state,struct dir_entry **table,int *table_rows,char *path_name,int start_num,int *dir_num,int *table_num);
-void load_file(struct editor_state *state,struct dir_entry *table,int table_num,char *path_name,struct file_browse_select_state *select_state);
-bool editor_alloc_text_buffer(struct editor_state *state, int line_count, long total_capacity);
-void editor_free_text_buffer(struct editor_state *state);
-bool editor_ensure_line_cap(struct editor_state *state, int line, int need);
-bool editor_ensure_row_capacity(struct editor_state *state, int need_rows);
-void set_line_memory(struct editor_state *state);
-void load_string_data(struct editor_state *state,long load_start_line,int load_size);
-void load_all_lines(struct editor_state *state);
-char *editor_buffer_to_utf8(struct editor_state *state);
-void save_file(struct editor_state *state);
-void load_screen_size(struct editor_state *state);
-void load_default_editor_settings(struct editor_settings *settings_data);
-void load_custom_editor_settings(struct editor_settings *settings_data);
-void file_select_line_update(struct file_select_line *file_select_line,int line);
-void input_mode_tmp_path(char *path,enum flags flags);
-const wchar_t *now_open_path_name(struct dir_table *path,enum flags flags);
-int check_dir_mem(struct dir_table *dir_table,int size);
-enum select_state get_path_state(const char *path);
-int now_input_path_open(struct editor_state *state,struct editor_input_context *ctx);
-int file_browser_show_mem_start_num(int start_num,enum flags flags);
-
-// editor_func.c
-void resize_file_browser(struct editor_state *state);
-void handle_resize(WINDOW *win, struct editor_input_context *ctx);
-void handle_backspace(struct editor_input_context *ctx);
-void handle_newline(struct editor_input_context *ctx);
-void handle_tab(WINDOW *win, struct editor_state *state);
-void handle_char_input(WINDOW *win, wchar_t ch, struct editor_state *state);
-void handle_input_allow(struct editor_input_context *ctx,wchar_t ch);
-int remove_line_join_str_data(struct editor_state *state,long remove_line_num);
-int make_new_line_space(struct editor_state *state,long make_space_line_num);
-void set_file_browse_path_input_mode(struct file_browse_state *file_browse,bool flag);
-bool get_file_browse_path_input_mode(struct file_browse_state *file_browse);
-void my_cur_set(struct editor_state *state,bool set);
-int init_input_context(struct editor_input_context *ctx,struct editor_state *state);
-int init_settings_data(struct editor_input_context *ctx);
-int editor_set_env_lang(struct editor_input_context *ctx,language lang);
-int env_language_ctl(language *lang,enum flags flags);
-language get_env_language();
-
-
-
-double comb_time_interval_ms(struct timespec t1,struct timespec t2);
+#include "editor_draw.h"
+#include "editor_file.h"
+#include "editor_func.h"
 
 // screen_state/editor_edit_screen.c
 int editor_input_str(struct editor_state *state,wchar_t *str);
@@ -792,4 +704,5 @@ int SetCursorMode(struct editor_state *state,CURSOR_MODE CurMode);
 int SetCursorColor(struct editor_state *state,CURSOR_COLOR color);
 
 int SetCursorModeScreen(struct editor_state *state,screen_state screen_state);
+
 #endif

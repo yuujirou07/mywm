@@ -621,8 +621,7 @@ int clear_box_area(struct editor_input_context *ctx,struct box b){
     if(b.h <= 2 || b.w <= 2)return -1;
     attr_t clear_attr = COLOR_PAIR(get_color_pair(ctx,COLOR_WHITE,COLOR_BLACK));
     for(int i = 0;i < b.h;i++){
-        // 本文色で塗る。b.w-1にして右端の枠線列は残す。
-        mvhline(b.pos.y + i,b.pos.x,L' '|clear_attr,b.w - 1);
+        mvhline(b.pos.y + i,b.pos.x,L' '|clear_attr,b.w );
     }
     return 0;
 }

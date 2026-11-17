@@ -1,6 +1,6 @@
 CC ?= gcc
 
-CFLAGS ?= -Wall -Wextra -g3 -O2
+CFLAGS ?= -Wall -Wextra -g3 -O0
 CFLAGS += -fsanitize=address -fno-omit-frame-pointer
 CFLAGS += -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600 -I./include -I./include/lsp_src
 
