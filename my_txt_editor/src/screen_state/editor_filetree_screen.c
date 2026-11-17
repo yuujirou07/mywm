@@ -76,8 +76,11 @@ ft_item_view_data *get_filetree_item_data(file_tree_data *file_tree,
         int new_allocate_num = (file_tree->item_view_data_allocate_num > 0)
             ?file_tree->item_view_data_allocate_num * 2 : 1;
 
-        new_data = realloc(file_tree->item_view_data,
-            sizeof(ft_item_view_data) * new_allocate_num);
+        new_data 
+            = realloc(
+            file_tree->item_view_data,
+            sizeof(ft_item_view_data) * new_allocate_num
+            );
             
         if(new_data == NULL)return NULL;
         file_tree->item_view_data_allocate_num = new_allocate_num;

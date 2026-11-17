@@ -6,7 +6,6 @@
 #include <dirent.h>
 #include <limits.h>
 #include <stddef.h>
-#include<stdio.h>
 #include<sys/stat.h>
 #include<string.h>
 #include<stdlib.h>
