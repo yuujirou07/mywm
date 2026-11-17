@@ -231,13 +231,13 @@ int editor_input_str(struct editor_state *state,wchar_t *str){
 void draw_edit_screen_base(struct editor_state *state,WINDOW *win,struct pos start_pos,struct pos end_pos){
     draw_line_numbers(state);
     if(state->settings_data->draw_split_line){
-        draw_line(start_pos,end_pos,win,all_draw_mode);
+        draw_line(start_pos,end_pos, all_draw_mode);
     }
     if(state->settings_data->show_status_bar){
         // draw_status_bar_path()はステータスバー行を丸ごと塗り直すため、
         // 行ステータスより先に描かないと"N/M"が消える。
-        draw_status_bar_line(state,*state->status_bar,win);
-        draw_status_bar_path(state,win);
+        draw_status_bar_line(state,*state->status_bar);
+        draw_status_bar_path(state);
         draw_line_status(state,win);
     }
 }

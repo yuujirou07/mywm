@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
-
+#include<ncurses.h>
 
 
 
@@ -136,17 +136,21 @@ void draw_line_numbers(struct editor_state *state) {
     }
 }
 
-// 画面のstart_posからend_pos方向の水平・垂直罫線を、modeに応じて全描画または補修する。winは未使用。
+// 画面のstart_posからend_pos方向の水平・垂直罫線を、modeに応じて全描画または補修する。
 // 返り値: なし。全描画は終点を除き、座標の増加方向に描くため始点は左または上に置く。斜線は描かない。
-void draw_line(struct pos start_pos,struct pos end_pos,WINDOW *win,enum line_mode mode){
-    (void)win;
+void draw_line(struct pos start_pos,struct pos end_pos,enum line_mode mode){
 
     int range;
     int step_x;
     int step_y;
     chtype line_ch;
 
-    if(!line_draw_info(start_pos, end_pos, &range, &step_x, &step_y, &line_ch)){
+    if(!line_draw_info(
+        start_pos, end_pos,
+        &range,
+        &step_x,
+        &step_y,
+        &line_ch)){
         return;
     }
 
@@ -187,7 +191,7 @@ static chtype box_joint_chr(chtype corner, chtype existing){
 
 // 画面上のboxの枠と四隅を描き、既存罫線に重なる角は接続用文字へ置き換える。
 // 返り値: なし。幅・高さが0以下なら描かず、winにかかわらず標準画面へ描く。
-void draw_box(struct box box, WINDOW *win){
+void draw_box(struct box box){
 
     int x = box.pos.x;
     int y = box.pos.y;
@@ -208,10 +212,10 @@ void draw_box(struct box box, WINDOW *win){
     chtype corner_ll = box_joint_chr(ACS_LLCORNER,box_existing_chr(y + h - 1, x));
     chtype corner_lr = box_joint_chr(ACS_LRCORNER,box_existing_chr(y + h - 1, x + w - 1));
 
-    draw_line(top_left,    bottom_left,  win, all_draw_mode);
-    draw_line(top_right,   bottom_right, win, all_draw_mode);
-    draw_line(top_left,    top_right,    win, all_draw_mode);
-    draw_line(bottom_left, bottom_right, win, all_draw_mode);
+    draw_line(top_left,    bottom_left, all_draw_mode);
+    draw_line(top_right,   bottom_right, all_draw_mode);
+    draw_line(top_left,    top_right, all_draw_mode);
+    draw_line(bottom_left, bottom_right, all_draw_mode);
 
     mvaddch(y,         x,         corner_ul);
     mvaddch(y,         x + w - 1, corner_ur);
@@ -222,11 +226,11 @@ void draw_box(struct box box, WINDOW *win){
 
 // queueの矩形全体を消去してから枠を順に描き、件数を0へ戻す。
 // 引数: ctx=色表を持つcontext、queue=有効な枠キュー、win=枠描画関数へ渡すウィンドウ。返り値: なし。
-static void flush_box_queue(struct editor_input_context *ctx,struct box_queue *queue, WINDOW *win){
+static void flush_box_queue(struct editor_input_context *ctx,struct box_queue *queue){
 
     for(int i = 0; i < queue->count; i++){
         clear_box_area(ctx,queue->box[i]);
-        draw_box(queue->box[i], win);
+        draw_box(queue->box[i]);
     }
     queue->count = 0;
 }
@@ -278,16 +282,16 @@ void editor_screen_move_line(struct editor_input_context *ctx,int num){
 
 // ステータスバーの横線と区切り接続部を描画する。
 // 引数: state=書き込み領域、status_bar=描画するバー領域、win=描画先ウィンドウ。 返り値: なし。
-void draw_status_bar_line(struct editor_state *state,struct box status_bar,WINDOW *win){
+void draw_status_bar_line(struct editor_state *state,struct box status_bar){
     struct pos end_pos = (struct pos){status_bar.pos.x + status_bar.w - 1,status_bar.pos.y};
     clear_status_bar_outline(state);
-    draw_line(status_bar.pos,end_pos,win,all_draw_mode);
+    draw_line(status_bar.pos,end_pos, all_draw_mode);
     mvaddch(status_bar.pos.y,state->write_area.x_start-1,ACS_TTEE);
 }
 
 // ステータスバー中央に現在開いているファイル名を描画する。
-// 引数: state=ファイルパスとステータスバー設定、win=描画先ウィンドウ。 返り値: なし。
-void draw_status_bar_path(struct editor_state *state, WINDOW *win){
+// 引数: state=ファイルパスとステータスバー設定。 返り値: なし。
+void draw_status_bar_path(struct editor_state *state){
     if(!state->settings_data->show_status_bar){
         return;
     }
@@ -324,7 +328,7 @@ void draw_status_bar_path(struct editor_state *state, WINDOW *win){
         mvhline(status_y, state->status_bar->pos.x, ' ', state->status_bar->w);
     }
     else{
-        draw_status_bar_line(state, *state->status_bar, win);
+        draw_status_bar_line(state, *state->status_bar);
     }
     mvaddnstr(status_y, draw_x, draw_path, draw_len);
 }
@@ -386,7 +390,7 @@ void update_screen(struct editor_input_context *ctx){
             clear_box(&state->clear_box_data);
         }
         if(flags & RENDER_STATUS_BAR_LINE){
-            draw_status_bar_line(state, *state->status_bar, win);
+            draw_status_bar_line(state, *state->status_bar);
         }
 
         if(flags & RENDER_LINE_STATUS){
@@ -411,7 +415,7 @@ void update_screen(struct editor_input_context *ctx){
         }
         if(flags & RENDER_LINE){
             draw_line(ctx->edit_screen.line_start_pos,
-                      ctx->edit_screen.line_end_pos, win, all_draw_mode);
+                      ctx->edit_screen.line_end_pos, all_draw_mode);
         }
         if(flags & RENDER_SELECT_DIR_SCENE_COLOR){
             draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,get_color_pair(ctx,COLOR_BLACK,COLOR_WHITE));
@@ -429,7 +433,7 @@ void update_screen(struct editor_input_context *ctx){
             draw_file_browse(ctx);
         }
         if(flags & RENDER_BOX){
-            flush_box_queue(ctx,&state->draw_box_queue, win);
+            flush_box_queue(ctx,&state->draw_box_queue);
         }
         if(flags & RENDER_LINE_JUMP){
            draw_line_jump(state);
@@ -605,7 +609,7 @@ int draw_editor_complete_word_box(struct editor_input_context *ctx){
         }
     }
     clear_box_area(ctx,complete_box_screen(state));
-    draw_box(complete_box_screen(state),stdscr);
+    draw_box(complete_box_screen(state));
     state->render_flags |= RENDER_BOX;
     return 0;
 }

@@ -1,6 +1,10 @@
 
 #include <ncurses.h>
 #include<stdlib.h>
+#include<string.h>
+
+
+
 #include "editor_types.h"
 #include "editor_log.h"
 #include "filetree.h"
@@ -9,7 +13,7 @@
 #include "editor_color.h"
 #include "editor_screen.h"
 
-
+static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer);
 
 // pathを起点とするツリーと直下項目の開閉状態を、未確保のfile_treeへ作成する。
 // 返り値: 成功0、作成・確保失敗-1。成功後は呼び出し側でroot_nodeをclose_treeし、open_check_dataをfreeする。
@@ -40,6 +44,7 @@ int get_root_file_tree_data(file_tree_data *file_tree,char *path){
         file_tree->open_check_data[i].is_open = false;
         file_tree->open_check_data[i].indent_num = 0;
         file_tree->open_check_data[i].screen_y = -1;
+        file_tree->open_check_data[i].scree_x = -1;
     }
 
     return 0;
@@ -49,6 +54,7 @@ int get_root_file_tree_data(file_tree_data *file_tree,char *path){
 // 返り値: 内部要素の借用ポインタ、確保失敗NULL。後の追加で再確保されると以前の返値は無効になり得る。
 ft_path_open_check_data *get_filetree_item_data(file_tree_data *file_tree,
                                                 struct table *table_ptr){
+
     for(int i = 0;i < file_tree->open_count_num;i++){
         if(file_tree->open_check_data[i].table_ptr == table_ptr){
             return &file_tree->open_check_data[i];
@@ -77,6 +83,7 @@ ft_path_open_check_data *get_filetree_item_data(file_tree_data *file_tree,
     new_data[new_count - 1].is_open = false;
     new_data[new_count - 1].indent_num = 0;
     new_data[new_count - 1].screen_y = -1;
+    new_data[new_count - 1].scree_x = -1;
     new_data[new_count - 1].drawing_data_num = 0;
     new_data[new_count - 1].draw_file_member_start_num = 0;
     return &new_data[new_count - 1];
@@ -217,7 +224,7 @@ int change_file_tree_width(struct editor_input_context *ctx,int width){
 
 // ctx/filetree_dataのtable_num件のtableを再帰描画し、開いた子も表示する。layerは深さ、*file_hは次の相対行。
 // 返り値: なし。*file_hと各項目の画面行を更新し、枠の下端・項目情報の確保失敗で打ち切る。
-static void draw_filetree_items(struct editor_input_context *ctx,
+static void ft_update_filetree_data(struct editor_input_context *ctx,
                                 file_tree_data *filetree_data,
                                 struct table *table,int table_num,
                                 int layer,int *file_h){
@@ -232,47 +239,33 @@ static void draw_filetree_items(struct editor_input_context *ctx,
             get_filetree_item_data(filetree_data,&table[i]);
         if(item_data == NULL)return;
 
-        const int y = box.pos.y + *file_h;
-        const int x = box.pos.x + 1 + layer * 2;
-
-        item_data->indent_num = layer;
-        item_data->screen_y = y;
+        //名前を表示するファイルツリーのy座標
+        //要素の名前を表示する際のx座標
+        //ファイルツリー内のiの要素の名前を描画する座標を返す
+        struct pos item_name_pos = ft_get_item_name_pos(box,*file_h,layer);
         
-        //ディレクトリか判定し、そのディレクトリの開閉状態を判断し、
-        //閉じているアイコンか開いているアイコンを表示する
-        if(table[i].s_data.d_type == DT_DIR && x < box.pos.x + box.w){
-            mvaddstr(y,x,item_data->is_open ? "\u2304" : ">");
-        }
-
-        //パスをstatで確認しファイルやディレクトリの
-        //アイコンを返す
-        const char *ext_icon_code 
-            = get_file_ext_code(
-                table[i].absolute_path,
-                &ctx->state->settings_data->icon_data
-            );
-
-        if(x + 1 < box.pos.x + box.w){
-            mvaddnstr(y,x + 1,ext_icon_code,box.pos.x + box.w - x - 1);
-        }
-
-        int name_x = x + 3;
-        int name_len = box.pos.x + box.w - name_x;
-        if(name_len > 0){
-            mvaddnstr(y,name_x,table[i].s_data.d_name,name_len);
-        }
+        
+        //取得した名前の座標をitemに代入する
+        item_data->indent_num = layer;
+        item_data->screen_y = item_name_pos.y;
+        item_data->scree_x = item_name_pos.x;
+        
 
         //表示されているデータの個数カウント
         filetree_data->open_check_data->drawing_data_num = (*file_h)++;
 
+        //iの要素がディレクトリかつ、is_openで展開判定になっていたら
+        //i番目のテーブルにそのディレクトリ内の要素のデータをつける
         if(table[i].s_data.d_type == DT_DIR && item_data->is_open){
             if(load_child_dir(&table[i]) == 0){
-                draw_filetree_items(ctx,filetree_data,table[i].c_table,
+                ft_update_filetree_data(ctx,filetree_data,table[i].c_table,
                                     table[i].c_table_num,layer + 1,file_h);
             }
         }
     }
 }
+
+
 
 // ctxの状態を使ってfiletree_dataの左側境界と開いている項目を標準画面へ描き、項目の画面行を更新する。
 // 返り値: 常に0。枠が小さい、またはルート未設定なら描画しない。
@@ -283,30 +276,87 @@ int draw_filetree(struct editor_input_context *ctx,file_tree_data *filetree_data
         return 0;
     }
 
-    // ツリーは編集画面の上に重ねるため、移動前の境界線も含めて消す。
-    for(int y = box.pos.y;y < box.pos.y + box.h;y++){
-        mvhline(y,box.pos.x,' ',box.w);
-    }
-    //開発用
-    filetree_data->ft_side = FT_LEFT;
+    //前に表示されていたツリーをクリアする
+    clear_box_area(ctx,box);
 
-    if(filetree_data->ft_side == FT_LEFT || filetree_data->ft_side == FT_RIGHT){
-        int wall_pos_x = (filetree_data->ft_side == FT_LEFT)
-            ?(box.pos.x + box.w):box.pos.x;
-        
+
+    //開発用
+    filetree_data->ft_side = LEFT;
+
+    //ファイルツリーの位置が左右だった場合位置におおじて枠線を設定する
+    // (ファイルツリーが左側にあった場合右に線を設定する)
+    if(filetree_data->ft_side == LEFT || filetree_data->ft_side == RIGHT){
+        int wall_pos_x = (filetree_data->ft_side == LEFT)
+            ?(box.pos.x + box.w):box.pos.x;  
+
         for(int i = box.pos.y;i < box.pos.y + box.h;i++){
             mvaddch(i,wall_pos_x,ACS_VLINE);
         }
     }
-
+    
     // 画面行は描画のたびに振り直す。-1のまま残った項目は画面外で、クリック判定に当たらない。
     for(int i = 0;i < filetree_data->open_count_num;i++){
         filetree_data->open_check_data[i].screen_y = -1;
+        filetree_data->open_check_data[i].scree_x = -1;
     }
 
     int file_h = 1;
-    draw_filetree_items(ctx,filetree_data,filetree_data->root_node->c_table,
-                        filetree_data->root_node->c_table_num,0,&file_h);
+    ft_update_filetree_data(
+        ctx,filetree_data,
+        filetree_data->root_node->c_table,
+        filetree_data->root_node->c_table_num,
+        0,
+        &file_h
+    );
+
+    ft_draw_filetree_data(ctx,filetree_data);
     
+    return 0;
+}
+
+static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer){
+    struct pos tmp_pos;
+    tmp_pos.x = ft_box.pos.x + 1 + (layer * 2);
+    tmp_pos.y = ft_box.pos.y + file_h;
+    return tmp_pos;
+}
+
+
+
+int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_tree_data){
+    struct editor_state *state = ctx->state;
+    
+    int draw_item_num = file_tree_data->open_count_num;
+
+    //ファイルツリー内に表示する要素数を決める
+    draw_item_num = (draw_item_num > (state->file_tree_data.ft_box.h))
+        ?state->file_tree_data.ft_box.h:draw_item_num;
+
+    struct box ft_box = state->file_tree_data.ft_box;
+
+    
+    char *tmp_abs_path_list[draw_item_num];
+    memset(tmp_abs_path_list,NULL,draw_item_num * sizeof(char *));
+
+    
+    int i = 0;
+    while(i < draw_item_num){
+        ft_path_open_check_data *tmp_open_check_data = &file_tree_data->open_check_data[i];
+        //ファイルツリーの横幅内に名前表示を抑えるガード
+        int draw_name_len = (ft_box.w - 1) - file_tree_data->open_check_data[i].scree_x;
+        if(draw_name_len <= 0){
+            continue;
+        }
+        
+        mvaddnstr(
+            ft_box.pos.y + i,
+            ft_box.pos.x + 1,
+            tmp_open_check_data->table_ptr->s_data.d_name,
+            draw_name_len
+        );
+        i++;
+    }
+
+
     return 0;
 }

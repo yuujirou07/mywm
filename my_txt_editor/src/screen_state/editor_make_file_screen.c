@@ -128,7 +128,6 @@ int file_save_motion(struct editor_input_context *ctx){
 // 引数: ctx=画面状態・配置基準・描画先を持つ入力context。 返り値: なし。入力画面ではカーソル反映位置と入力欄の矩形も更新する。
 void draw_make_file_dialog(struct editor_input_context *ctx){
     struct editor_state *state = ctx->state;
-    WINDOW *win = ctx->win;
 
     if(!state->make_file_mode_status.is_input_scene){
         char comment[] = "The file cannot be found; would you like to create it?";
@@ -146,7 +145,7 @@ void draw_make_file_dialog(struct editor_input_context *ctx){
         struct pos text_pos = {box.pos.x + 1, box.pos.y + 1};
 
         state->ask_make_file_box = box;
-        draw_box(box, win);
+        draw_box(box);
         my_mvaddstr(text_pos, comment);
         mvaddstr(text_pos.y + 1, text_pos.x + box.w / 2 - (int)strlen("YES[y]") - 2, "YES[y]");
         mvaddstr(text_pos.y + 1, text_pos.x + box.w / 2 + 2, "NO[n]");
@@ -174,8 +173,8 @@ void draw_make_file_dialog(struct editor_input_context *ctx){
     };
 
     clear_box(&clear_data);
-    draw_box(write_box, win);
-    draw_box(input_box, win);
+    draw_box(write_box);
+    draw_box(input_box);
     mvaddstr(write_box.pos.y + 1, label_x, label);
     mvaddnstr(input_box.pos.y + 1, input_box.pos.x + 1,
                state->make_file_mode_status.new_file_name,

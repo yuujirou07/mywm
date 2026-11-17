@@ -207,7 +207,7 @@ void draw_settings_screen(struct editor_input_context *ctx){
     struct editor_state *state = ctx->state;
     settings_screen_data st_scr_data = state->settings_screen_data;
 
-    draw_box(st_scr_data.box,ctx->win);
+    draw_box(st_scr_data.box);
     draw_settings_title(ctx,st_scr_data.box);
 
     int item_num = st_scr_data.settings_item_data_num;
@@ -292,7 +292,7 @@ int draw_settings_search_box(struct editor_input_context *ctx){
 
     struct pos search_box_pos = (struct pos){st_scr_data.box.pos.x,st_scr_data.box.pos.y - 3};
     struct box search_box = {search_box_pos,st_scr_data.box.w,3};
-    draw_box(search_box,ctx->win);
+    draw_box(search_box);
     int input_w = search_box.w - 2;
     if(input_w <= 0)return -1;
 
@@ -373,7 +373,7 @@ void draw_settings_explanation_box(struct editor_input_context *ctx){
     }
 
     struct box explanation_box = {explanation_pos,area_w,area_h};
-    draw_box(explanation_box,ctx->win);
+    draw_box(explanation_box);
     draw_explanation_str(st_scr_data.item_data[st_scr_data.select_line].explanation,
         explanation_box);
     move(set_mouse_pos_y,set_mouse_pos_x);

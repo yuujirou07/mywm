@@ -704,8 +704,8 @@ enum line_mode {
 // editor_draw.c
 void draw_editor_buffer_line(struct editor_state *state, int line, int write_y);
 void draw_line_numbers(struct editor_state *state);
-void draw_line(struct pos start_pos,struct pos end_pos,WINDOW *win,enum line_mode mode);
-void draw_box(struct box box,WINDOW *win);
+void draw_line(struct pos start_pos,struct pos end_pos,enum line_mode mode);
+void draw_box(struct box box);
 void request_draw_box(struct editor_state *state,struct box box);
 void draw_now_path_name(struct box file_browse_box,char *path_name);
 void draw_edit_screen_base(struct editor_state *state,WINDOW *win,struct pos start_pos,struct pos end_pos);
@@ -716,8 +716,8 @@ void set_file_select_line(struct editor_state *state,int dir_num,int line);
 void editor_screen_move_line(struct editor_input_context *ctx,int num);
 void editor_error_screen(struct editor_state *state,char *error_comment);
 void draw_file_data(struct editor_state *state);
-void draw_status_bar_line(struct editor_state *state,struct box status_bar,WINDOW *win);
-void draw_status_bar_path(struct editor_state *state, WINDOW *win);
+void draw_status_bar_line(struct editor_state *state,struct box status_bar);
+void draw_status_bar_path(struct editor_state *state);
 void clear_box(struct clear_box_data *clear_box);
 void draw_line_status(struct editor_state *state,WINDOW *win);
 void update_screen(struct editor_input_context *ctx);

@@ -11,11 +11,6 @@
 //ファイルツリーのダブルクリックでのリサイズ設定falseならシングルっクリックでリサイズイベントが発生する
 #define FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE false
 
-// ファイルツリーを接続する画面端。
-typedef enum{
-    FT_LEFT, // 画面左端。
-    FT_RIGHT, // 画面右端。
-}filetree_side;
 
 struct ft_path_click_data;
 struct editor_input_context;
@@ -26,6 +21,7 @@ typedef struct{
     bool is_open; // ディレクトリの子要素を展開中ならtrue。
     int indent_num; // ルート直下を0とするツリー階層。
     int screen_y; // 直近の描画先となる画面y座標。非表示なら-1。
+    int scree_x; // 直近の描画先となる画面x座標(項目先頭)。非表示なら-1。
     int drawing_data_num;//ファイルツリーに表示しているメンバ数
     int draw_file_member_start_num;//ファイルツリーに表示するメンバの開始数
 }ft_path_open_check_data;
@@ -46,7 +42,7 @@ typedef struct{
     bool is_show; // ファイルツリーを表示中ならtrue。編集領域を右へ寄せる幅の計算に使う。
     bool is_grabed; // 枠線をマウスで掴み、幅を変更中ならtrue。
     ft_outline_click_data outline_click_data;//枠線のクリック判定 ダブルクリックなどマウスでのサイズ変更イベントに使う
-    filetree_side ft_side; // ファイルツリーを接続する画面端。
+    side ft_side; // ファイルツリーを接続する画面端。
 }file_tree_data;
 
 
@@ -63,4 +59,5 @@ void show_filetree(struct editor_input_context *ctx,struct box ft_box);
 void hide_filetree(struct editor_input_context *ctx);
 
 
+int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_tree_data);
 #endif

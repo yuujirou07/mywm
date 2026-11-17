@@ -497,7 +497,7 @@ void set_file_select_line(struct editor_state *state,int dir_num,int line){
 // 引数: search_box=枠線を含む描画領域、win=描画先ウィンドウ。 返り値: なし。winがNULLなら何もしない。
 static void draw_search_box(struct box search_box,WINDOW *win){
     if(win == NULL)return;
-    draw_box(search_box,win);
+    draw_box(search_box);
     mvaddch(search_box.pos.y,search_box.pos.x,ACS_LTEE);
     mvaddch(search_box.pos.y,search_box.pos.x + search_box.w -1,ACS_RTEE);
 }
@@ -506,11 +506,10 @@ static void draw_search_box(struct box search_box,WINDOW *win){
 // 引数: ctx=状態と描画先を持つ入力context。 返り値: なし。
 void draw_file_browse(struct editor_input_context *ctx){
     struct editor_state *state = ctx->state;
-    WINDOW *win = ctx->win;
     //ブラウザ画面を後ろのコードが見えないように消す
     set_clear_box(&state->clear_box_data,state->file_browse.box);
     clear_box(&state->clear_box_data);
-    draw_box(state->file_browse.box, win);
+    draw_box(state->file_browse.box);
     draw_now_path_name(state->file_browse.box,
                        state->file_browse.path_name);
     draw_box_inside_dir(state, state->file_browse.dir_name_table);

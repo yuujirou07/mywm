@@ -14,6 +14,13 @@ typedef enum{
 }language;
 
 
+typedef enum{
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT,
+}side;
+
 
 // 呼び出し側が定める座標系上の2次元位置。
 struct pos {
