@@ -343,7 +343,6 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
     int i = 0;
     while(i < item_view_num){
         ft_item_view_data *tmp_view_data = &file_tree_data->item_view_data[i];
-        int name_len_max = (ft_box.w - 1) - (tmp_view_data->screen_x - 1);
 
         const char *ext_icon =
             get_file_ext_code(
@@ -364,12 +363,15 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             
             mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x - 1,dir_open_state_icon);
         }
+        
+        int name_len_max = (ft_box.w - 1) - (tmp_view_data->screen_x - 1);
+
 
         mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x,ext_icon);
 
         mvaddnstr(
             tmp_view_data->screen_y,
-            tmp_view_data->screen_x + 1,
+            tmp_view_data->screen_x,
             tmp_view_data->table_ptr->s_data.d_name,
             name_len_max
         );
