@@ -37,6 +37,12 @@ SRC := src/main.c \
 	src/plugin_src/edit_input_complete.c \
 	src/public_settings_src/c_settings_src.c/c_settings_settings.c
 
+PLUGIN_OUT := editor_settings/so_file/start_menu_plug.so
+PLUGIN_SRC := src/plugin_src/start_menu_plug.c \
+	src/plugin_src/ascii_art_comb.c \
+	src/editor_log.c \
+	src/path_util.c
+
 SETTINGS_OUT := editor_settings/so_file/settings.so
 SETTINGS_SRC := editor_settings/src/settings.c \
 	editor_settings/settings_libs/src/sh.c
@@ -47,7 +53,12 @@ DEP := $(OBJ:.o=.d)
 
 .PHONY: all run clean rebuild
 
-all: $(OUT) $(SETTINGS_OUT)
+all: $(OUT) $(PLUGIN_OUT) $(SETTINGS_OUT)
+
+$(PLUGIN_OUT): $(PLUGIN_SRC)
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -shared -fPIC $^ -lncursesw -o $@
+	@echo "Build OK: $@"
 
 $(SETTINGS_OUT): $(SETTINGS_SRC)
 	@mkdir -p $(@D)
@@ -67,7 +78,7 @@ run: $(OUT)
 	./$(OUT)
 
 clean:
-	rm -rf $(OBJ_DIR) $(OUT) $(SETTINGS_OUT)
+	rm -rf $(OBJ_DIR) $(OUT) $(PLUGIN_OUT) $(SETTINGS_OUT)
 
 rebuild: clean all
 

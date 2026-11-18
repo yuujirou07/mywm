@@ -11,6 +11,10 @@
 
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6e84494 (Nov 19, 2026, 4:26 AM)
 #include "editor_commands.h"
 #include "editor_types.h"
 #include "filetree.h"
@@ -448,7 +452,15 @@ void update_screen(struct editor_input_context *ctx){
 
         }
         if(flags & RENDER_COMMAND_MODE){
+<<<<<<< HEAD
             draw_command_str(ctx);
+=======
+            //入力されている文字が0以上なら文字を描画する
+            if(state->command_mode_data.command_str_data.command_str_len > 0){
+               draw_command_str(ctx);
+               
+            } 
+>>>>>>> 6e84494 (Nov 19, 2026, 4:26 AM)
         }
     }
 

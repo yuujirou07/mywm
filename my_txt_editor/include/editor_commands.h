@@ -9,8 +9,11 @@
 #include <stddef.h>
 #include <wchar.h>
 
+<<<<<<< HEAD
 /* editor.hはこのヘッダを参照しているため、ここでincludeすると循環参照になり
    プリコンパイル済みヘッダの構築に失敗する。必要な前方宣言のみ置く。 */
+=======
+>>>>>>> 6e84494 (Nov 19, 2026, 4:26 AM)
 struct editor_state;
 struct editor_input_context;
 
@@ -46,8 +49,11 @@ int cursor_set_command_mode_position(struct editor_state *state);
 
 
 int draw_command_str(struct editor_input_context *ctx);
+<<<<<<< HEAD
 
 int clear_command_str(struct editor_input_context *ctx);
+=======
+>>>>>>> 6e84494 (Nov 19, 2026, 4:26 AM)
 
 
 int backspace_command_str(struct editor_input_context *ctx);

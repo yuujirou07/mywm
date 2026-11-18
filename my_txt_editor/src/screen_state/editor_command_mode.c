@@ -57,6 +57,8 @@ int destory_command_mode(struct editor_state *state){
 
 
 bool handle_command_mode(struct editor_input_context *ctx,wchar_t chr,int input_result){
+
+    struct editor_state *state = ctx->state;
     if(ctx == NULL){
         return true;
     }
@@ -68,6 +70,7 @@ bool handle_command_mode(struct editor_input_context *ctx,wchar_t chr,int input_
     if(chr == L'q'){
         return false;
     }
+<<<<<<< HEAD
     
     struct editor_state *state = ctx->state;
 
@@ -100,8 +103,25 @@ bool handle_command_mode(struct editor_input_context *ctx,wchar_t chr,int input_
         }
         else if(chr == KEY_ENTER){
             
+=======
+        
+
+    if(input_result == OK && iswalnum(chr)){
+        command_str_data *tmp_cmd_str_data = &state->command_mode_data.command_str_data;
+        // 終端NULを残して配列の要素数以内かを判定する
+        size_t command_str_cap =
+            sizeof(tmp_cmd_str_data->command_str) / sizeof(tmp_cmd_str_data->command_str[0]);
+        if(tmp_cmd_str_data->command_str_len < command_str_cap - 1){
+            tmp_cmd_str_data->command_str[tmp_cmd_str_data->command_str_len] = chr;
+            tmp_cmd_str_data->command_str_len++;
+            tmp_cmd_str_data->command_str[tmp_cmd_str_data->command_str_len] = L'\0';
+            state->render_flags |= RENDER_COMMAND_MODE;
+>>>>>>> 6e84494 (Nov 19, 2026, 4:26 AM)
         }
     }
+
+
+
 
   
     return true;
@@ -197,4 +217,36 @@ int cursor_set_command_mode_position(struct editor_state *state){
     cur_pos_push(cmd_mode_cur_pos,state);
 
     return 0;
+}
+
+
+
+int draw_command_str(struct editor_input_context *ctx){
+
+    if(ctx == NULL){
+        return -1;
+    }
+    struct editor_state *state = ctx->state;
+
+    if(state->command_mode_data.command_str_data.command_str_len <= 0){
+        return -1;
+    }
+     
+    cchar_t tmp_cchr;
+    //終端の文字を代入する
+    wchar_t wchr[2];
+
+    wchr[0] = state->command_mode_data.
+        command_str_data.
+            command_str[state->command_mode_data.
+                command_str_data.command_str_len - 1];
+    wchr[1] = L'\0';
+    
+
+    setcchar(&tmp_cchr,wchr,A_NORMAL,get_color_pair(ctx,COLOR_WHITE,COLOR_BLACK),NULL);
+    struct pos m_pos = state->cursor.screen_pos;
+    add_wch(&tmp_cchr);
+    cur_pos_push((struct pos){m_pos.x + 1,m_pos.y},state);
+    
+   return 0; 
 }
