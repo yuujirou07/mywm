@@ -350,7 +350,7 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
                 tmp_view_data->table_ptr->absolute_path,
                 &ctx->state->settings_data->icon_data
             );
-
+        
         if(tmp_view_data->table_ptr->s_data.d_type == DT_DIR){
             
             const char *dir_open_state_icon;
@@ -372,6 +372,8 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             tmp_view_data->table_ptr->s_data.d_name,
             name_len_max
         );
+
+        
         i++;
     }
 
