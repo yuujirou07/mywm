@@ -767,5 +767,10 @@ int str_display_width(const char *str){
 
     size_t str_len = strlen(str);
     wchar_t wstr[str_len + 1];
-    mbstowcs(wstr,str,str_len);
+    size_t rt = mbstowcs(wstr,str,str_len);
+    if(rt == (size_t)(-1)){
+        return -1;
+    }
+
+    wcswidth(wstr,str_len);
 }
