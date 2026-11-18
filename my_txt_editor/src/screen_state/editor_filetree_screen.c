@@ -345,15 +345,16 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
         ft_item_view_data *tmp_view_data = &file_tree_data->item_view_data[i];
         int name_len_max = (ft_box.w - 1) - (tmp_view_data->screen_x - 1);
 
-        const char *ext_icon = 
+        const char *ext_icon =
             get_file_ext_code(
                 tmp_view_data->table_ptr->absolute_path,
                 &ctx->state->settings_data->icon_data
             );
         
+        const char *dir_open_state_icon = NULL;
+
         if(tmp_view_data->table_ptr->s_data.d_type == DT_DIR){
             
-            const char *dir_open_state_icon;
             if(tmp_view_data->is_open){
                 dir_open_state_icon = FILE_TREE_ICON_OPEN;
             }
@@ -373,7 +374,7 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             name_len_max
         );
 
-        
+
         i++;
     }
 
