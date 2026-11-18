@@ -760,3 +760,12 @@ double comb_time_interval_ms(struct timespec t1,struct timespec t2){
 }
 
 
+int str_display_width(const char *str){
+    if(str == NULL){
+        return 0;
+    }
+
+    size_t str_len = strlen(str);
+    wchar_t wstr[str_len + 1];
+    mbstowcs(wstr,str,str_len);
+}
