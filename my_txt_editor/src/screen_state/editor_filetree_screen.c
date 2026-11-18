@@ -331,7 +331,6 @@ static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer){
 int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_tree_data){
     
     (void)ctx;
-
    
     struct box ft_box = file_tree_data->ft_box;
 
