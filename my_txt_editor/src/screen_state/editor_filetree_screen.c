@@ -343,7 +343,7 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
     int i = 0;
     while(i < item_view_num){
         ft_item_view_data *tmp_view_data = &file_tree_data->item_view_data[i];
-        int name_len_max = (ft_box.w - 1) - (tmp_view_data->screen_x);
+        int name_len_max = (ft_box.w - 1) - (tmp_view_data->screen_x - 1);
 
         const char *ext_icon = 
             get_file_ext_code(
@@ -409,7 +409,7 @@ int ft_get_same_layer_item_view_data(file_tree_data *file_tree_data,int layer,
 
     ft_item_view_data **layer_item_view_data = 
         malloc(sizeof(ft_item_view_data *) * tmp_item_view_data_count);
-        
+
     if(layer_item_view_data == NULL){
         *item_view_num = 0;
         *item_view_data = NULL;
