@@ -353,14 +353,9 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
         const char *dir_open_state_icon = NULL;
 
         if(tmp_view_data->table_ptr->s_data.d_type == DT_DIR){
-            
-            if(tmp_view_data->is_open){
-                dir_open_state_icon = FILE_TREE_ICON_OPEN;
-            }
-            else{
-                dir_open_state_icon = FILE_TREE_ICON_CLOSE;
-            }
-            
+            dir_open_state_icon = (tmp_view_data->is_open)
+                ?FILE_TREE_ICON_OPEN:FILE_TREE_ICON_CLOSE;
+                
             mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x - 2,dir_open_state_icon);
         }
         
