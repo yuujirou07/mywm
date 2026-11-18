@@ -346,7 +346,7 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
 
         const char *ext_icon =
             get_file_ext_code(
-                tmp_view_data->table_ptr->absolute_path,
+                tmp_view_data->table_ptr->s_data.d_name,
                 &ctx->state->settings_data->icon_data
             );
         
