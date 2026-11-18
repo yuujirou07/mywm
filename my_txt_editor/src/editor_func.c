@@ -771,6 +771,5 @@ int str_display_width(const char *str){
     if(rt == (size_t)(-1)){
         return -1;
     }
-
-    wcswidth(wstr,str_len);
+    return wcswidth(wstr,str_len);
 }
