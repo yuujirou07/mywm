@@ -358,11 +358,11 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             const char *dir_open_state_icon = (tmp_view_data->is_open)
                 ?FILE_TREE_ICON_OPEN : FILE_TREE_ICON_CLOSE;
             
-            item_icon_len = strlen(dir_open_state_icon);
+            item_icon_len = str_display_width(dir_open_state_icon);
             mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x,dir_open_state_icon);
         }
         else{
-            item_icon_len = strlen(ext_icon);
+            item_icon_len = str_display_width(ext_icon);
             mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x,ext_icon);
         }
         
