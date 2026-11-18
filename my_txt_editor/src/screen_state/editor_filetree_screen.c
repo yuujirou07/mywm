@@ -350,6 +350,7 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
                 &ctx->state->settings_data->icon_data
             );
         
+        //アイコンの使用セル数を保持する変数
         int item_icon_len = 0;
 
         //ディレクトリの開閉状態アイコン表示
@@ -357,10 +358,11 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             
             const char *dir_open_state_icon = (tmp_view_data->is_open)
                 ?FILE_TREE_ICON_OPEN : FILE_TREE_ICON_CLOSE;
-            
+
             item_icon_len = str_display_width(dir_open_state_icon);
             mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x,dir_open_state_icon);
         }
+        //ディレクトリではない場合アイコンを表示する
         else{
             item_icon_len = str_display_width(ext_icon);
             mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x,ext_icon);
@@ -375,7 +377,6 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             tmp_view_data->table_ptr->s_data.d_name,
             name_len_max
         );
-
 
         i++;
     }
