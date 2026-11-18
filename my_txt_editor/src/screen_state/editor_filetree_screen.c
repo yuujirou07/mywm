@@ -407,7 +407,9 @@ int ft_get_same_layer_item_view_data(file_tree_data *file_tree_data,int layer,
         return 0;
     }
 
-    ft_item_view_data **layer_item_view_data = malloc(sizeof(ft_item_view_data *) * tmp_item_view_data_count);
+    ft_item_view_data **layer_item_view_data = 
+        malloc(sizeof(ft_item_view_data *) * tmp_item_view_data_count);
+        
     if(layer_item_view_data == NULL){
         *item_view_num = 0;
         *item_view_data = NULL;
