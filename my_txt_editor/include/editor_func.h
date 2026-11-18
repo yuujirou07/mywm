@@ -31,6 +31,7 @@ int env_language_ctl(language *lang,enum flags flags);
 language get_env_language();
 
 
+int str_display_width(const char *str);
 
 double comb_time_interval_ms(struct timespec t1,struct timespec t2);
 
