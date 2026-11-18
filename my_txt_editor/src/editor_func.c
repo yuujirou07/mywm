@@ -718,10 +718,6 @@ int get_write_screen_pos_chr(struct editor_state *state,struct pos pos,char *chr
     return pos.x;
 }
 
-
-
-
-
 int SetCursorModeScreen(struct editor_state *state,screen_state screen_state){
     switch(screen_state){
         case edit_screen_mode:
