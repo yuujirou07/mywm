@@ -361,17 +361,18 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
                 dir_open_state_icon = FILE_TREE_ICON_CLOSE;
             }
             
-            mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x - 1,dir_open_state_icon);
+            mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x - 2,dir_open_state_icon);
         }
         
+
+
+        mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x - 1,ext_icon);
+        
+        //アイテム名の描画文字数制限
         int name_len_max = (ft_box.w - 1) - (tmp_view_data->screen_x - 1);
-
-
-        mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x,ext_icon);
-
         mvaddnstr(
             tmp_view_data->screen_y,
-            tmp_view_data->screen_x,
+            tmp_view_data->screen_x + 1,
             tmp_view_data->table_ptr->s_data.d_name,
             name_len_max
         );
