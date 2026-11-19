@@ -355,10 +355,13 @@ int filetree_mouse_event(struct editor_input_context *ctx){
             for(int i = 0;i < state->file_tree_data.item_view_count_num;i++){
                 ft_item_view_data *item =
                     &state->file_tree_data.item_view_data[i];
-                if(item->screen_y != ev->y)continue;
+                if(item->screen_y != ev->y){
+                    continue;
+                }
 
                 enum select_state path_state =
                     get_path_state(item->table_ptr->absolute_path);
+                    
                 if(path_state == folder){
                     item->is_open = !item->is_open;
                     state->render_flags |= RENDER_EDIT_SCREEN_BASE;

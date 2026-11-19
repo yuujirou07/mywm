@@ -477,15 +477,15 @@ void request_clear_box(struct editor_state *state, struct box box){
 // 消去対象の矩形をclear_box_dataの末尾へ追加する。
 // 引数: clear_box_data=追加先、box=消去対象領域。 返り値: 成功時0、引数がNULLまたは配列が満杯なら-1。
 int set_clear_box(struct clear_box_data *clear_box_data,struct box box){
-        if(clear_box_data == NULL){
-            return -1;
-        }
-        if((int)(sizeof(clear_box_data->clear_box)/sizeof(struct box)) <= clear_box_data->clear_box_counter){
-            return -1;   
-        }
+    if(clear_box_data == NULL){
+        return -1;
+    }
+    if((int)(sizeof(clear_box_data->clear_box)/sizeof(struct box)) <= clear_box_data->clear_box_counter){
+        return -1;   
+    }
 
-        clear_box_data->clear_box[clear_box_data->clear_box_counter++] = box;
-        return 0;
+    clear_box_data->clear_box[clear_box_data->clear_box_counter++] = box;
+    return 0;
 }
 
 
