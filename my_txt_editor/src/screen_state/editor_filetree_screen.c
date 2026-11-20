@@ -765,7 +765,8 @@ static bool editor_click_move_cursor(struct editor_state *state, const MEVENT *e
 
 //マウス座標がファイルツリーの枠線の上にあるかの判定
 static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev){
-    return (state->file_tree_data.ft_box.pos.x + state->file_tree_data.ft_box.w == ev->x);
+    int out_line_pos_x = state->file_tree_data.ft_box.pos.x + state->file_tree_data.ft_box.w;
+    return (out_line_pos_x == ev->x || out_line_pos_x - 1 == ev->x);
 }
 
 static int file_tree_outline_first_click_process(struct editor_state *state){
