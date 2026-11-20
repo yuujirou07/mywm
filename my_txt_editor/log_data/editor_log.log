@@ -11309,3 +11309,5 @@
  LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/tests DATE: unknown TIME: unknown FILE: unknown LINE: 0
  LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/src DATE: unknown TIME: unknown FILE: unknown LINE: 0
  LOG: /home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/.git DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: /home/yuujirou07/vscode_proj/mywm/my_txt_editor/editor_settings/so_file/settings.so DATE: unknown TIME: unknown FILE: unknown LINE: 0
+ LOG: DL Path Add SUCCESS: /home/yuujirou07/vscode_proj/mywm/my_txt_editor/editor_settings/so_file/settings.so DATE: Nov 20 2026 TIME: 17:29:41 FILE: src/public_settings_src/c_settings_src.c/c_settings_settings.c LINE: 391

@@ -63,7 +63,7 @@ static const wchar_t *const reserved_words[] = {
     L"#include",
     L"#define",
     L"#ifndef",
-    L"#endif",
+L"#endif",
 };
 
 static const wchar_t *const declaration_words[] = {
