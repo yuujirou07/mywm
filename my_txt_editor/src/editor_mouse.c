@@ -36,7 +36,7 @@ void handle_mouse(struct editor_input_context *ctx,int dir_num) {
             break;
         }
         case filetree_screen_mode:{
-            filetree_mouse_event(ctx);
+            ft_mouse_event(ctx);
             break;
         }
 
@@ -86,7 +86,7 @@ bool screen_pos_to_box_pos(struct box b1,struct pos p1,struct pos *rp1){
 }
 
 // stateの表示開始行をeditor_pos.yへ加え、編集領域の相対位置から論理位置を返す。
-// 返り値: xが論理行、yが列のpos。通常の座標と順序が逆で、範囲検査は行わない。
+// 返り値: xが列、yが論理行のpos。範囲検査は行わない。
 struct pos editor_pos_to_buffer_pos(
                 struct editor_state *state,
                 struct pos editor_pos){

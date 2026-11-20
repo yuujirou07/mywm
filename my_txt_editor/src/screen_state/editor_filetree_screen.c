@@ -9,6 +9,7 @@
 #include "ftj.h"
 #include "editor_screen.h"
 #include <math.h>
+#include <wctype.h>
 
 static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev);
 static bool is_within_double_click(struct timespec st);
@@ -529,7 +530,7 @@ int ft_get_max_layer_item_view_data(ft_item_view_data *item_view_data,int item_v
 
 // ctxのマウスイベントでツリーの開閉・ファイル読込・境界のドラッグ開始・編集画面への移行を処理する。
 // 返り値: 常に0。イベントはgetmouseで取得済みとし、必要な再描画と構文情報更新を要求する。
-int filetree_mouse_event(struct editor_input_context *ctx){
+int ft_mouse_event(struct editor_input_context *ctx){
     MEVENT *ev = &ctx->mouse_event;
     struct editor_state *state = ctx->state;
     
@@ -659,7 +660,10 @@ int filetree_mouse_event(struct editor_input_context *ctx){
         }
     }
     //スクロール判定
-    else if(ev->bstate & (BUTTON5_PRESSED | BUTTON4_PRESSED)){
+    else if(ev->bstate & 
+        (BUTTON5_PRESSED | BUTTON5_CLICKED | 
+            BUTTON4_CLICKED| BUTTON4_PRESSED)){
+
         struct box tmp_write_area_box = 
             comb_write_possible_area_to_box(state->write_area);
 
@@ -673,22 +677,61 @@ int filetree_mouse_event(struct editor_input_context *ctx){
             state->file_tree_data.ft_box,
             (struct pos){ev->x,ev->y})){
 
+        
+
             file_tree_data *tmp_file_tree = &state->file_tree_data;
 
-            //手前へのスクロールイベント
-            if(ev->bstate & (BUTTON5_CLICKED | BUTTON5_PRESSED)){
+            nodelay(stdscr,true);
             
-                if(tmp_file_tree->item_view_count_num - tmp_file_tree->ft_box.h)
-                tmp_file_tree->scroll_y++;
-                
-            }
-            else if(ev->bstate & (BUTTON4_CLICKED | BUTTON4_PRESSED)){
-                //表示するアイテム数がファイルツリー内に収まらない場合にのみスクロールする
-                if(tmp_file_tree->scroll_y > 0){
-                            
-                    tmp_file_tree->scroll_y--;
+            MEVENT msev = *ev;
+            wint_t wint;
+
+            do{
+                //手前へのスクロールイベント
+                if(msev.bstate & (BUTTON5_CLICKED | BUTTON5_PRESSED)){
+                    
+                    //表示するアイテム数がファイルツリー内に収まらず、かつ末尾まで表示しきっていない場合にのみスクロールする
+                    if(tmp_file_tree->item_view_count_num > tmp_file_tree->ft_box.h && 
+                        tmp_file_tree->item_view_count_num > 
+                            tmp_file_tree->scroll_y + tmp_file_tree->ft_box.h){
+
+                        tmp_file_tree->scroll_y++;
+                    }
                 }
+                else if(msev.bstate & (BUTTON4_CLICKED | BUTTON4_PRESSED)){
+                    //先頭まで戻っていない場合にのみスクロールする
+                    if(tmp_file_tree->scroll_y > 0){
+                                
+                        tmp_file_tree->scroll_y--;
+                    }
+                }
+                
+                //マウスのスクロールキューの解消
+                get_wch(&wint);
+                if(wint == KEY_MOUSE){
+                    if(getmouse(&msev) == OK){
+                        if(msev.bstate &
+                            (BUTTON5_PRESSED | 
+                             BUTTON5_CLICKED | 
+                             BUTTON4_CLICKED | 
+                             BUTTON4_PRESSED)){
+                            
+                            continue;       
+                        }
+                        else{
+                            ungetmouse(&msev);
+                            break;
+                        }
+                    }
+                }    
+                else{
+                    unget_wch(wint);
+                    break;
+                }           
             }
+            while(1);
+
+            nodelay(stdscr,false);
             state->render_flags |= RENDER_EDIT_SCREEN_BASE;
         }
     }
@@ -712,9 +755,9 @@ static bool editor_click_move_cursor(struct editor_state *state, const MEVENT *e
 
     struct pos rel_pos = editor_mouse_to_buffer_pos(state,mouse_pos);
 
-    //論理座標 (注意: x=行、y=列の順で返る)
+    //論理座標 (x=列、y=行の順で返る)
     struct pos logical_pos = editor_pos_to_buffer_pos(state,rel_pos);
-    editor_set_cursor(state,logical_pos.x,logical_pos.y);
+    editor_set_cursor(state,logical_pos.y,logical_pos.x);
     editor_set_screen_state(state,edit_screen_mode);
     my_cur_set(state,true);
     return true;

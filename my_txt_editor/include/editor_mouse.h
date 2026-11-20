@@ -16,7 +16,7 @@ struct editor_state;
 void handle_mouse(struct editor_input_context *ctx,int dir_num);
 void editor_screen_mouse_event(struct editor_input_context *ctx);
 void file_browse_screen_mouse_event(WINDOW *win, MEVENT *event, struct editor_state *state,int dir_num);
-int filetree_mouse_event(struct editor_input_context *ctx);
+int ft_mouse_event(struct editor_input_context *ctx);
 bool box_contains_point(struct box b,struct pos p);
 struct pos editor_mouse_to_buffer_pos(struct editor_state *state,
                         struct pos mouse_pos);

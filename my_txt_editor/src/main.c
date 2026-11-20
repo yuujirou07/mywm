@@ -639,7 +639,6 @@ static void lsp_poll_events(int *epfd, struct lsp_process *lsp, int timeout_ms)
         }
         lsp_handle_message(lsp, msg);
         free(msg);
-        
     }
 }
 

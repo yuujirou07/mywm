@@ -648,6 +648,5 @@ int redraw_write_area_line_str(struct editor_state *state,uint16_t line,uint16_t
     }
 
 
-
     return 0;
 }

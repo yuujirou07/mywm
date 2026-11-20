@@ -488,7 +488,7 @@ static inline int editor_line_cap(struct editor_state *state, int line){
 }
 
 static inline struct box create_box(int x,int y,int w,int h){
-    return (struct box){(struct pos){y,x},w,h};
+    return (struct box){(struct pos){x,y},w,h};
 }
 static inline struct box comb_write_possible_area_to_box(struct write_possible_area write_area){
     return create_box(write_area.x_start,write_area.y_start,write_area.w,write_area.h);
