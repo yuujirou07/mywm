@@ -1,8 +1,11 @@
 
+#include <ncurses.h>
 #include<stdlib.h>
 
 
+#include "editor.h"
 #include "editor_log.h"
+#include "filetree.h"
 #include "ftj.h"
 #include "editor_screen.h"
 #include <math.h>
@@ -30,6 +33,7 @@ int get_root_file_tree_data(file_tree_data *file_tree,char *path){
     file_tree->is_grabed = false;
     file_tree->drawing_data_num = 0;
     file_tree->draw_file_member_start_num = 0;
+    file_tree->scroll_y = 0;
     if(mem_num == 0)return 0;
 
     file_tree->item_view_data = malloc(sizeof(ft_item_view_data) * mem_num);
@@ -235,21 +239,24 @@ static void ft_update_filetree_data(struct editor_input_context *ctx,
     struct box box = filetree_data->ft_box;
 
     for(int i = 0;i < table_num;i++){
+        // スクロール分ずらした枠内の相対行
+        int view_h = *file_h - filetree_data->scroll_y;
         //ファイルツリー外描画ガード
-        if(*file_h >= box.h - 1)return;
+        if(view_h >= box.h - 1)return;
         //現在のレイヤーのi番目のテーブルのデータを取得する
         ft_item_view_data *item_data =
             get_filetree_item_data(filetree_data,&table[i]);
         if(item_data == NULL)return;
 
-        // i番目の要素の名前を描く画面座標
-        struct pos item_name_pos = ft_get_item_name_pos(box,*file_h,layer);
-        
-        
-        //取得した名前の座標をitemに代入する
         item_data->layer = layer;
-        item_data->screen_y = item_name_pos.y;
-        item_data->screen_x = item_name_pos.x;
+        // 上へスクロールアウトした項目はscreen_y=-1のまま残す
+        if(view_h >= 1){
+            // i番目の要素の名前を描く画面座標
+            struct pos item_name_pos = ft_get_item_name_pos(box,view_h,layer);
+            //取得した名前の座標をitemに代入する
+            item_data->screen_y = item_name_pos.y;
+            item_data->screen_x = item_name_pos.x;
+        }
         
 
         //表示されているデータの個数カウント
@@ -349,6 +356,11 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
     while(i < sorted_num){
         ft_item_view_data *tmp_view_data = sorted_item_view_data[i];
 
+        if(tmp_view_data->screen_y < 1){
+            i++;
+            continue;
+        }
+        
         // screen_y=-1は画面外の項目。表示行はft_update_filetree_dataで枠内に制限済み。
         if(tmp_view_data->screen_y < 0){
             i++;
@@ -371,12 +383,19 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
                 ?FILE_TREE_ICON_OPEN : FILE_TREE_ICON_CLOSE;
 
             item_icon_len = str_display_width(dir_open_state_icon);
-            mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x,dir_open_state_icon);
+            mvaddstr(
+                tmp_view_data->screen_y,
+                tmp_view_data->screen_x,
+                dir_open_state_icon);
         }
         //ディレクトリではない場合アイコンを表示する
         else{
             item_icon_len = str_display_width(ext_icon);
-            mvaddstr(tmp_view_data->screen_y,tmp_view_data->screen_x,ext_icon);
+            mvaddstr(
+                tmp_view_data->screen_y,
+                tmp_view_data->screen_x,
+                ext_icon
+            );
         }
         
         //アイテム名の描画文字数制限
@@ -654,12 +673,23 @@ int filetree_mouse_event(struct editor_input_context *ctx){
             state->file_tree_data.ft_box,
             (struct pos){ev->x,ev->y})){
 
-
+            file_tree_data *tmp_file_tree = &state->file_tree_data;
 
             //手前へのスクロールイベント
-            if(ev->bstate & BUTTON5_CLICKED){
-                state->file_tree_data.draw_file_member_start_num++;
+            if(ev->bstate & (BUTTON5_CLICKED | BUTTON5_PRESSED)){
+            
+                if(tmp_file_tree->item_view_count_num - tmp_file_tree->ft_box.h)
+                tmp_file_tree->scroll_y++;
+                
             }
+            else if(ev->bstate & (BUTTON4_CLICKED | BUTTON4_PRESSED)){
+                //表示するアイテム数がファイルツリー内に収まらない場合にのみスクロールする
+                if(tmp_file_tree->scroll_y > 0){
+                            
+                    tmp_file_tree->scroll_y--;
+                }
+            }
+            state->render_flags |= RENDER_EDIT_SCREEN_BASE;
         }
     }
     return 0;
