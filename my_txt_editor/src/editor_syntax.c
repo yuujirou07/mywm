@@ -1,14 +1,6 @@
-#include <ncurses.h>
-#include <stdint.h>
-#include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
-#include <sys/types.h>
-#include <time.h>
-#include <wctype.h>
-#include<wchar.h>
 
-#include"editor.h"
 #include"editor_syntax.h"
 #include"editor_color.h"
 

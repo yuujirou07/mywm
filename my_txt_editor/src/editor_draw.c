@@ -1,23 +1,8 @@
-#include <assert.h>
-#include <dirent.h>
-#include <ncurses.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <wchar.h>
-#include<ncurses.h>
 
 
 
-#include "editor_commands.h"
-#include "editor_types.h"
-#include "filetree.h"
-#include "input_complete.h"
-#include "settings_screen.h"
-#include "editor.h"
-#include"editor_syntax.h"
 #include"editor_color.h"
 
 

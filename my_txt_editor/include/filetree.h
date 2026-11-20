@@ -27,9 +27,10 @@ typedef struct{
     int screen_x; // 直近の描画先となる画面x座標(項目先頭)。非表示なら-1。
 }ft_item_view_data;
 
+// 枠線クリックの回数と最初のクリック時刻。ダブルクリックでのリサイズ判定に使う。
 typedef struct{
-    int outline_click_count;
-    struct timespec first_click_time;
+    int outline_click_count; // 判定中の連続クリック回数。
+    struct timespec first_click_time; // 連続クリックの1回目の時刻。
 }ft_outline_click_data;
 
 // ファイルツリー画面の形状、ツリー本体、項目ごとの表示状態。
@@ -65,6 +66,14 @@ void hide_filetree(struct editor_input_context *ctx);
 
 int ft_get_same_layer_item_view_data(file_tree_data *file_tree_data,int layer,
                                     ft_item_view_data ***item_view_data,int *item_view_num);
+int ft_get_sorted_screen_y_item_view_data(ft_item_view_data *item_view_data,int item_view_num,
+                                    ft_item_view_data ***sorted_data);
 
 int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_tree_data);
+
+
+
+int ft_get_max_layer_item_view_data(ft_item_view_data *item_view_data,int item_view_num);
+
+
 #endif

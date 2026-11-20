@@ -1,41 +1,16 @@
-#include <assert.h>
-#include <bits/types/idtype_t.h>
-#include <linux/limits.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <ncurses.h>
 #include <locale.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/syscall.h>   // SYS_getdents64
-#include <sys/types.h>     // uint64_t など
-#include <dirent.h>
 #include <dlfcn.h>
-#include <time.h>
-#include <wchar.h>
-#include <wctype.h>
-#include <dirent.h>
-#include <libgen.h>
-#include <limits.h>
 #include <unistd.h>
 #include <sys/epoll.h>
 
 
 #include "c_settings.h"
-#include "ascii_art_comb.h"
-#include "default_settings.h"
-#include "editor_commands.h"
-#include "editor_types.h"
 #include "ftj.h"
-#include "kbd_input_log.h"
-#include "lsp_src/language_server_communication.h"
-#include "editor.h"
 #include "editor_screen.h"
 #include"editor_log.h"
 #include"path_util.h"
-#include "editor_icon.h"
-#include"editor_syntax.h"
-#include"input_complete.h"
 #include"editor_color.h"
 
 static void end_process(struct editor_state *state);

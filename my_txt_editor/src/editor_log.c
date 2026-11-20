@@ -2,10 +2,7 @@
 #include "path_util.h"
 
 #include <linux/limits.h>
-#include <ncurses.h>
 #include<stdlib.h>
-#include <stddef.h>
-#include<stdio.h>
 #include <string.h>
 
 

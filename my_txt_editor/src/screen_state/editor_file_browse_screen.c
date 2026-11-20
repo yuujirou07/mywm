@@ -1,19 +1,10 @@
-#include <dirent.h>
 #include <errno.h>
-#include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
-#include <wchar.h>
-#include <wctype.h>
 #include "editor_log.h"
-#include "editor.h"
 #include "editor_screen.h"
-#include "editor_syntax.h"
 #include "editor_color.h"
-#include "editor_icon.h"
 
 // ファイルブラウザ画面の移動・選択・復帰を処理する。
 // 引数: ctx=入力context(state->file_browseにファイル一覧・現在パスが入っている)、input_result=get_wch()の結果、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
@@ -545,5 +536,37 @@ void draw_file_browse(struct editor_input_context *ctx){
         int y;
         getyx(ctx->win,y,x);
         cur_pos_push((struct pos){x,y},state);
+    }
+}
+
+// ホイール入力でファイルブラウザの選択行を循環移動する。
+// 引数: win=描画先。現在は未使用、event=マウスイベント、state=選択状態、dir_num=表示項目数。 返り値: なし。選択行の強調表示が無効なら何もしない。
+void file_browse_screen_mouse_event(WINDOW *win, MEVENT *event, struct editor_state *state,int dir_num){
+    //ホイールで選択行を動かすだけなので描画先ウィンドウは使わない
+    (void)win;
+
+    if(event->bstate & BUTTON1_DOUBLE_CLICKED){
+        if(box_contains_point(state->file_browse.box,(struct pos){event->x,event->y})){
+
+            
+        
+
+        }
+    }
+
+    if(state->settings_data->file_select_scene_lighting){
+        if(event->bstate & BUTTON4_PRESSED){
+             // next_lineはハイライトを移す先。端では上下に循環させる。
+            int next_line = (state->file_browse.select_line.now_line <= 0) 
+                ? dir_num - 1:state->file_browse.select_line.now_line - 1;
+            set_file_select_line(state, dir_num, next_line);
+            
+        }  
+        if(event->bstate & BUTTON5_PRESSED){
+            // next_lineはハイライトを移す先。端では上下に循環させる。
+            int next_line = (state->file_browse.select_line.now_line  >= dir_num - 1)
+                ?0:state->file_browse.select_line.now_line + 1;
+            set_file_select_line(state, dir_num, next_line);
+        }      
     }
 }

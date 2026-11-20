@@ -1,6 +1,4 @@
-#include "editor_types.h"
 #include "editor_screen.h"
-#include "editor_commands.h"
 
 // 現在のscreen_stateに応じて入力処理を各state関数へ振り分ける。
 // 引数: ctx=描画対象や共有状態をまとめた入力context、input_result=get_wch()の結果、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue、終了要求ならfalse。

@@ -7,15 +7,7 @@
 
 
 
-#include "default_settings.h"
-#include"editor.h"
 #include "editor_color.h"
-#include "editor_types.h"
-#include "editor_commands.h"
-#include <ncurses.h>
-#include <stddef.h>
-#include <wchar.h>
-#include <wctype.h>
 #include<stdlib.h>
 
 

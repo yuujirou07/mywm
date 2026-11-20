@@ -1,12 +1,6 @@
 #include "kbd_input_log.h"
-#include <limits.h>
 #include "path_util.h"
-#include <stddef.h>
-#include <stdint.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <wchar.h>
-#include "editor_types.h"
 #include "editor_log.h"
 #include "editor.h"
 

@@ -1,6 +1,3 @@
-#include <ncurses.h>
-#include <stdint.h>
-#include<stdio.h>
 #include <string.h>
 #include"editor_log.h"
 #include"ascii_art_comb.h"

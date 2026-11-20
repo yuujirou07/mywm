@@ -1,13 +1,7 @@
 
 
-#include<stdio.h>
 #include<stdlib.h>
-#include <wchar.h>
-#include <wctype.h>
-#include "default_settings.h"
-#include "editor_types.h"
 #include "editor_log.h"
-#include"input_complete.h"
 #include"editor.h"
 
 

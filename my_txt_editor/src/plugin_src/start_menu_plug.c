@@ -1,11 +1,5 @@
-#include<stdio.h>
-#include<ncurses.h>
 #include <string.h>
-#include <wctype.h>
-#include<time.h>
 #include"editor_log.h"
-#include"ascii_art_comb.h"
-#include"start_menu.h"
 #include"path_util.h"
 #include"editor.h"
 

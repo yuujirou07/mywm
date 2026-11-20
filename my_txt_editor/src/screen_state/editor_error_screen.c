@@ -1,6 +1,5 @@
 #include <string.h>
 #include "editor_log.h"
-#include "editor_screen.h"
 #include "editor_color.h"
 
 // エラー画面でEnterが押されたら遷移元に応じて画面へ戻す。

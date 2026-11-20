@@ -1,24 +1,9 @@
 #include <limits.h>
-#include <ncurses.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <unistd.h>
-#include <wchar.h>
-#include <wctype.h>
-#include "default_settings.h"
-#include "editor_types.h"
 #include "editor_log.h"
-#include "filetree.h"
-#include "input_complete.h"
-#include "editor.h"
 #include "editor_screen.h"
-#include"editor_syntax.h"
 #include"editor_color.h"
-#include"editor_types.h"
 
 // stateの画面寸法からブラウザの枠・入力欄・内側領域を再計算し、高さ変更時に一覧を再読込する。
 // 返り値: なし。一覧の容量不足は再確保し、失敗時は表示行数を既存容量へ制限する。

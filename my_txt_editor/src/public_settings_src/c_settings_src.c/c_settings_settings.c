@@ -1,26 +1,14 @@
 
 
-#include <assert.h>
 #include <dlfcn.h>
-#include <limits.h>
-#include <linux/limits.h>
-#include <ncurses.h>
-#include <stddef.h>
-#include<stdio.h>
 #include<stdlib.h>
 #include <sys/stat.h>
-#include <wchar.h>
 #include<unistd.h>
-#include <wctype.h>
 
 
 #include "c_settings.h"
 #include "editor_log.h"
-#include "editor_types.h"
-#include "kbd_input_log.h"
 #include "path_util.h"
-#include "public_data/c_settings/c_settings_setting.h"
-#include"editor.h"
 #include"string.h"
 #include "editor_screen.h"
 

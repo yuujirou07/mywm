@@ -1,27 +1,12 @@
-#include <dirent.h>
 #include <errno.h>
-#include <libgen.h>
 #include <limits.h>
-#include <linux/limits.h>
-#include <ncurses.h>
-#include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
-#include <termios.h>
-#include <time.h>
-#include <wchar.h>
-#include <sys/stat.h>
 #include <unistd.h>
-#include<dirent.h>
 #include<sys/stat.h>
 #include "editor_log.h"
-#include "editor.h"
 #include "editor_screen.h"
 #include "json_read.h"
-#include"default_settings.h"
-#include"editor_syntax.h"
 
 // path_nameの全項目を呼び出し側所有の*tableへ読み、*table_rowsを必要時拡張する。stateはブラウザ状態。
 // start_num以降の可視件数を*table_num、全件数を*dir_numへ返す。返り値: 成功0、引数・読込・確保の失敗-1。

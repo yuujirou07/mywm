@@ -1,6 +1,4 @@
-#include "start_menu.h"
 #include "editor_color.h"
-#include "editor.h"
 #include "editor_screen.h"
 
 // start menu pluginを実行し、選択結果に対応する画面へ遷移する。

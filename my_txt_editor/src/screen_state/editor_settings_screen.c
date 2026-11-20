@@ -1,11 +1,6 @@
-#include <ncurses.h>
 #include<stdlib.h>
 #include<string.h>
-#include<wctype.h>
-#include "settings_screen.h"
-#include "editor.h"
 #include "editor_color.h"
-#include "editor_screen.h"
 #include"editor_log.h"
 
 

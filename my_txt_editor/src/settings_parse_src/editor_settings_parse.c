@@ -1,13 +1,8 @@
 #include <limits.h>
-#include <ncurses.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include "cjson/cJSON.h"
-#include "default_settings.h"
 #include "editor_log.h"
-#include "input_complete.h"
 #include "json_read.h"
 #include "path_util.h"
 #include "editor.h"

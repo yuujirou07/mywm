@@ -1,11 +1,7 @@
 
 
 
-#include <assert.h>
 #include <cjson/cJSON.h>
-#include <dirent.h>
-#include <limits.h>
-#include <stddef.h>
 #include<sys/stat.h>
 #include<string.h>
 #include<stdlib.h>
@@ -13,7 +9,6 @@
 #include "path_util.h"
 #include"editor.h"
 #include"json_read.h"
-#include "editor_icon.h"
 
 
 // 対応表を解放し、未読み込み状態へ戻す。

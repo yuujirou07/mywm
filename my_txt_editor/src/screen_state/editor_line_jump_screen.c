@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include "editor_syntax.h"
 #include "editor_screen.h"
-#include "editor_color.h"
 
 // 行ジャンプ入力中の数字入力・確定・キャンセルを処理する。
 // 引数: ctx=ジャンプ後の再描画に必要なcontext、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。

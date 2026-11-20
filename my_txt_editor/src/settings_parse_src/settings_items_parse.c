@@ -1,7 +1,6 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include "cjson/cJSON.h"
 #include "json_read.h"
 #include "path_util.h"

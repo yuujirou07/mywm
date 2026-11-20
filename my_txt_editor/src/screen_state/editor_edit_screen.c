@@ -1,19 +1,6 @@
-#include <ncurses.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <wchar.h>
-#include <wctype.h>
-#include<unistd.h>
-#include "default_settings.h"
-#include "editor_types.h"
-#include "filetree.h"
-#include "input_complete.h"
-#include "editor.h"
-#include "editor_color.h"
-#include "editor_syntax.h"
 #include "editor_screen.h"
-#include "editor_commands.h"
 
 static void send_lsp_did_change(struct editor_input_context *ctx);
 
@@ -249,4 +236,173 @@ void draw_file_data(struct editor_state *state){
         int line = state->scr.scr_start_num + i;
         draw_editor_buffer_line(state, line, i);
     }
+}
+
+// ctxの取得済みマウスイベントでスクロール・本文クリック・ツリーへの移行を処理する。
+// 返り値: なし。ホイールは表示開始行だけ、本文クリックは論理カーソルを動かし、最後にカーソル表示可否を更新する。
+void editor_screen_mouse_event(struct editor_input_context *ctx){
+    MEVENT *event = &ctx->mouse_event;
+    struct editor_state *state = ctx->state;
+
+    int line_limit = editor_line_limit(state);
+    bool can_scroll_down = state->scr.scr_start_num + state->write_area.h < line_limit;
+
+    //エディター画面下スクロール処理
+    if (event->bstate & BUTTON5_PRESSED && can_scroll_down){
+
+        
+        bool is_cur_on_edit_screen = true;
+        //ファイルツリーが表示されている場合
+        // スクロール時のマウスポインターがファイルツリー上にあるか判断する
+        if(state->file_tree_data.is_show){
+            struct box tmp_write_area_box = comb_write_possible_area_to_box(state->write_area);
+            if(!box_contains_point(tmp_write_area_box,(struct pos){event->x,event->y})){
+                editor_set_screen_state(state,filetree_screen_mode);
+                is_cur_on_edit_screen = false;
+            }
+        }
+        if(is_cur_on_edit_screen){
+            
+            wint_t chr;
+            MEVENT tmp_msev;
+
+            nodelay(stdscr,true);
+            //エディタースクロールスタック解消ループ処理
+            do{
+                int before_scr_start_num = state->scr.scr_start_num;
+                //文字のスクロール処理 
+                editor_scroll_logical_line(
+                    state,state->settings_data->editor_scroll_sensitivity);
+                int scrolled_num = state->scr.scr_start_num - before_scr_start_num;
+                // 構文情報は画面相対行で持つため、実際にスクロールした行数だけずらし、
+                // 新しく見える最下行からscrolled_num行分を解析する。
+                if(state->settings_data->built_in_syntax && scrolled_num > 0){
+                    scroll_syntax_pos_data(
+                        &ctx->syntax_data,-scrolled_num,state->write_area.h);
+                    int first_line = state->write_area.h - scrolled_num;
+                    if(first_line < 0)first_line = 0;
+                    for(int line = first_line;line < state->write_area.h;line++){
+                        update_line_syntax_data(ctx,line);
+                    }
+                }
+
+                if(get_wch(&chr) == ERR){
+                    break;
+                }
+
+
+                if(chr == KEY_MOUSE){
+                    if(getmouse(&tmp_msev) == OK && 
+                        !(tmp_msev.bstate & (BUTTON5_PRESSED | BUTTON5_CLICKED))){
+                        ungetmouse(&tmp_msev);
+                        break;
+                    }
+                }
+                else{
+                    unget_wch(chr);
+                    break;
+                }
+                
+
+            }while(1);
+
+            nodelay(stdscr,false);
+        }
+        
+    //エディター画面上スクロール処理
+    }else if ((event->bstate & BUTTON4_PRESSED) && state->scr.scr_start_num > 0) {
+        bool is_cur_on_edit_screen = true;
+         if(state->file_tree_data.is_show){
+            struct box tmp_write_area_box = 
+                comb_write_possible_area_to_box(state->write_area);
+            if(!box_contains_point(tmp_write_area_box,(struct pos){event->x,event->y})){
+                editor_set_screen_state(state,filetree_screen_mode);
+                is_cur_on_edit_screen = false;
+            }
+        }
+
+        if(is_cur_on_edit_screen){ 
+            wint_t chr;
+            
+            nodelay(stdscr,true);
+            MEVENT tmp_msev;
+            //スクロール処理はスタックがたまるため一時的にノンブロッキングにして
+            //溜まっているスクロールスタックをループで処理する
+            do{
+                int before_scr_start_num = state->scr.scr_start_num;
+                editor_scroll_logical_line(
+                    state,-state->settings_data->editor_scroll_sensitivity);
+                int scrolled_num = before_scr_start_num - state->scr.scr_start_num;
+                // 下スクロールの逆。実際にスクロールした行数だけ既存分を下げ、
+                // 新しく見える最上行からscrolled_num行分を解析する。
+                if(state->settings_data->built_in_syntax && scrolled_num > 0){
+                    scroll_syntax_pos_data(
+                        &ctx->syntax_data,scrolled_num,state->write_area.h);
+                    int last_line = scrolled_num;
+                    if(last_line > state->write_area.h)last_line = state->write_area.h;
+                    for(int line = 0;line < last_line;line++){
+                        update_line_syntax_data(ctx,line);
+                    }
+                }
+
+                if(get_wch(&chr) == ERR){
+                    break;
+                }
+                
+                if(chr == KEY_MOUSE){
+                    if(getmouse(&tmp_msev) == OK && 
+                        !(tmp_msev.bstate & (BUTTON4_PRESSED | BUTTON4_CLICKED))){
+                        ungetmouse(&tmp_msev);
+                        break;
+                    }
+                }    
+                else{
+                    unget_wch(chr);
+                    break;
+                }
+
+            }while(1);
+                
+            nodelay(stdscr,false);
+        }
+    }
+    //マウスクリック処理
+    else if(event->bstate &
+            (BUTTON1_PRESSED | BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED)){
+        int x = event->x;
+        int y = event->y;
+
+      
+        if(box_contains_point(ctx->state->file_tree_data.ft_box,(struct pos){event->x,event->y})){
+            editor_set_screen_state(state,filetree_screen_mode);
+            filetree_mouse_event(ctx);
+            return;
+        }
+        else{
+            struct box tmp_write_area_box = 
+                {(struct pos){
+                    ctx->state->write_area.x_start,
+                    ctx->state->write_area.y_start
+                },
+                    ctx->state->write_area.w,
+                    ctx->state->write_area.h
+                };
+            if(box_contains_point(tmp_write_area_box,(struct pos){x,y})){
+                struct pos write_area_pos;
+                write_area_pos.y = y - state->write_area.y_start;
+                write_area_pos.x = x - state->write_area.x_start;
+                int line_num = state->scr.scr_start_num + write_area_pos.y;
+                if(state->file_data.description_line_end < line_num){
+                    line_num = *state->str.line;
+                }
+                editor_set_cursor(state,line_num,write_area_pos.x);
+            }
+        }
+    }
+    else{
+        return;
+    }
+
+    // カーソル行が編集領域から出たら隠す。戻ってきたらまた出す。
+    my_cur_set(state,editor_cursor_is_visible(state));
 }

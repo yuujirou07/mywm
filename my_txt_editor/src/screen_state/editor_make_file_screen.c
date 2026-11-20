@@ -1,8 +1,4 @@
-#include <ncurses.h>
 #include <string.h>
-#include <wctype.h>
-#include "editor.h"
-#include "editor_color.h"
 #include "editor_screen.h"
 
 // 未保存ファイル作成確認と新規ファイル名入力を処理する。

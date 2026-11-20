@@ -1,21 +1,17 @@
 
-#include <dirent.h>
-#include <ncurses.h>
-#include <stdbool.h>
 #include<stdlib.h>
-#include<string.h>
-#include<assert.h>
-#include <sys/stat.h>
 
 
-#include "editor_icon.h"
-#include "editor_types.h"
 #include "editor_log.h"
-#include "filetree.h"
 #include "ftj.h"
-#include "editor.h"
-#include "editor_color.h"
 #include "editor_screen.h"
+#include <math.h>
+
+static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev);
+static bool is_within_double_click(struct timespec st);
+static double get_time_elapsed_MS(struct timespec time);
+static int file_tree_outline_first_click_process(struct editor_state *state);
+static bool editor_click_move_cursor(struct editor_state *state, const MEVENT *ev);
 
 static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer);
 
@@ -319,6 +315,8 @@ int draw_filetree(struct editor_input_context *ctx,file_tree_data *filetree_data
     return 0;
 }
 
+// ft_boxの枠内で、相対行file_h・階層layerの項目名を描く画面座標を求める(階層ごとに2列字下げ)。
+// 返り値: 画面上の座標。範囲検査はしない。
 static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer){
     struct pos tmp_pos;
     tmp_pos.x = ft_box.pos.x + 1 + (layer * 2);
@@ -328,20 +326,34 @@ static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer){
 
 
 
+// file_tree_dataの先頭から枠の高さ-1件までの項目を、記録済みscreen_y/screen_xへアイコン付きで描く。
+// 返り値: 常に0。座標は事前にft_update_filetree_dataで設定しておく。
 int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_tree_data){
-    
-    (void)ctx;
-   
+       
     struct box ft_box = file_tree_data->ft_box;
 
-    //アイテムの表示数制限
-    int item_view_num = (ft_box.h - 1 < file_tree_data->item_view_count_num)
-        ?ft_box.h - 1:file_tree_data->item_view_count_num;
+    ft_item_view_data **sorted_item_view_data;
+    //y座標の昇順にソートした配列を取得する
+    int sorted_num = ft_get_sorted_screen_y_item_view_data(
+            file_tree_data->item_view_data,
+            file_tree_data->item_view_count_num,
+            &sorted_item_view_data
+        );
 
+    if(sorted_num <= 0){
+        return -1;
+    }
+    
 
     int i = 0;
-    while(i < item_view_num){
-        ft_item_view_data *tmp_view_data = &file_tree_data->item_view_data[i];
+    while(i < sorted_num){
+        ft_item_view_data *tmp_view_data = sorted_item_view_data[i];
+
+        // screen_y=-1は画面外の項目。表示行はft_update_filetree_dataで枠内に制限済み。
+        if(tmp_view_data->screen_y < 0){
+            i++;
+            continue;
+        }
 
         const char *ext_icon =
             get_file_ext_code(
@@ -372,7 +384,7 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
 
         mvaddnstr(
             tmp_view_data->screen_y,
-            tmp_view_data->screen_x + item_icon_len,
+            tmp_view_data->screen_x + item_icon_len + 1,
             tmp_view_data->table_ptr->s_data.d_name,
             name_len_max
         );
@@ -380,13 +392,17 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
         i++;
     }
 
+    free(sorted_item_view_data);
     
     return 0;
 }
 
 
+// file_tree_dataのdraw_file_member_start_num以降からlayer階層の項目を集め、ポインタ配列を*item_view_dataへ確保する。
+// 返り値: 成功で件数(0件なら*item_view_data=NULL)、引数不正・確保失敗-1。配列は呼び出し側でfreeし、要素は借用。
 int ft_get_same_layer_item_view_data(file_tree_data *file_tree_data,int layer,
                                     ft_item_view_data ***item_view_data,int *item_view_num){
+
     if(layer < 0 || file_tree_data == NULL || 
         item_view_data == NULL || item_view_num == NULL){
         return -1;
@@ -433,3 +449,270 @@ int ft_get_same_layer_item_view_data(file_tree_data *file_tree_data,int layer,
     return tmp_item_view_data_count;
 }
 
+
+// qsort用: ft_item_view_data *の配列要素a,bをscreen_yで比較する。
+// 返り値: aが小さければ負、等しければ0、大きければ正。
+static int ft_cmp_screen_y(const void *a,const void *b){
+    const ft_item_view_data *item_a = *(ft_item_view_data * const *)a;
+    const ft_item_view_data *item_b = *(ft_item_view_data * const *)b;
+    return (item_a->screen_y > item_b->screen_y) - (item_a->screen_y < item_b->screen_y);
+}
+
+// 構造体配列item_view_dataのitem_view_num件をscreen_y昇順に並べたポインタ配列を*sorted_dataへ確保して返す。
+// 返り値: 成功で件数、引数不正・確保失敗-1。*sorted_dataは呼び出し側でfreeする(要素自体は借用)。
+int ft_get_sorted_screen_y_item_view_data(
+    ft_item_view_data *item_view_data,
+    int item_view_num,
+    ft_item_view_data ***sorted_data){
+
+    if(item_view_data == NULL || item_view_num < 0 || sorted_data == NULL){
+        return -1;
+    }
+    *sorted_data = NULL;
+    if(item_view_num == 0)return 0;
+
+    ft_item_view_data **tmp_sorted_data = 
+        malloc(sizeof(ft_item_view_data *) * item_view_num);
+        
+    if(tmp_sorted_data == NULL){
+        error_log("malloc error");
+        return -1;
+    }
+    for(int i = 0;i < item_view_num;i++){
+        tmp_sorted_data[i] = &item_view_data[i];
+    }
+    qsort(tmp_sorted_data,item_view_num,sizeof(ft_item_view_data *),ft_cmp_screen_y);
+
+    *sorted_data = tmp_sorted_data;
+    
+    return item_view_num;
+}
+
+
+int ft_get_max_layer_item_view_data(ft_item_view_data *item_view_data,int item_view_num){
+    if(item_view_data == NULL){
+        return -1;
+    }
+
+    if(item_view_num <= 0){
+        return 0;
+    }
+
+    int tmp_layer = 0;
+    for(int i = 0;i < item_view_num;i++){
+        if(item_view_data[i].layer > tmp_layer){
+            tmp_layer = item_view_data[i].layer;
+            continue;
+        }        
+    }
+    return tmp_layer;
+}
+
+// ctxのマウスイベントでツリーの開閉・ファイル読込・境界のドラッグ開始・編集画面への移行を処理する。
+// 返り値: 常に0。イベントはgetmouseで取得済みとし、必要な再描画と構文情報更新を要求する。
+int filetree_mouse_event(struct editor_input_context *ctx){
+    MEVENT *ev = &ctx->mouse_event;
+    struct editor_state *state = ctx->state;
+    
+    //ファイルツリーの枠線をダブルクリックした場合にリサイズ処理に移る
+    if(state->file_tree_data.is_show == true){
+        file_tree_data *tmp_ft_data = &state->file_tree_data;
+        //枠線のダブルクリック判定
+        //ダブルクリックかつボタンを離しているか
+        if((ev->bstate & (BUTTON1_PRESSED|BUTTON1_DOUBLE_CLICKED)) &&
+                                            tmp_ft_data->is_grabed == false){
+
+            ft_outline_click_data *tmp_outline_click_data =
+                        &state->file_tree_data.outline_click_data;
+            //枠線判定
+            if(file_tree_is_on_outline(state,ev) == true){
+                tmp_outline_click_data->outline_click_count++;   
+                //クリックが1っ回目かの判定
+                if(tmp_outline_click_data->outline_click_count == 1){
+                    file_tree_outline_first_click_process(state);
+                }
+                //二回目のクリックで決めたダブルクリックの
+                // 間隔内で2回クリックされているかの判定をし、
+                //間隔内であればリサイズシグナルをtrueにする
+                else if(tmp_outline_click_data->outline_click_count == 2){
+                    struct timespec st_time = tmp_outline_click_data->first_click_time;
+                    tmp_ft_data->is_grabed = is_within_double_click(st_time);
+                    tmp_outline_click_data->outline_click_count = 0;                     
+                }  
+            }
+            //ファイルツリーの枠線外をクリックしていれば
+            // 枠線クリックカウントを0に初期化する
+            else if(tmp_outline_click_data->outline_click_count > 0){
+                tmp_outline_click_data->outline_click_count = 0;
+            }
+        }
+        if((ev->bstate & BUTTON1_RELEASED) && tmp_ft_data->is_grabed == true){
+            tmp_ft_data->is_grabed = false;
+            tmp_ft_data->outline_click_data.outline_click_count = 0;
+        }
+    }
+
+    //ファイルツリーリサイズ処理
+    if(state->file_tree_data.is_grabed && 
+        ev->bstate & REPORT_MOUSE_POSITION){
+
+        // 溜まったマウスイベントを読み捨て、最新の座標をevへ取得する
+        wint_t chr;
+        int result;
+        nodelay(stdscr,true);
+        while((result = get_wch(&chr)) != ERR){
+            if(result != KEY_CODE_YES || chr != KEY_MOUSE){
+                unget_wch(chr);
+                break;
+            }
+            if(getmouse(ev) != OK || 
+                !(ev->bstate & REPORT_MOUSE_POSITION)){
+                break;
+            }
+        }
+        nodelay(stdscr,false);
+
+        const int screen_width = getmaxx(ctx->win);
+        int new_ft_width = ev->x;
+
+        //ファイルツリー横幅制限
+        if(ev->x < FILETREE_DEFAULT_SIZE_W){
+            new_ft_width = FILETREE_DEFAULT_SIZE_W;
+        }
+        else if(screen_width < ev->x){
+            new_ft_width = screen_width;
+        }
+
+        change_file_tree_width(ctx,new_ft_width);
+    }
+
+    //左クリック
+    if(ev->bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED)){
+        struct box ft_box = ctx->state->file_tree_data.ft_box;
+        //ファイルツリーボックスは枠線も含むサイズのため、枠線のクリックで
+        //ファイルなどが開かないよう横幅を−1する
+        ft_box.w--;
+        // ファイルツリー内クリック時の処理
+        if(box_contains_point(ft_box,(struct pos){ev->x,ev->y})){
+            for(int i = 0;i < state->file_tree_data.item_view_count_num;i++){
+                ft_item_view_data *item =
+                    &state->file_tree_data.item_view_data[i];
+                if(item->screen_y != ev->y){
+                    continue;
+                }
+
+                enum select_state path_state =
+                    get_path_state(item->table_ptr->absolute_path);
+                    
+                if(path_state == folder){
+                    item->is_open = !item->is_open;
+                    state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+                }
+                else if(path_state == file){
+                    struct file_browse_select_state select_state;
+                    load_file(state,NULL,0
+                        ,item->table_ptr->absolute_path,
+                        &select_state);
+                    
+                    if(select_state.select_state == file){
+                        load_screen_size(state);
+                        editor_set_cursor(state,0,0);
+                        state->render_flags |= RENDER_FILE_DATA;
+                        state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+                        if(state->settings_data->built_in_syntax){
+                            set_syntax_data(&ctx->syntax_data,ctx);
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        else{
+            editor_click_move_cursor(state,ev);
+        }
+    }
+    //ファイルツリーの枠線をダブルクリックするとファイルツリーサイズを変更する
+    if(ev->bstate & BUTTON1_DOUBLE_CLICKED ){
+        //枠線クリック判定
+        if(state->file_tree_data.ft_box.pos.x + 
+                state->file_tree_data.ft_box.w == ev->x){
+            state->file_tree_data.is_grabed = true;
+        }
+    }
+    //スクロール判定
+    else if(ev->bstate & (BUTTON5_PRESSED | BUTTON4_PRESSED)){
+        struct box tmp_write_area_box = 
+            comb_write_possible_area_to_box(state->write_area);
+
+        //編集画面内でのスクロール
+        if(box_contains_point(tmp_write_area_box,(struct pos){ev->x,ev->y})){
+            editor_set_screen_state(state,edit_screen_mode);
+            my_cur_set(state,true);
+        }
+        //ファイルツリー内でのスクロール
+        else if(box_contains_point(
+            state->file_tree_data.ft_box,
+            (struct pos){ev->x,ev->y})){
+
+
+
+            //手前へのスクロールイベント
+            if(ev->bstate & BUTTON5_CLICKED){
+                state->file_tree_data.draw_file_member_start_num++;
+            }
+        }
+    }
+    return 0;
+}
+
+static bool is_within_double_click(struct timespec st){
+    //st_timeから関数実行時までの時間差取得
+    return (trunc(get_time_elapsed_MS(st)) < MOUSE_DOUBLE_CLICK_INTERVAL);
+}
+
+// 編集領域内のクリックなら、その位置へ論理カーソルを移して編集画面に切り替える。
+// 返り値: 移動したらtrue、編集領域外ならfalse。行・列の範囲への丸めはeditor_set_cursorが行う。
+static bool editor_click_move_cursor(struct editor_state *state, const MEVENT *ev){
+    struct pos mouse_pos = {ev->x,ev->y};
+    //editor_mouse_to_buffer_posは領域外でエラーログを出すため先に範囲判定する
+    struct box write_area_box = comb_write_possible_area_to_box(state->write_area);
+    if(!box_contains_point(write_area_box,mouse_pos)){
+        return false;
+    }
+
+    struct pos rel_pos = editor_mouse_to_buffer_pos(state,mouse_pos);
+
+    //論理座標 (注意: x=行、y=列の順で返る)
+    struct pos logical_pos = editor_pos_to_buffer_pos(state,rel_pos);
+    editor_set_cursor(state,logical_pos.x,logical_pos.y);
+    editor_set_screen_state(state,edit_screen_mode);
+    my_cur_set(state,true);
+    return true;
+}
+
+//マウス座標がファイルツリーの枠線の上にあるかの判定
+static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev){
+    return (state->file_tree_data.ft_box.pos.x + state->file_tree_data.ft_box.w == ev->x);
+}
+
+static int file_tree_outline_first_click_process(struct editor_state *state){
+    //ダブルクリックリサイズが無効だった場合シングルクリックでリサイズを開始する
+    if(FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE == false){
+        state->file_tree_data.is_grabed = true;
+    }
+    else{
+        struct timespec *tmp_click_time = 
+            &state->file_tree_data.outline_click_data.first_click_time;
+        //ダブルクリック判定一回目のクリックの時間取得
+        // (2回目のクリックとの時間差でダブルクリックか判定する)
+        clock_gettime(CLOCK_MONOTONIC,tmp_click_time);
+    } 
+    return 0;
+}
+
+static double get_time_elapsed_MS(struct timespec time){
+    struct timespec last_click_time;
+    clock_gettime(CLOCK_MONOTONIC,&last_click_time);
+    //ダブルクリックのミリ秒の差取得
+    return comb_time_interval_ms(time,last_click_time);
+}
