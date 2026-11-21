@@ -58,7 +58,9 @@ int change_edit_complete_lang(struct editor_input_context *ctx,language lang){
 // 返り値: 追加0、既存文字列長が上限以上なら-1。文字数と実長を一致させ、文字と終端の2要素分の空きが必要。
 int set_edit_comp_candidacy_part_data(struct editor_state *state,wint_t ch){
     if(COMPLETE_WORLD_CANDIDACY_PART_DATA_MAX_LEN <=
-        (int)wcslen(state->edit_input_complete_data.comp_world_candidacy_part_data.complete_world_candidacy_part_str)){
+        (int)wcslen(state->edit_input_complete_data.
+            comp_world_candidacy_part_data.
+                complete_world_candidacy_part_str)){
         return -1;
     }
     // 入力済み文字数の位置を指し、文字と終端文字を書き込む。
