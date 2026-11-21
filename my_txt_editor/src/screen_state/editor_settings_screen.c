@@ -379,20 +379,11 @@ void draw_settings_explanation_box(struct editor_input_context *ctx){
 // 引数: str=描画するNUL終端文字列、box=枠線を含む描画領域。 返り値: なし。
 // 空文字列なら何も描画しない。strがNULLまたはbox.wが2以下の場合の動作は未定義。
 static void draw_explanation_str(const char *str,struct box box){
-    int str_len = strlen(str);
-    if(str_len <= 0)return;
-
-    // 枠線の左右1セルずつを除いた内側幅(box.w-2)で割り、切り上げた行数が必要行数になる。
-    int loop_h = (str_len + box.w - 3) / (box.w - 2);
-    int offset = 0;
-    for(int h = 0;h < loop_h;h++){
-        struct pos explanation_str_pos = {box.pos.x + 1,box.pos.y + h+1};
-        const int split_len = (str_len > box.w)?box.w - 2:str_len;
-        char splited_explanation_str[split_len + 1];
-        memcpy(splited_explanation_str,&str[offset],sizeof(char) * split_len);
-        splited_explanation_str[split_len] = '\0';
-        my_mvaddstr(explanation_str_pos,splited_explanation_str);
-        offset += split_len;
+    if(str == NULL || box.w <= 2 || box.h <= 0){
+        return;
     }
-    return;
+
+    
+
+
 }
