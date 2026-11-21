@@ -416,9 +416,14 @@ void draw_box_inside_dir(struct editor_state *state,struct dir_entry *table){
         int len = (int)strlen(entry->name);
 
         char entry_path[sizeof(state->file_browse.path_name) + sizeof(entry->name) + 1];
-        snprintf(entry_path,sizeof(entry_path),"%s%s%s",base_path,
-            strcmp(base_path,"/") == 0 ? "" : "/",entry->name);
-        editor_log(entry_path, NULL, NULL, NULL, 0);
+        snprintf(
+            entry_path,
+            sizeof(entry_path),
+            "%s%s%s",base_path,
+            strcmp(base_path,"/") == 0 ? "" : "/",
+            entry->name
+        );
+
         const char *icon_code =
             get_file_ext_code(entry_path,&state->settings_data->icon_data);
       
