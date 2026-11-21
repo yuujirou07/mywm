@@ -389,7 +389,7 @@ static void draw_explanation_str(const char *str,struct box box){
 
     int str_offset = 0;
     for(int h = 0;h < box.h - 2;h++){
-        if((h + 1) * str_line_len >= str_len){
+        if( h * str_line_len >= str_len){
             return;
         }
         mvaddnstr(box.pos.y + h + 1,str_start_pos_x,&str[str_offset],str_line_len);
