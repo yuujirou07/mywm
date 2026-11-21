@@ -383,7 +383,16 @@ static void draw_explanation_str(const char *str,struct box box){
         return;
     }
 
-    
+    const int str_line_len = box.w - 2;
+    const int str_len  = strlen(str);
+    const int str_start_pos_x = box.pos.x + 1; 
+
+    int str_offset = 0;
+    for(int h = 0;h < box.h - 2;h++){
+        if((h + 1)* str_line_len)
+        mvaddnstr(box.pos.y + h + 1,str_start_pos_x,str[str_offset],str_line_len);
+        str_offset += str_line_len;
+    }
 
 
 }
