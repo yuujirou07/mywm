@@ -145,13 +145,7 @@ int main(int argc, char *argv[])
     state.file_browse.box.pos.x = (state.scr.scr_size.x / 2) - state.file_browse.box.w / 2;
     state.file_browse.box.pos.y = state.scr.scr_size.y / 4;
 
-    state.file_tree_data.ft_box = (struct box){(struct pos){0,0},0,0};
-    state.file_tree_data.ft_search_box = (struct box){(struct pos){0,0},0,0};
-    state.file_tree_data.root_node = NULL;
-    state.file_tree_data.is_show = false;
-    state.file_tree_data.outline_click_data.outline_click_count = 0;
-    state.file_tree_data.outline_click_data.first_click_time.tv_nsec = 0;
-    state.file_tree_data.outline_click_data.first_click_time.tv_sec = 0;
+    ft_init_file_tree(&state.file_tree_data);
 
     state.edit_input_complete_data.box.pos = (struct pos){0,0};
     state.edit_input_complete_data.box.h = 

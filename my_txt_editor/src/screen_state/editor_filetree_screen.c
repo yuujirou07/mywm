@@ -19,6 +19,25 @@ static bool editor_click_move_cursor(struct editor_state *state, const MEVENT *e
 
 static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer);
 
+
+
+int ft_init_file_tree(file_tree_data *file_tree){
+    if(file_tree == NULL){
+        return -1;
+    }
+
+    file_tree->ft_box = (struct box){(struct pos){0,0},0,0};
+    file_tree->ft_search_box = (struct box){(struct pos){0,0},0,0};
+    file_tree->root_node = NULL;
+    file_tree->is_show = false;
+    file_tree->outline_click_data.outline_click_count = 0;
+    file_tree->outline_click_data.first_click_time.tv_nsec = 0;
+    file_tree->outline_click_data.first_click_time.tv_sec = 0;
+    
+    return 0;
+}
+
+
 // pathを起点とするツリーと直下項目の表示状態を、未確保のfile_treeへ作成する。
 // 返り値: 成功0、作成・確保失敗-1。成功後は呼び出し側でroot_nodeをclose_treeし、item_view_dataをfreeする。
 int get_root_file_tree_data(file_tree_data *file_tree,char *path){
