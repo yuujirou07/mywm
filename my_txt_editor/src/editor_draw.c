@@ -646,7 +646,17 @@ int redraw_write_area_line_str(struct editor_state *state,uint16_t line,uint16_t
         draw_editor_buffer_line(state,state->scr.scr_start_num + line + i,line + i);
         
     }
-
-
     return 0;
+}
+
+int draw_screen_back_ground(struct editor_input_context *ctx){
+    if(ctx == NULL){
+        return - 1;
+    }
+
+
+
+
+
+
 }
