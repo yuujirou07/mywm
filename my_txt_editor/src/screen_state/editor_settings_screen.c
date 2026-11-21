@@ -388,8 +388,12 @@ static void draw_explanation_str(const char *str,struct box box){
     const int str_start_pos_x = box.pos.x + 1; 
 
     int str_offset = 0;
-    for(int h = 0;h < box.h - 2 && !(h * str_line_len) > str_len ;h++){
-        mvaddnstr(box.pos.y + h + 1,str_start_pos_x,&str[str_offset += str_len],str_line_len);
+    for(int h = 0;h < box.h - 2 ;h++){
+        if( h * str_line_len >= str_len){
+            return;
+        }
+        mvaddnstr(box.pos.y + h + 1,str_start_pos_x,&str[str_offset],str_line_len);
+        str_offset += str_line_len;
     }
 
     return;
