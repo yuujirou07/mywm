@@ -155,7 +155,6 @@ int main(int argc, char *argv[])
         settings_data.auto_complete_settings_data.auto_complete_window_size.x;
 
     
-    
     my_cur_set(&state,true);
     raw();
     scrollok(win, TRUE);
