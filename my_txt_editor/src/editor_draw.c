@@ -653,7 +653,6 @@ int redraw_write_area_line_str(struct editor_state *state,uint16_t line,uint16_t
 int set_editor_background_color(short color){
     if(color >= COLOR_PAIRS)return -1;
     bkgd(COLOR_PAIR(color));
-    bkgdset(COLOR_PAIR(color));
     return 0;
 }
 

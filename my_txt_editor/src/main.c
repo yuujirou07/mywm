@@ -428,7 +428,7 @@ int main(int argc, char *argv[])
     int input_result = 0;
     
 
-    set_editor_background_color(COLOR_WHITE);
+    
     while (running) {
         
         //もしlspを使用する設定だったら
