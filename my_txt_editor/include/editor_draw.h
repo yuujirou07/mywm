@@ -48,4 +48,5 @@ int draw_editor_complete_word_box(struct editor_input_context *ctx);
 int draw_edit_complete_world(struct editor_state *state);
 int redraw_write_area_line_str(struct editor_state *state,uint16_t line,uint16_t size);
 
+int set_editor_background_color(short color);
 #endif
