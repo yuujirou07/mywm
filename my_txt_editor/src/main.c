@@ -647,3 +647,4 @@ static void lsp_poll_events(int *epfd, struct lsp_process *lsp, int timeout_ms)
 void my_mvaddstr(struct pos pos,char * str){
     mvaddstr(pos.y,pos.x,str);
 }
+

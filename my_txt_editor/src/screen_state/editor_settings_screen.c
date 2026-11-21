@@ -387,7 +387,7 @@ static void draw_explanation_str(const char *str,struct box box){
     int offset = 0;
     for(int h = 0;h < loop_h;h++){
         struct pos explanation_str_pos = {box.pos.x + 1,box.pos.y + h+1};
-        int split_len = (str_len > box.w)?box.w - 2:str_len;
+        const int split_len = (str_len > box.w)?box.w - 2:str_len;
         char splited_explanation_str[split_len + 1];
         memcpy(splited_explanation_str,&str[offset],sizeof(char) * split_len);
         splited_explanation_str[split_len] = '\0';
