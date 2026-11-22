@@ -50,9 +50,12 @@ void handle_mouse(struct editor_input_context *ctx,int dir_num) {
 // 引数: b=画面座標と幅・高さを持つボックス、p=判定する画面座標。 返り値: pが左上から右下の境界を含む範囲内ならtrue、それ以外はfalse。
 bool box_contains_point(struct box b,struct pos p){
     // 右端・下端も含める(<=)。枠線を含む箱でクリック判定をするための仕様。
-    if(b.pos.x <= p.x && b.pos.x + b.w >= p.x && 
-        b.pos.y <= p.y && b.pos.y + b.h >= p.y)return true;
-    return false;
+    return(
+        b.pos.x <= p.x && 
+        b.pos.x + b.w >= p.x && 
+        b.pos.y <= p.y && 
+        b.pos.y + b.h >= p.y
+    );
 }
 
 // マウスの画面座標を編集領域の左上基準の座標へ変換する。
@@ -80,7 +83,7 @@ struct pos editor_mouse_to_buffer_pos(struct editor_state *state,
 // 画面座標p1をb1左上からの相対座標へ変換して非NULLのrp1へ格納する。右下境界も範囲に含む。
 // 返り値: 成功false、範囲外true。失敗時は*rp1を変更しない。
 bool screen_pos_to_box_pos(struct box b1,struct pos p1,struct pos *rp1){
-    if(!box_contains_point(b1,p1))return 1;
+    if(!box_contains_point(b1,p1)){return 1;}
     *rp1 = (struct pos){p1.x - b1.pos.x,p1.y - b1.pos.y};
     return 0;
 }
