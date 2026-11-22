@@ -258,8 +258,6 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
         }
     }
 
-
-    
     //エディター画面下スクロール処理
     if(event->bstate & BUTTON5_PRESSED && can_scroll_down){
 
@@ -356,8 +354,6 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
         nodelay(stdscr,false);
     
     }
-
-
 
     //マウスクリック処理
     if(event->bstate &
