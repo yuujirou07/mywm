@@ -188,7 +188,9 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
         }
         ft_draw_item_data(ctx,ft_box,tmp_view_data);
         //選択中の項目は、その行のツリー幅いっぱい(枠線は除く)を薄い白背景にして目立たせる
-        if(i == file_tree_data->ft_item_select_line){
+        // 選択行は項目領域内の0始まりの行なので、項目のscreen_yを同じ基準に直して比べる。
+        const int item_row = tmp_view_data->screen_y - (file_tree_data->ft_item_box.pos.y + 1);
+        if(item_row == file_tree_data->ft_item_select_line){
             set_cell_color_pair(
                 PAIR_FILETREE_SELECT,
                 ft_box.pos.x,

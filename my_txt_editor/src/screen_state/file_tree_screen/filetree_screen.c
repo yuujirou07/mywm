@@ -97,7 +97,10 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
 
     if(ch == KEY_ENTER || ch == L'\n'){
         int item_view_num = state->file_tree_data.item_view_count_num;
-        int select_line = state->file_tree_data.ft_item_select_line + 1;
+        //選択行(項目領域内の0始まりの行)を画面のy座標へ変換する。
+        //項目領域の先頭1行は項目を置かない(項目はview_h=1から並ぶ)ため+1する。
+        const struct box item_box = state->file_tree_data.ft_item_box;
+        int select_line = item_box.pos.y + 1 + state->file_tree_data.ft_item_select_line;
         ft_item_view_data *tmp_item_data_list = state->file_tree_data.item_view_data;
 
         ft_item_view_data *tmp_item = NULL;

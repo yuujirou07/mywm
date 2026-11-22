@@ -276,6 +276,8 @@ static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev){
     ft_item_view_data *const item = &tmp_item_data[j];
     
     ft_item_open_event(ctx,item);
-    state->file_tree_data.ft_item_select_line = item->screen_y;
+    // 選択行は項目領域内の0始まりの行で持つ(項目はft_item_boxの先頭から1行下に並ぶ)。
+    state->file_tree_data.ft_item_select_line =
+        item->screen_y - (state->file_tree_data.ft_item_box.pos.y + 1);
     return;
 }
