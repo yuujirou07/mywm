@@ -185,7 +185,17 @@ void hide_filetree(struct editor_input_context *ctx){
 bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int input_result){
     (void)input_result;
     struct editor_state *state = ctx->state;
+    file_tree_data *tmp_file_tree = &state->file_tree_data;
     if(state->cursor.is_cur_show)my_cur_set(state,false);
+
+    if(ch == L'j'){
+        if(tmp_file_tree->item_view_count_num > 
+            tmp_file_tree->ft_item_select_line){
+
+            tmp_file_tree->ft_item_select_line++;
+            state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+        }
+    }
 
     if(ch == CTRL('n')){
         // ツリーを出したキーと同じキーで閉じる。
@@ -211,6 +221,17 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
     }
 
     return true;
+}
+
+int ft_set_file_tree_item_select_line(file_tree_data *file_tree_data,int line_num){
+    if(file_tree_data == NULL || line_num < 0){
+        return -1;
+    }
+
+    
+
+
+
 }
 
 
@@ -358,7 +379,8 @@ static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer){
 // 引数: ctx=アイコン設定を持つcontext、ft_box=名前を切り詰める基準の枠、view_data=描画する項目(screen_y/xは設定済み)。 返り値: なし。名前の描画幅が残っていなければ名前は描かない。
 static void ft_draw_item_data(struct editor_input_context *ctx,struct box ft_box,
                          ft_item_view_data *view_data){
-    char *item_name = view_data->table_ptr->s_data.d_name;
+
+    const char *item_name = view_data->table_ptr->s_data.d_name;
     const char *icon;
 
     //ディレクトリは開閉状態、それ以外は拡張子に応じたアイコンを使う
@@ -370,7 +392,7 @@ static void ft_draw_item_data(struct editor_input_context *ctx,struct box ft_box
     }
 
     //アイコンの使用セル数
-    int item_icon_len = str_display_width(icon);
+    const int item_icon_len = str_display_width(icon);
     mvaddstr(view_data->screen_y,view_data->screen_x,icon);
 
     //アイテム名の描画文字数制限。0以下はmvaddnstrで「全文字」の意味になるため描かない。
@@ -397,7 +419,6 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
     if(sorted_num <= 0){
         return -1;
     }
-    
 
     int i = 0;
     while(i < sorted_num){

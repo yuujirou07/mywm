@@ -131,7 +131,7 @@ int load_icon_data(const char *relative_path,icon_data *icon_data_ptr){
 
 // file_extの実在パスを調べ、ディレクトリまたはシンボリックリンクならフォルダ用、それ以外はicon_data_ptrの拡張子対応・既定の順でアイコンを返す。
 // 返値は借用文字列で解放不可。対応表内の返値は表の解放で無効になる。stat失敗時は拡張子対応・既定へ進む。
-const char *get_file_ext_code(char *file_ext,icon_data *icon_data_ptr){
+const char *get_file_ext_code(const char *file_ext,icon_data *icon_data_ptr){
 
     struct stat state;
     // "\uf07b" = フォルダのアイコン(Nerd Font: nf-fa-folder)
