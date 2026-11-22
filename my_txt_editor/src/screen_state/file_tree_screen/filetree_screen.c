@@ -96,7 +96,22 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
     }
 
     if(ch == KEY_ENTER){
-        
+        int item_view_num = state->file_tree_data.item_view_count_num;
+        int select_line = state->file_tree_data.ft_item_select_line;
+        ft_item_view_data *tmp_item_data_list = state->file_tree_data.item_view_data;
+
+        ft_item_view_data *tmp_item = NULL;
+        for(int i = 0;i < item_view_num;i++){
+            if(tmp_item_data_list[i].screen_y == select_line){
+                tmp_item = &tmp_item_data_list[i];
+                break;
+            }
+        }
+        if(tmp_item != NULL){
+            ft_item_open_event(ctx,tmp_item);
+            state->render_flags |= RENDER_FILETREE;
+        }
+
     }
 
     if(ch == CTRL('n')){
@@ -138,4 +153,39 @@ int change_file_tree_width(struct editor_input_context *ctx,int width){
     tmp_ft_data->ft_box.w = width;
     show_filetree(ctx,tmp_ft_data->ft_box);
     return 0;
+}
+
+// item_dataの項目を開く。ディレクトリなら開閉を切り替え、ファイルなら読み込んで編集画面の表示を更新する。
+// 引数: ctx=編集状態・構文情報を持つcontext、item_data=開く項目(table_ptrは有効であること)。 返り値: なし。必要な再描画フラグを立てる。
+void ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data){
+
+    ft_item_view_data *item = item_data;
+    struct editor_state *state = ctx->state;
+
+    enum select_state path_state =
+        get_path_state(item->table_ptr->absolute_path);
+        
+    if(path_state == folder){
+        item->is_open = !item->is_open;
+        state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+        state->render_flags |= RENDER_FILETREE;
+    }
+    else if(path_state == file){
+        struct file_browse_select_state select_state;
+        load_file(state,NULL,0
+            ,item->table_ptr->absolute_path,
+            &select_state);
+        
+        if(select_state.select_state == file){
+            load_screen_size(state);
+            editor_set_cursor(state,0,0);
+            state->render_flags |= RENDER_FILE_DATA;
+            state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+            state->render_flags |= RENDER_FILETREE;
+            if(state->settings_data->built_in_syntax){
+                set_syntax_data(&ctx->syntax_data,ctx);
+            }
+        }
+    }
+    return;
 }

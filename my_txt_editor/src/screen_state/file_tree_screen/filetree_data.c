@@ -249,38 +249,3 @@ int ft_get_max_layer_item_view_data(ft_item_view_data *item_view_data,int item_v
     }
     return tmp_layer;
 }
-
-// item_dataの項目を開く。ディレクトリなら開閉を切り替え、ファイルなら読み込んで編集画面の表示を更新する。
-// 引数: ctx=編集状態・構文情報を持つcontext、item_data=開く項目(table_ptrは有効であること)。 返り値: なし。必要な再描画フラグを立てる。
-void ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data){
-
-    ft_item_view_data *item = item_data;
-    struct editor_state *state = ctx->state;
-
-    enum select_state path_state =
-        get_path_state(item->table_ptr->absolute_path);
-        
-    if(path_state == folder){
-        item->is_open = !item->is_open;
-        state->render_flags |= RENDER_EDIT_SCREEN_BASE;
-        state->render_flags |= RENDER_FILETREE;
-    }
-    else if(path_state == file){
-        struct file_browse_select_state select_state;
-        load_file(state,NULL,0
-            ,item->table_ptr->absolute_path,
-            &select_state);
-        
-        if(select_state.select_state == file){
-            load_screen_size(state);
-            editor_set_cursor(state,0,0);
-            state->render_flags |= RENDER_FILE_DATA;
-            state->render_flags |= RENDER_EDIT_SCREEN_BASE;
-            state->render_flags |= RENDER_FILETREE;
-            if(state->settings_data->built_in_syntax){
-                set_syntax_data(&ctx->syntax_data,ctx);
-            }
-        }
-    }
-    return;
-}
