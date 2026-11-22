@@ -95,9 +95,9 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
         }
     }
 
-    if(ch == KEY_ENTER){
+    if(ch == KEY_ENTER || ch == L'\n'){
         int item_view_num = state->file_tree_data.item_view_count_num;
-        int select_line = state->file_tree_data.ft_item_select_line;
+        int select_line = state->file_tree_data.ft_item_select_line + 1;
         ft_item_view_data *tmp_item_data_list = state->file_tree_data.item_view_data;
 
         ft_item_view_data *tmp_item = NULL;
@@ -107,7 +107,7 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
                 break;
             }
         }
-        
+
         if(tmp_item != NULL){
             ft_item_open_event(ctx,tmp_item);
         }
