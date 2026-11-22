@@ -119,7 +119,10 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
         }
         
         if(tmp_item != NULL){
-            ft_item_open_event(ctx,tmp_item);
+            enum select_state state = ft_item_open_event(ctx,tmp_item);
+            if(state == file){
+                
+            }
         }
 
     }
@@ -167,7 +170,7 @@ int change_file_tree_width(struct editor_input_context *ctx,int width){
 
 // item_dataの項目を開く。ディレクトリなら開閉を切り替え、ファイルなら読み込んで編集画面の表示を更新する。
 // 引数: ctx=編集状態・構文情報を持つcontext、item_data=開く項目(table_ptrは有効であること)。 返り値: なし。必要な再描画フラグを立てる。
-void ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data){
+enum select_state ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data){
 
     ft_item_view_data *item = item_data;
     struct editor_state *state = ctx->state;
@@ -196,5 +199,5 @@ void ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item
             }
         }
     }
-    return;
+    return path_state;
 }

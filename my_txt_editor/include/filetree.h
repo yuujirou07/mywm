@@ -85,5 +85,5 @@ int ft_get_max_layer_item_view_data(ft_item_view_data *item_view_data,int item_v
 
 int ft_set_file_tree_item_select_line(file_tree_data *file_tree_data,int line_num);
 
-void ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data);
+enum select_state ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data);
 #endif
