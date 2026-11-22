@@ -314,8 +314,8 @@ static void ft_update_filetree_data(struct editor_input_context *ctx,
             //取得した名前の座標をitemに代入する
             item_data->screen_y = item_name_pos.y;
             item_data->screen_x = item_name_pos.x;
-        }
-    
+        }   
+        (*file_h)++;
         //iの要素がディレクトリかつ、is_openで展開判定になっていたら
         //i番目のテーブルにそのディレクトリ内の要素のデータをつける
         if(table[i].s_data.d_type == DT_DIR && item_data->is_open){
