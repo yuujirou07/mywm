@@ -354,6 +354,33 @@ static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer){
 
 
 
+// 項目1件を、記録済みのscreen_y/screen_xへアイコン(ディレクトリは開閉、ファイルは拡張子別)と名前の順に描く。
+// 引数: ctx=アイコン設定を持つcontext、ft_box=名前を切り詰める基準の枠、view_data=描画する項目(screen_y/xは設定済み)。 返り値: なし。名前の描画幅が残っていなければ名前は描かない。
+static void ft_draw_item_data(struct editor_input_context *ctx,struct box ft_box,
+                         ft_item_view_data *view_data){
+    char *item_name = view_data->table_ptr->s_data.d_name;
+    const char *icon;
+
+    //ディレクトリは開閉状態、それ以外は拡張子に応じたアイコンを使う
+    if(view_data->table_ptr->s_data.d_type == DT_DIR){
+        icon = view_data->is_open ? FILE_TREE_ICON_OPEN : FILE_TREE_ICON_CLOSE;
+    }
+    else{
+        icon = get_file_ext_code(item_name,&ctx->state->settings_data->icon_data);
+    }
+
+    //アイコンの使用セル数
+    int item_icon_len = str_display_width(icon);
+    mvaddstr(view_data->screen_y,view_data->screen_x,icon);
+
+    //アイテム名の描画文字数制限。0以下はmvaddnstrで「全文字」の意味になるため描かない。
+    int name_len_max = (ft_box.w - 1) - (view_data->screen_x + 1 + item_icon_len);
+    if(name_len_max <= 0)return;
+
+    mvaddnstr(view_data->screen_y,view_data->screen_x + item_icon_len + 1,
+              item_name,name_len_max);
+}
+
 // file_tree_dataの先頭から枠の高さ-1件までの項目を、記録済みscreen_y/screen_xへアイコン付きで描く。
 // 返り値: 常に0。座標は事前にft_update_filetree_dataで設定しておく。
 int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_tree_data){
@@ -387,47 +414,7 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             continue;
         }
 
-        const char *ext_icon =
-            get_file_ext_code(
-                tmp_view_data->table_ptr->s_data.d_name,
-                &ctx->state->settings_data->icon_data
-            );
-        
-        //アイコンの使用セル数を保持する変数
-        int item_icon_len = 0;
-
-        //ディレクトリの開閉状態アイコン表示
-        if(tmp_view_data->table_ptr->s_data.d_type == DT_DIR){
-            
-            const char *dir_open_state_icon = (tmp_view_data->is_open)
-                ?FILE_TREE_ICON_OPEN : FILE_TREE_ICON_CLOSE;
-
-            item_icon_len = str_display_width(dir_open_state_icon);
-            mvaddstr(
-                tmp_view_data->screen_y,
-                tmp_view_data->screen_x,
-                dir_open_state_icon
-            );
-        }
-        //ディレクトリではない場合アイコンを表示する
-        else{
-            item_icon_len = str_display_width(ext_icon);
-            mvaddstr(
-                tmp_view_data->screen_y,
-                tmp_view_data->screen_x,
-                ext_icon
-            );
-        }
-        
-        //アイテム名の描画文字数制限
-        int name_len_max = (ft_box.w - 1) - (tmp_view_data->screen_x + 1 + item_icon_len);
-
-        mvaddnstr(
-            tmp_view_data->screen_y,
-            tmp_view_data->screen_x + item_icon_len + 1,
-            tmp_view_data->table_ptr->s_data.d_name,
-            name_len_max
-        );
+        ft_draw_item_data(ctx,ft_box,tmp_view_data);
       
         i++;
     }
