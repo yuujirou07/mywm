@@ -8,6 +8,7 @@
 #include "filetree.h"
 #include "ftj.h"
 #include "editor_screen.h"
+#include "editor_color.h"
 
 static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer);
 
@@ -186,8 +187,15 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             continue;
         }
         ft_draw_item_data(ctx,ft_box,tmp_view_data);
+        //選択中の項目は、その行のツリー幅いっぱい(枠線は除く)を白背景にして目立たせる
         if(i == file_tree_data->ft_item_select_line){
-            bkgdset(COLOR_PAIR(COLOR_BLACK));
+            set_cell_bg_color(
+                ctx,
+                COLOR_WHITE,
+                ft_box.pos.x,
+                tmp_view_data->screen_y,
+                ft_box.w
+            );
         }
 
         

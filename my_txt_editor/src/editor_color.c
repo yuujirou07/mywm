@@ -71,7 +71,10 @@ short get_color_pair(struct editor_input_context *ctx,int fg,int bg){
 
 
 
+// (x,y)から右へn セルの背景色をcolorへ変える。文字・前景色・文字属性はセルごとに保ったまま、背景色だけを差し替える。
+// 引数: ctx=色表を持つcontext、color=新しい背景色(COLOR_*)、x/y=開始セルの画面座標、n=変更するセル数。 返り値: 成功0、ctxがNULLまたはnが0以下なら-1。
 int set_cell_bg_color(struct editor_input_context *ctx,short color,int x,int y,int n){
+    if(ctx == NULL || n <= 0)return -1;
     chtype cht[n];
     mvinchnstr(y,x,cht,n);
 
