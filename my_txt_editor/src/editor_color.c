@@ -4,6 +4,8 @@
 
 #include"editor_color.h"
 
+// 8色×8色の前景/背景の全組み合わせを色ペアとして登録し、ctxの色表へ保存する。初期属性は白on黒。
+// 引数: ctx=色表の保存先。 返り値: ctxがNULLなら-1、それ以外は0(カラー非対応・確保失敗時は色表なしで0)。
 int init_curses_color(struct editor_input_context *ctx){
 
     if(ctx == NULL){
@@ -38,6 +40,8 @@ int init_curses_color(struct editor_input_context *ctx){
     return 0;
 }
 
+// 前景色fgと背景色bgに対応する色ペア番号を色表から探す。
+// 引数: ctx=色表を持つcontext、fg/bg=ncursesの色番号。 返り値: 見つかった番号。ctxがNULL・色表未確保・未登録なら-1。
 int get_color_id(struct editor_input_context *ctx,int fg,int bg){
     if(ctx == NULL){
         return -1;

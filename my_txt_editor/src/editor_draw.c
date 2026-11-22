@@ -506,6 +506,7 @@ int clear_status_bar_outline(struct editor_state *state){
 
 
 // 補完候補枠(編集領域内座標)を画面座標へ変換して返す。
+// 引数: state=編集領域と補完枠を持つ状態。 返り値: write_areaの開始位置を足した枠のコピー(stateは変更しない)。
 struct box complete_box_screen(struct editor_state *state){
     struct box b = state->edit_input_complete_data.box;
     b.pos.x += state->write_area.x_start;
@@ -650,12 +651,16 @@ int redraw_write_area_line_str(struct editor_state *state,uint16_t line,uint16_t
 }
 
 
+// 標準画面の背景属性を色ペアcolorに設定する。
+// 引数: color=init_pair済みの色ペア番号。 返り値: 成功時0、colorがCOLOR_PAIRS以上なら-1。
 int set_editor_background_color(short color){
     if(color >= COLOR_PAIRS)return -1;
     bkgd(COLOR_PAIR(color));
     return 0;
 }
 
+// 画面全体の背景描画用の関数。現状は未実装で、ctxの検証のみ行う。
+// 引数: ctx=エディタ入力コンテキスト。 返り値: ctxがNULLなら-1、それ以外は0(描画は行わない)。
 int draw_screen_back_ground(struct editor_input_context *ctx){
     if(ctx == NULL){
         return - 1;
