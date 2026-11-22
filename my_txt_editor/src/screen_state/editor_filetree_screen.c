@@ -54,6 +54,7 @@ int get_root_file_tree_data(file_tree_data *file_tree,char *path){
     file_tree->drawing_data_num = 0;
     file_tree->draw_file_member_start_num = 0;
     file_tree->scroll_y = 0;
+    file_tree->ft_item_select_line = 0;
     if(mem_num == 0)return 0;
 
     file_tree->item_view_data = malloc(sizeof(ft_item_view_data) * mem_num);
@@ -358,7 +359,6 @@ static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer){
 int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_tree_data){
        
     struct box ft_box = file_tree_data->ft_box;
-
     ft_item_view_data **sorted_item_view_data;
     //y座標の昇順にソートした配列を取得する
     int sorted_num = ft_get_sorted_screen_y_item_view_data(
@@ -385,6 +385,10 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
         if(tmp_view_data->screen_y < 0){
             i++;
             continue;
+        }
+        
+        if(i == file_tree_data->ft_item_select_line){
+            bkgdset(COLOR_PAIR(COLOR_WHITE));
         }
 
         const char *ext_icon =
