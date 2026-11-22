@@ -71,8 +71,16 @@ short get_color_pair(struct editor_input_context *ctx,int fg,int bg){
 
 
 int set_cell_bg_color(short color,int x,int y,int n){
+    chtype cht[n];
+    mvinchnstr(y,x,cht,n);
 
-    
+    short current_pair[n];
+    short fg_list[n];
+    for(int i = 0;i < n;i++){
+        current_pair[i] = PAIR_NUMBER(cht[i]);
+    }
+
+
 
 
 }
