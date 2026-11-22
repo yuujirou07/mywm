@@ -17,6 +17,7 @@
 #define PAIR_FILETREE_SELECT 5  // ファイルツリーの選択行(黒on薄い白)。
 #define PAIR_SYNTAX_BASE     16 // 構文色の先頭。PAIR_SYNTAX_BASE+syntax_typeが各分類のペア番号。
 
+
 // 固定の色ペアを登録し、初期属性を本文色にする。
 // 引数: ctx=NULL検査のみに使う。 返り値: ctxがNULLなら-1、それ以外は0(カラー非対応・ペア数不足なら登録せず0)。
 int init_curses_color(struct editor_input_context *ctx);
