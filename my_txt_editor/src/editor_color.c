@@ -68,3 +68,11 @@ short get_color_pair(struct editor_input_context *ctx,int fg,int bg){
     int id = get_color_id(ctx,fg,bg);
     return (id < 0) ? 0 : (short)id;
 }
+
+
+int set_background_color(short color,int x,int y){
+
+
+
+
+}

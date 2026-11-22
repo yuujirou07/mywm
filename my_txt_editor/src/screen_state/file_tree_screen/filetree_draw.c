@@ -185,13 +185,12 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             i++;
             continue;
         }
-        if(i == file_tree_data->ft_item_select_line){
-            bkgdset(COLOR_PAIR(COLOR_WHITE));
-        }
         ft_draw_item_data(ctx,ft_box,tmp_view_data);
         if(i == file_tree_data->ft_item_select_line){
             bkgdset(COLOR_PAIR(COLOR_BLACK));
         }
+
+        
         drawing_item_count++;
         i++;
     }

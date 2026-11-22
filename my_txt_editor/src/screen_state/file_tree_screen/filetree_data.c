@@ -114,7 +114,7 @@ int ft_set_file_tree_item_select_line(file_tree_data *file_tree_data,int line_nu
         return -1;
     }
 
-    if(file_tree_data->ft_box.h <= line_num && 
+    if(file_tree_data->ft_box.h <= line_num || 
         file_tree_data->drawing_item_num <= line_num){
         return -1;
     }
