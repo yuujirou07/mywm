@@ -5,6 +5,8 @@
 
 static void send_lsp_did_change(struct editor_input_context *ctx);
 
+static void editor_mouse_click_event(struct editor_input_context *ctx,MEVENT *mev);
+
 // 通常編集画面のキー入力を処理する。
 // 引数: ctx=編集画面の描画・状態更新に必要なcontext、input_result=get_wch()の結果、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue、qで終了するならfalse。
 bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result, wint_t ch){
@@ -342,6 +344,7 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
             return;
         }
     }
+
     //ホイールの向き(上下)ごとのイベントマスク
     const mmask_t button5_ev = BUTTON5_CLICKED | BUTTON5_PRESSED;
     const mmask_t button4_ev = BUTTON4_CLICKED | BUTTON4_PRESSED;
@@ -353,11 +356,10 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
 
     //マウスクリック処理
     if(event->bstate &
-        (BUTTON1_PRESSED |
-        BUTTON1_CLICKED | 
+       (BUTTON1_PRESSED |
+        BUTTON1_CLICKED  | 
         BUTTON1_DOUBLE_CLICKED)){
-
-     
+        editor_mouse_click_event(ctx,event);
     }
     else{
         return;
