@@ -83,17 +83,24 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
     file_tree_data *tmp_file_tree = &state->file_tree_data;
     if(state->cursor.is_cur_show)my_cur_set(state,false);
 
-    if(ch == (wchar_t)L'j'){
+
+    
+    if(ch == (wchar_t)L'j' || ch == (wchar_t)L'k'){
         if(tmp_file_tree->item_view_count_num > 
             tmp_file_tree->ft_item_select_line){
-
+            int next_select_line = tmp_file_tree->ft_item_select_line+1;
+            if(ch == (wchar_t)L'k'){
+                next_select_line -= 2;
+            }
+            
             ft_set_file_tree_item_select_line(
                 tmp_file_tree,
-                tmp_file_tree->ft_item_select_line+1
+                next_select_line
             );
             state->render_flags |= RENDER_FILETREE;
         }
     }
+
 
     if(ch == KEY_ENTER || ch == L'\n'){
         int item_view_num = state->file_tree_data.item_view_count_num;
