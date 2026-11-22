@@ -260,6 +260,8 @@ void editor_screen_move_line(struct editor_input_context *ctx,int num){
     }
 
     state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+    state->render_flags |= RENDER_FILETREE;
+    state->render_flags |= RENDER_FILETREE;
     state->render_flags |= RENDER_FILE_DATA;
 }
 
@@ -408,8 +410,10 @@ void update_screen(struct editor_input_context *ctx){
         if(flags & RENDER_EDIT_SCREEN_BASE){
             draw_edit_screen_base(state, win, ctx->edit_screen.line_start_pos,
                                   ctx->edit_screen.line_end_pos);
-            // 行番号の消去は画面左端から始まりツリーの枠まで及ぶため、
-            // ツリーを表示中は必ずこの後で描き直す。
+        }
+        // 行番号の消去は画面左端から始まりツリーの枠まで及ぶため、
+        // RENDER_EDIT_SCREEN_BASEを要求するときはRENDER_FILETREEも同時に要求し、必ずこの後で描き直す。
+        if(flags & RENDER_FILETREE){
             if(state->file_tree_data.is_show){
                 draw_filetree(ctx,&state->file_tree_data);
             }

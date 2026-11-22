@@ -24,6 +24,7 @@ bool handle_error_screen_input(struct editor_input_context *ctx, wint_t ch){
             my_cur_set(state,true);
             editor_set_screen_state(state, edit_screen_mode);
             state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+            state->render_flags |= RENDER_FILETREE;
             state->render_flags |= RENDER_FILE_DATA;
         }
         

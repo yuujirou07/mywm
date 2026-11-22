@@ -64,6 +64,7 @@ static int draw_start_line_for_target(struct editor_state *state, long target_li
 static void redraw_edit_screen(struct editor_state *state){
     clear();
     state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+    state->render_flags |= RENDER_FILETREE;
     state->render_flags |= RENDER_FILE_DATA;
 }
 
@@ -166,6 +167,7 @@ int update_screen_ratio(struct editor_input_context *ctx){
                                   ctx->ask_make_file_mode.screen_center_y,
                                   ctx->ask_make_file_mode.screen_center_pos);
             state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+            state->render_flags |= RENDER_FILETREE;
             state->render_flags |= RENDER_FILE_DATA;
             state->render_flags |= RENDER_MAKE_FILE;
             break;
@@ -173,6 +175,7 @@ int update_screen_ratio(struct editor_input_context *ctx){
             // 入力欄の位置はステータスバー基準で毎回計算されるので描き直すだけでよい
             clear();
             state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+            state->render_flags |= RENDER_FILETREE;
             state->render_flags |= RENDER_FILE_DATA;
             state->render_flags |= RENDER_LINE_JUMP;
             break;
@@ -224,6 +227,7 @@ int update_screen_ratio(struct editor_input_context *ctx){
 
             clear();
             state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+            state->render_flags |= RENDER_FILETREE;
             state->render_flags |= RENDER_FILE_DATA;
             editor_sync_cursor(state);
             break;

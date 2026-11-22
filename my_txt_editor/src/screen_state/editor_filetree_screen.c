@@ -150,6 +150,7 @@ void show_filetree(struct editor_input_context *ctx,struct box ft_box){
     editor_sync_split_line(ctx);
     editor_sync_cursor(state);
     state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+    state->render_flags |= RENDER_FILETREE;
     state->render_flags |= RENDER_FILE_DATA;
 }
 
@@ -194,8 +195,11 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
         if(tmp_file_tree->item_view_count_num > 
             tmp_file_tree->ft_item_select_line){
 
-            tmp_file_tree->ft_item_select_line++;
-            state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+            ft_set_file_tree_item_select_line(
+                tmp_file_tree,
+                tmp_file_tree->ft_item_select_line++
+            );
+            state->render_flags |= RENDER_FILETREE;
         }
     }
 
@@ -230,10 +234,12 @@ int ft_set_file_tree_item_select_line(file_tree_data *file_tree_data,int line_nu
         return -1;
     }
 
-    
+    if(file_tree_data->ft_box.h <= line_num){
+        return -1;
+    }
 
-
-
+    file_tree_data->ft_item_select_line = line_num;
+    return 0;
 }
 
 
@@ -664,6 +670,7 @@ int ft_mouse_event(struct editor_input_context *ctx){
                 if(path_state == folder){
                     item->is_open = !item->is_open;
                     state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+                    state->render_flags |= RENDER_FILETREE;
                 }
                 else if(path_state == file){
                     struct file_browse_select_state select_state;
@@ -676,6 +683,7 @@ int ft_mouse_event(struct editor_input_context *ctx){
                         editor_set_cursor(state,0,0);
                         state->render_flags |= RENDER_FILE_DATA;
                         state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+                        state->render_flags |= RENDER_FILETREE;
                         if(state->settings_data->built_in_syntax){
                             set_syntax_data(&ctx->syntax_data,ctx);
                         }
@@ -770,6 +778,7 @@ int ft_mouse_event(struct editor_input_context *ctx){
 
             nodelay(stdscr,false);
             state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+            state->render_flags |= RENDER_FILETREE;
         }
     }
     return 0;

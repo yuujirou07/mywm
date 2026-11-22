@@ -27,6 +27,7 @@ void handle_mouse(struct editor_input_context *ctx,int dir_num) {
             editor_screen_mouse_event(ctx);
             if(old_scr_start_num != state->scr.scr_start_num){
                 state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+                state->render_flags |= RENDER_FILETREE;
                 state->render_flags |= RENDER_FILE_DATA;
             }
             break;

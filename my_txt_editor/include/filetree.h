@@ -81,5 +81,6 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
 
 int ft_get_max_layer_item_view_data(ft_item_view_data *item_view_data,int item_view_num);
 
+int ft_set_file_tree_item_select_line(file_tree_data *file_tree_data,int line_num);
 
 #endif

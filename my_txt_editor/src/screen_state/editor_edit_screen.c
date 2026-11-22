@@ -15,6 +15,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
 
     if(state->file_data.now_open_path_name[0] != '\0' && state->settings_data->show_status_bar){
         state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+        state->render_flags |= RENDER_FILETREE;
     }
     if (input_result == KEY_CODE_YES && ch == KEY_BACKSPACE && state->cursor.is_cur_show) {
         reduce_edit_comp_candidacy_part_data(state);

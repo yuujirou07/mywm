@@ -57,6 +57,7 @@ bool handle_start_menu_input(struct editor_input_context *ctx, wint_t ch){
         editor_set_cursor(state, 0, 0);
         editor_sync_cursor(state);
         state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+        state->render_flags |= RENDER_FILETREE;
         return true;
     }
     else if(start_menu_result == settings){

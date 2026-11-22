@@ -52,6 +52,7 @@ bool handle_ask_make_file_mode_input(struct editor_input_context *ctx, int input
             clear();
             editor_set_screen_state(state,edit_screen_mode);
             state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+            state->render_flags |= RENDER_FILETREE;
             state->render_flags |= RENDER_FILE_DATA;
             editor_sync_cursor(state);
         }
@@ -68,6 +69,7 @@ bool handle_ask_make_file_mode_input(struct editor_input_context *ctx, int input
             clear();
             state->make_file_mode_status.is_input_scene = false;
             state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+            state->render_flags |= RENDER_FILETREE;
             state->render_flags |= RENDER_FILE_DATA;
             editor_set_screen_state(state, edit_screen_mode);
             editor_sync_cursor(state);

@@ -67,7 +67,8 @@ enum render_flags {
     RENDER_MAKE_FILE = 1 << 12,     // 新規ファイル作成ダイアログを更新する。
     RENDER_SETTINGS = 1 << 13,      //設定ファイルを描画する
     RENDER_EDIT_COMPLETE_WINDOW = 1 << 14,//入力補完ウィンドウの描画
-    RENDER_COMMAND_MODE = 1 << 15 //コマンドモード
+    RENDER_COMMAND_MODE = 1 << 15, //コマンドモード
+    RENDER_FILETREE = 1 << 16 // ファイルツリー(表示中のみ)を再描画する。
 };
 
 

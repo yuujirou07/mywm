@@ -192,6 +192,8 @@ void handle_backspace(struct editor_input_context *ctx) {
         //どちらの経路も桁は触らないため、ここで結合位置へ寄せる
         state->cursor.file_pos.x = editor_clamp_col(state, state->cursor.file_pos.y, join_col);
         state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+        state->render_flags |= RENDER_FILETREE;
+        state->render_flags |= RENDER_FILETREE;
     }
     state->render_flags |= RENDER_FILE_DATA;
 }
@@ -227,6 +229,8 @@ void handle_newline(struct editor_input_context *ctx) {
         state->file_data.description_line_end = state->cursor.file_pos.y + 1;
     }
     state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+    state->render_flags |= RENDER_FILETREE;
+    state->render_flags |= RENDER_FILETREE;
     state->render_flags |= RENDER_FILE_DATA;
 }
 
