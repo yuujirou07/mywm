@@ -247,7 +247,8 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
 
     const int line_limit = editor_line_limit(state);
     const bool can_scroll_down = state->scr.scr_start_num + state->write_area.h < line_limit;
-
+    
+    //ファイルツリー領域でのマウスイベント判定
     if(state->file_tree_data.is_show){
         if(box_contains_point(
             state->file_tree_data.ft_box,
