@@ -256,13 +256,14 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
         //ファイルツリーが表示されている場合
         // スクロール時のマウスポインターがファイルツリー上にあるか判断する
         if(state->file_tree_data.is_show){
-            struct box tmp_write_area_box = comb_write_possible_area_to_box(state->write_area);
-            if(!box_contains_point(tmp_write_area_box,(struct pos){event->x,event->y})){
+            if(box_contains_point(state->file_tree_data.ft_box,(struct pos){event->x,event->y})){
                 editor_set_screen_state(state,filetree_screen_mode);
                 my_cur_set(state,false);
                 is_cur_on_edit_screen = false;
+                return;
             }
         }
+
         if(is_cur_on_edit_screen){
             
             wint_t chr;
