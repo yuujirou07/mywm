@@ -52,7 +52,7 @@ int get_root_file_tree_data(file_tree_data *file_tree,char *path){
     file_tree->item_view_count_num = 0;
     file_tree->item_view_data_allocate_num = 0;
     file_tree->is_grabed = false;
-    file_tree->drawing_data_num = 0;
+    file_tree->drawing_item_num = 0;
     file_tree->draw_file_member_start_num = 0;
     file_tree->scroll_y = 0;
     file_tree->ft_item_select_line = 0;
@@ -234,7 +234,8 @@ int ft_set_file_tree_item_select_line(file_tree_data *file_tree_data,int line_nu
         return -1;
     }
 
-    if(file_tree_data->ft_box.h <= line_num && file_tree_data->drawing_data_num <= line_num){
+    if(file_tree_data->ft_box.h <= line_num && 
+        file_tree_data->drawing_item_num <= line_num){
         return -1;
     }
 
@@ -287,7 +288,7 @@ int change_file_tree_width(struct editor_input_context *ctx,int width){
 }
 
 // filetree_dataのtable_num件のtableに表示座標と階層を再帰的に割り当てる(描画はしない)。layerは深さ、*file_hは次の相対行。
-// 返り値: なし。*file_h・各項目の画面座標・drawing_data_numを更新し、枠の下端・項目情報の確保失敗で打ち切る。
+// 返り値: なし。*file_h・各項目の画面座標・drawing_item_numを更新し、枠の下端・項目情報の確保失敗で打ち切る。
 static void ft_update_filetree_data(struct editor_input_context *ctx,
                                 file_tree_data *filetree_data,
                                 struct table *table,int table_num,
@@ -314,11 +315,7 @@ static void ft_update_filetree_data(struct editor_input_context *ctx,
             item_data->screen_y = item_name_pos.y;
             item_data->screen_x = item_name_pos.x;
         }
-        
-
-        //表示されているデータの個数カウント
-        filetree_data->drawing_data_num = (*file_h)++;
-
+    
         //iの要素がディレクトリかつ、is_openで展開判定になっていたら
         //i番目のテーブルにそのディレクトリ内の要素のデータをつける
         if(table[i].s_data.d_type == DT_DIR && item_data->is_open){
@@ -436,6 +433,8 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
     }
 
     int i = 0;
+    //実際に表示するアイテム個数カウンター
+    int drawing_item_count = 0;
     while(i < sorted_num){
         ft_item_view_data *tmp_view_data = sorted_item_view_data[i];
 
@@ -456,10 +455,11 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
         if(i == file_tree_data->ft_item_select_line){
             bkgdset(COLOR_PAIR(COLOR_BLACK));
         }
-
+        drawing_item_count++;
         i++;
     }
-    file_tree_data->drawing_data_num = i;
+    
+    file_tree_data->drawing_item_num = drawing_item_count;
 
     free(sorted_item_view_data);
     

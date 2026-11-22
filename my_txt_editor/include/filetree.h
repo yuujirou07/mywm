@@ -43,7 +43,7 @@ typedef struct{
     
     int item_view_count_num; // item_view_dataに格納済みの有効要素数。
     int item_view_data_allocate_num; // item_view_dataの確保済み要素数。item_view_count_num以上。
-    int drawing_data_num;//ファイルツリーに表示しているメンバ数
+    int drawing_item_num;//ファイルツリーに表示しているメンバ数
     int draw_file_member_start_num;//ファイルツリーに表示するメンバの開始数
     int scroll_y;//ファイルツリーのスクロール行数。0以上
     int now_select_item;
