@@ -70,15 +70,24 @@ short get_color_pair(struct editor_input_context *ctx,int fg,int bg){
 }
 
 
-int set_cell_bg_color(short color,int x,int y,int n){
+int set_cell_bg_color(struct editor_input_context *ctx,short color,int x,int y,int n){
     chtype cht[n];
+    attr_t attr[n];
     mvinchnstr(y,x,cht,n);
-
-    short current_pair[n];
+    
     short fg_list[n];
+    short bg_list[n];
+
+    //セルの色取得
     for(int i = 0;i < n;i++){
-        current_pair[i] = PAIR_NUMBER(cht[i]);
+        short col_pair = PAIR_NUMBER(cht[i]);
+        attr[i] = cht[i] & A_ATTRIBUTES;
+        pair_content(col_pair,&fg_list[i],&bg_list[i]);
     }
+
+    short col_id = get_color_id(ctx,, int bg)
+
+
 
 
 
