@@ -191,7 +191,7 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
     file_tree_data *tmp_file_tree = &state->file_tree_data;
     if(state->cursor.is_cur_show)my_cur_set(state,false);
 
-    if(ch == (wchar_t)L'a'){
+    if(ch == (wchar_t)L'j'){
         if(tmp_file_tree->item_view_count_num > 
             tmp_file_tree->ft_item_select_line){
 
@@ -200,7 +200,6 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
                 tmp_file_tree->ft_item_select_line+1
             );
             state->render_flags |= RENDER_FILETREE;
-            state->render_flags |= RENDER_EDIT_SCREEN_BASE;
         }
     }
 
@@ -235,7 +234,7 @@ int ft_set_file_tree_item_select_line(file_tree_data *file_tree_data,int line_nu
         return -1;
     }
 
-    if(file_tree_data->ft_box.h <= line_num){
+    if(file_tree_data->ft_box.h <= line_num && file_tree_data->drawing_data_num <= line_num){
         return -1;
     }
 
@@ -460,6 +459,7 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
 
         i++;
     }
+    file_tree_data->drawing_data_num = i;
 
     free(sorted_item_view_data);
     
