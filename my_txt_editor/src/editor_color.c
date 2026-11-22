@@ -14,7 +14,7 @@ int init_curses_color(struct editor_input_context *ctx){
     start_color();
     
     //カラー非対応か対応色が64色以下ならカラーをつけない
-    if (!has_colors() || COLOR_PAIRS < 64) {
+    if (!has_colors() || COLOR_PAIRS < SUPPORT_COLOR_NUM) {
         return 0;
     }
     
