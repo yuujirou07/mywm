@@ -70,29 +70,23 @@ short get_color_pair(struct editor_input_context *ctx,int fg,int bg){
 }
 
 
+
 int set_cell_bg_color(struct editor_input_context *ctx,short color,int x,int y,int n){
     chtype cht[n];
-    attr_t attr[n];
     mvinchnstr(y,x,cht,n);
-    
 
     //セルの色取得
     for(int i = 0;i < n;i++){
         //文字データ取得
-        attr[i] = cht[i] & A_ATTRIBUTES;
+        attr_t attr = cht[i] & A_ATTRIBUTES;
         //カラーid取得
         short col_pair = PAIR_NUMBER(cht[i]);
         //背景色文字色をカラーidから取得する
         short fg_col;
         short bg_col;
         pair_content(col_pair,&fg_col,&bg_col);
+        short new_col_id = get_color_pair(ctx,fg_col,color);
+        mvchgat(y,x + i,1,attr,new_col_id,NULL);
     }
-
-    
-
-
-
-
-
-
+    return 0;
 }
