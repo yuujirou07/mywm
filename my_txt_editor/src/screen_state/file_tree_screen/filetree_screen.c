@@ -107,9 +107,9 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
                 break;
             }
         }
+        
         if(tmp_item != NULL){
             ft_item_open_event(ctx,tmp_item);
-            state->render_flags |= RENDER_FILETREE;
         }
 
     }
@@ -167,7 +167,6 @@ void ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item
         
     if(path_state == folder){
         item->is_open = !item->is_open;
-        state->render_flags |= RENDER_EDIT_SCREEN_BASE;
         state->render_flags |= RENDER_FILETREE;
     }
     else if(path_state == file){
