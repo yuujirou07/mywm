@@ -84,7 +84,7 @@ void handle_resize(WINDOW *win, struct editor_input_context *ctx){
         int msg_y = state->scr.scr_size.y / 2;
 
         clear();
-        attr_t error_attr = COLOR_PAIR(get_color_pair(ctx,COLOR_BLACK,COLOR_RED));
+        attr_t error_attr = COLOR_PAIR(PAIR_ERROR);
         attron(error_attr);
         mvaddnstr(msg_y, msg_x, resize_msg, draw_len);
         attroff(error_attr);

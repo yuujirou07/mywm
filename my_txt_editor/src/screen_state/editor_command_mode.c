@@ -106,7 +106,7 @@ int draw_command_str(struct editor_input_context *ctx){
     tmp_chr[1] = L'\0';
     
     
-    short color_id = get_color_id(ctx,COLOR_WHITE,COLOR_BLACK);
+    short color_id = PAIR_TEXT;
 
     setcchar(&tmp_cchar,tmp_chr,A_NORMAL,color_id,NULL);
     struct pos ms_pos = state->cursor.screen_pos;

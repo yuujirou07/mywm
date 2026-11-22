@@ -20,7 +20,7 @@ bool handle_start_menu_input(struct editor_input_context *ctx, wint_t ch){
         ctx->start_menu_screen.ascii_data,
         ctx->start_menu_screen.startup_start_time,
         ctx->start_menu_screen.startup_log_path,
-        get_color_pair(ctx,COLOR_WHITE,COLOR_BLACK));
+        PAIR_TEXT);
     flushinp();
     *ctx->start_menu_screen.open = false;
 

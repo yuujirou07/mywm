@@ -29,28 +29,29 @@ static int collection_count = 0;
 static void color_text_cells(struct editor_state *state,int y,int x,int width,short color);
 
 
-// ncursesとstart_color初期化後に、256色の構文色ペアをget_color_idの表より後ろの番号へ登録する。
-// 引数・返り値: なし。256色未満なら8色の表を使うので何もせず、色登録の失敗は通知しない。
+// ncursesとstart_color初期化後に、構文色のペアをPAIR_SYNTAX_BASE以降の番号へ登録する。
+// 引数・返り値: なし。256色以上なら256色の色番号、未満なら基本色を使う。色非対応なら何もせず、登録の失敗は通知しない。
 void init_syntax_colors(void){
-    if(!has_colors() || COLORS < 256)return;
+    if(!has_colors())return;
     for(size_t i = 0;i < sizeof(syntax_colors) / sizeof(syntax_colors[0]);i++){
-        short pair = (short)(SUPPORT_COLOR_NUM + i);
-        if(pair >= COLOR_PAIRS)break; // 端末のペア上限を超える分は登録しない(syntax_color_pairが8色へ退避)。
-        init_pair(pair,syntax_colors[i].color_256,COLOR_BLACK);
+        short pair = (short)(PAIR_SYNTAX_BASE + i);
+        if(pair >= COLOR_PAIRS)break; // 端末のペア上限を超える分は登録しない(syntax_color_pairが本文色へ退避)。
+        short fg = (COLORS >= 256) ? syntax_colors[i].color_256 : syntax_colors[i].color_8;
+        init_pair(pair,fg,COLOR_BLACK);
     }
 }
 
 // word_typeに対応する構文色ペア番号を返す。事前にinit_syntax_colorsを呼ぶ。
-// 返り値: 色非対応は0、分類不正は本文色、256色はSUPPORT_COLOR_NUM+word_type、それ以外は8色の色ペア。
+// 返り値: 色非対応は0、分類不正・ペア不足は本文色、それ以外はPAIR_SYNTAX_BASE+word_type。
 short syntax_color_pair(struct editor_input_context *ctx,syntax_type word_type){
     if(!has_colors())return 0;
     //suntax_typeが要素数より上の値かの条件分岐
     if((unsigned int)word_type >= sizeof(syntax_colors) / sizeof(syntax_colors[0])){
-        return get_color_pair(ctx,COLOR_WHITE,COLOR_BLACK);
+        return PAIR_TEXT;
     }
-    short pair = (short)(SUPPORT_COLOR_NUM + word_type);
-    if(COLORS >= 256 && pair < COLOR_PAIRS)return pair;
-    return get_color_pair(ctx,syntax_colors[word_type].color_8,COLOR_BLACK);
+    short pair = (short)(PAIR_SYNTAX_BASE + word_type);
+    if(pair < COLOR_PAIRS)return pair;
+    return PAIR_TEXT;
 }
 
 static const wchar_t *const reserved_words[] = {
@@ -388,7 +389,7 @@ int apply_syntax_color(struct editor_input_context *ctx,syntax syntax){
     int syntax_num = syntax.syntax_list_data.syntax_list_num;
     
     // 本文描画の後に色だけを重ねる方式なので、まず通常色に戻して前回の着色を消す。
-    short normal_color = get_color_pair(ctx,COLOR_WHITE,COLOR_BLACK);
+    short normal_color = PAIR_TEXT;
     for(int h = 0;h < state->write_area.h;h++){
         if(state->write_area.w > 0){
             color_text_cells(state,state->write_area.y_start + h,state->write_area.x_start,

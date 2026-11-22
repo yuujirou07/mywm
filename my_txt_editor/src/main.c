@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     init_curses_color(&input_context);
 
 
-    // 8色の組み合わせはinit_curses_colorが登録済み。256色の構文色だけその次の番号から登録する。
+    // 固定の色ペアはinit_curses_colorが登録済み。構文色はPAIR_SYNTAX_BASE以降へ登録する。
     if(state.settings_data->built_in_syntax){
         init_syntax_colors();
     }
@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
     input_context.ask_make_file_mode.screen_center_pos.x = state.scr.scr_size.x / 2;
     input_context.ask_make_file_mode.screen_center_pos.y = input_context.ask_make_file_mode.screen_center_y;
     
-    bkgd(COLOR_PAIR(get_color_pair(&input_context,COLOR_WHITE,COLOR_BLACK)));
+    bkgd(COLOR_PAIR(PAIR_TEXT));
     editor_sync_cursor(&state);
     set_cur_pos(&state);
     refresh();
@@ -547,7 +547,6 @@ int main(int argc, char *argv[])
     }
 
     free(input_context.input_manager.key_maps.key_mapp_list);
-    free(input_context.color_list.col_id_data);
     destroy_dl_path(&input_context);
     destoroy_key_input_event_handle(&input_context);
     destory_command_mode(&state);

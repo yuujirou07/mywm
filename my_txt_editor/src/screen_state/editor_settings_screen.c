@@ -145,7 +145,7 @@ static void draw_settings_title(struct editor_input_context *ctx,struct box box)
     if(box.w < title_len + 2)return;
 
     int title_x = box.pos.x + (box.w - title_len) / 2;
-    attr_t accent_attr = COLOR_PAIR(get_color_pair(ctx,COLOR_CYAN,COLOR_BLACK)) | A_BOLD;
+    attr_t accent_attr = COLOR_PAIR(PAIR_ACCENT) | A_BOLD;
     attron(accent_attr);
     mvaddstr(box.pos.y,title_x,title);
     attroff(accent_attr);
@@ -263,14 +263,14 @@ void draw_settings_screen(struct editor_input_context *ctx){
 
             wchar_t key_code[SETTINGS_ITEM_KEY_WIDTH + 1] =
                 {L'[',(wchar_t)item.key_code,L']',L'\0'};
-            attr_t accent_attr = COLOR_PAIR(get_color_pair(ctx,COLOR_CYAN,COLOR_BLACK)) | A_BOLD;
+            attr_t accent_attr = COLOR_PAIR(PAIR_ACCENT) | A_BOLD;
             attron(accent_attr);
             mvaddnwstr(scr_pos_y,key_pos_x,key_code,SETTINGS_ITEM_KEY_WIDTH);
             attroff(accent_attr);
 
             //反転は最後に重ねる。名前とキーの色より選択表示を優先する。
             if(is_select){
-                mvchgat(scr_pos_y,col_pos_x,col_w,A_NORMAL,get_color_pair(ctx,COLOR_BLACK,COLOR_WHITE),NULL);
+                mvchgat(scr_pos_y,col_pos_x,col_w,A_NORMAL,PAIR_SELECT,NULL);
             }
         }
     }

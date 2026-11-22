@@ -461,7 +461,7 @@ void draw_select_dir_scene_color(struct editor_state *state,int dir_num,int num)
     if(state->file_browse.select_line.previous_line != state->file_browse.select_line.now_line){
         int previous_line = state->file_browse.area.pos.y + state->file_browse.select_line.previous_line;
         // 選択が移った前の行を通常の本文色へ戻す。
-        mvchgat(previous_line,state->file_browse.area.pos.x,state->file_browse.area.w,A_NORMAL,get_color_pair(state->input_ctx,COLOR_WHITE,COLOR_BLACK),NULL);
+        mvchgat(previous_line,state->file_browse.area.pos.x,state->file_browse.area.w,A_NORMAL,PAIR_TEXT,NULL);
     }
     move(cur_y,cur_x);
 }
@@ -509,7 +509,7 @@ void draw_file_browse(struct editor_input_context *ctx){
     draw_now_path_name(state->file_browse.box,
                        state->file_browse.path_name);
     draw_box_inside_dir(state, state->file_browse.dir_name_table);
-    draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,get_color_pair(ctx,COLOR_BLACK,COLOR_WHITE));
+    draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,PAIR_SELECT);
 
     //サーチボックスの描画とサーチボックス内のパス描画
     if(get_file_browse_path_input_mode(&state->file_browse)){

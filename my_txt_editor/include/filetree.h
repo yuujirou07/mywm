@@ -14,6 +14,8 @@
 #define FILE_TREE_ICON_CLOSE ">"
 #define FILE_TREE_ICON_OPEN "\u2304"
 
+#define FILE_TREE_SELECT_LINE_COLOR_RGB 250
+
 
 struct ft_path_click_data;
 struct editor_input_context;

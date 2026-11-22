@@ -48,7 +48,7 @@ void editor_error_screen(struct editor_state *state,char *error_comment){
     int press_enter_comment_start_pos_x = screen_center_x - (press_enter_comment/2);
     int screen_center_y        =  state->file_browse.area.pos.y + (state->file_browse.area.h/2);
 
-    attr_t error_attr = COLOR_PAIR(get_color_pair(state->input_ctx,COLOR_BLACK,COLOR_RED));
+    attr_t error_attr = COLOR_PAIR(PAIR_ERROR);
     attron(error_attr);
     mvaddstr(screen_center_y-10,error_start_pos_x,"error");
     attroff(error_attr);

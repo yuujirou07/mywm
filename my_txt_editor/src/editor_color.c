@@ -4,92 +4,45 @@
 
 #include"editor_color.h"
 
-// 8色×8色の前景/背景の全組み合わせを色ペアとして登録し、ctxの色表へ保存する。初期属性は白on黒。
-// 引数: ctx=色表の保存先。 返り値: ctxがNULLなら-1、それ以外は0(カラー非対応・確保失敗時は色表なしで0)。
+// 固定の色ペア(PAIR_xxx)をncursesへ登録し、初期属性を本文色(白on黒)にする。
+// 引数: ctx=NULL検査のみに使う。 返り値: ctxがNULLなら-1、それ以外は0(カラー非対応・ペア数不足なら登録せず0)。
 int init_curses_color(struct editor_input_context *ctx){
 
     if(ctx == NULL){
         return -1;
     }
     start_color();
-    
-    //カラー非対応か対応色が64色以下ならカラーをつけない
-    if (!has_colors() || COLOR_PAIRS < SUPPORT_COLOR_NUM) {
-        return 0;
-    }
-    
-    ctx->color_list.col_id_data = malloc(sizeof(color_id_data) * SUPPORT_COLOR_NUM);
-    if(ctx->color_list.col_id_data == NULL){
-        return 0;
-    }
-    // 確保に成功してから件数を入れる。失敗時はget_color_idが-1を返す。
-    ctx->color_list.col_data_allocate_num = SUPPORT_COLOR_NUM;
-    ctx->color_list.col_data_num = SUPPORT_COLOR_NUM;
 
-    for(int i = 0;i < 8;i++){
-        for(int j = 0;j < 8;j++){
-            int idx = (i * 8) + j;
-            // ペア0は端末既定色で変更できないため登録しない。
-            if(idx != 0)init_pair(idx,i,j);
-            ctx->color_list.col_id_data[idx].id = idx;
-            ctx->color_list.col_id_data[idx].fg_col = i;
-            ctx->color_list.col_id_data[idx].bg_col = j;
-        }
+    //カラー非対応か、固定ペア+構文色を置けるだけのペア数がなければカラーをつけない
+    if (!has_colors() || COLOR_PAIRS <= PAIR_SYNTAX_BASE) {
+        return 0;
     }
-    attrset(COLOR_PAIR(get_color_pair(ctx,COLOR_WHITE,COLOR_BLACK)));
+
+    // 薄い白は256色端末だけ。それ以外は基本色の白で代用する。
+    const short light_gray = (COLORS >= 256) ? COLOR_LIGHT_GRAY : COLOR_WHITE;
+
+    init_pair(PAIR_TEXT,COLOR_WHITE,COLOR_BLACK);
+    init_pair(PAIR_ERROR,COLOR_BLACK,COLOR_RED);
+    init_pair(PAIR_SELECT,COLOR_BLACK,COLOR_WHITE);
+    init_pair(PAIR_ACCENT,COLOR_CYAN,COLOR_BLACK);
+    init_pair(PAIR_FILETREE_SELECT,COLOR_BLACK,light_gray);
+
+    attrset(COLOR_PAIR(PAIR_TEXT));
     return 0;
 }
 
-// 前景色fgと背景色bgに対応する色ペア番号を色表から探す。
-// 引数: ctx=色表を持つcontext、fg/bg=ncursesの色番号。 返り値: 見つかった番号。ctxがNULL・色表未確保・未登録なら-1。
-int get_color_id(struct editor_input_context *ctx,int fg,int bg){
-    if(ctx == NULL){
-        return -1;
-    }
-    
-    if(ctx->color_list.col_data_allocate_num <= 0){
-        return -1;
-    }
+// (x,y)から右へnセルを色ペアpairへ変える。各セルの文字・文字属性は保つ。
+// 引数: pair=PAIR_xxxの色ペア番号、x/y=開始セルの画面座標、n=変更するセル数。 返り値: 成功0、nが0以下または読み取り失敗なら-1。
+int set_cell_color_pair(short pair,int x,int y,int n){
+    if(n <= 0)return -1;
+    // mvinchnstrは読み取った末尾に終端の0を書くため、n+1個の領域が要る。
+    chtype cht[n + 1];
+    if(mvinchnstr(y,x,cht,n) == ERR)return -1;
 
-    int tmp_id = -1;
-    for(int i = 0;i < SUPPORT_COLOR_NUM;i++){
-        if(ctx->color_list.col_id_data[i].fg_col == fg && 
-            ctx->color_list.col_id_data[i].bg_col == bg){
-            tmp_id = i;
-            break;
-        }
-    }
-    return tmp_id;
-}
-
-// get_color_idの結果をCOLOR_PAIR・mvchgatへそのまま渡せる形で返す。
-// 返り値: 色ペア番号。色非対応や未登録の組み合わせなら端末既定色の0。
-short get_color_pair(struct editor_input_context *ctx,int fg,int bg){
-    int id = get_color_id(ctx,fg,bg);
-    return (id < 0) ? 0 : (short)id;
-}
-
-
-
-// (x,y)から右へn セルの背景色をcolorへ変える。文字・前景色・文字属性はセルごとに保ったまま、背景色だけを差し替える。
-// 引数: ctx=色表を持つcontext、color=新しい背景色(COLOR_*)、x/y=開始セルの画面座標、n=変更するセル数。 返り値: 成功0、ctxがNULLまたはnが0以下なら-1。
-int set_cell_bg_color(struct editor_input_context *ctx,short color,int x,int y,int n){
-    if(ctx == NULL || n <= 0)return -1;
-    chtype cht[n];
-    mvinchnstr(y,x,cht,n);
-
-    //セルの色取得
     for(int i = 0;i < n;i++){
-        //文字データ取得
-        attr_t attr = cht[i] & A_ATTRIBUTES;
-        //カラーid取得
-        short col_pair = PAIR_NUMBER(cht[i]);
-        //背景色文字色をカラーidから取得する
-        short fg_col;
-        short bg_col;
-        pair_content(col_pair,&fg_col,&bg_col);
-        short new_col_id = get_color_pair(ctx,fg_col,color);
-        mvchgat(y,x + i,1,attr,new_col_id,NULL);
+        // 元の色ペアのビットは外し、文字属性だけ残す。
+        attr_t attr = cht[i] & A_ATTRIBUTES & ~A_COLOR;
+        mvchgat(y,x + i,1,attr,pair,NULL);
     }
     return 0;
 }

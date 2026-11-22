@@ -405,7 +405,7 @@ void update_screen(struct editor_input_context *ctx){
                       ctx->edit_screen.line_end_pos, all_draw_mode);
         }
         if(flags & RENDER_SELECT_DIR_SCENE_COLOR){
-            draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,get_color_pair(ctx,COLOR_BLACK,COLOR_WHITE));
+            draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,PAIR_SELECT);
         }
         if(flags & RENDER_EDIT_SCREEN_BASE){
             draw_edit_screen_base(state, win, ctx->edit_screen.line_start_pos,
@@ -613,7 +613,7 @@ int draw_editor_complete_word_box(struct editor_input_context *ctx){
 // 返り値: 幅・高さが2以下なら-1、それ以外0。ncursesの描画失敗は通知しない。
 int clear_box_area(struct editor_input_context *ctx,struct box b){
     if(b.h <= 2 || b.w <= 2)return -1;
-    attr_t clear_attr = COLOR_PAIR(get_color_pair(ctx,COLOR_WHITE,COLOR_BLACK));
+    attr_t clear_attr = COLOR_PAIR(PAIR_TEXT);
     for(int i = 0;i < b.h;i++){
         mvhline(b.pos.y + i,b.pos.x,L' '|clear_attr,b.w );
     }
