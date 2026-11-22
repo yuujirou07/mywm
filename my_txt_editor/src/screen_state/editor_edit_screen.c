@@ -249,7 +249,7 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
     bool can_scroll_down = state->scr.scr_start_num + state->write_area.h < line_limit;
 
     //エディター画面下スクロール処理
-    if (event->bstate & BUTTON5_PRESSED && can_scroll_down){
+    if(event->bstate & BUTTON5_PRESSED && can_scroll_down){
 
         
         bool is_cur_on_edit_screen = true;
@@ -291,7 +291,6 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
                 if(get_wch(&chr) == ERR){
                     break;
                 }
-
 
                 if(chr == KEY_MOUSE){
                     if(getmouse(&tmp_msev) == OK && 
