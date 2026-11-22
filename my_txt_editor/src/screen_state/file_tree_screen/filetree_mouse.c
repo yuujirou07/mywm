@@ -274,6 +274,16 @@ static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev){
     }
 
     ft_item_view_data *const item = &tmp_item_data[j];
+    
+    ft_item_open_event(ctx,item);
+
+    return;
+}
+
+void ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data){
+
+    ft_item_view_data *item = item_data;
+    struct editor_state *state = ctx->state;
 
     enum select_state path_state =
         get_path_state(item->table_ptr->absolute_path);
@@ -302,3 +312,5 @@ static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev){
     }
     return;
 }
+
+
