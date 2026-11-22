@@ -191,13 +191,13 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
     file_tree_data *tmp_file_tree = &state->file_tree_data;
     if(state->cursor.is_cur_show)my_cur_set(state,false);
 
-    if(ch == L'j'){
+    if(ch == (wchar_t)L'a'){
         if(tmp_file_tree->item_view_count_num > 
             tmp_file_tree->ft_item_select_line){
 
             ft_set_file_tree_item_select_line(
                 tmp_file_tree,
-                tmp_file_tree->ft_item_select_line++
+                tmp_file_tree->ft_item_select_line+1
             );
             state->render_flags |= RENDER_FILETREE;
         }
@@ -413,7 +413,7 @@ static void ft_draw_item_data(struct editor_input_context *ctx,struct box ft_box
     //アイテム名の描画文字数制限。0以下はmvaddnstrで「全文字」の意味になるため描かない。
     int name_len_max = (ft_box.w - 1) - (view_data->screen_x + 1 + item_icon_len);
     if(name_len_max <= 0)return;
-
+    
     mvaddnstr(view_data->screen_y,view_data->screen_x + item_icon_len + 1,
               item_name,name_len_max);
 }
@@ -449,9 +449,14 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             i++;
             continue;
         }
-
+        if(i == file_tree_data->ft_item_select_line){
+            bkgdset(COLOR_PAIR(COLOR_WHITE));
+        }
         ft_draw_item_data(ctx,ft_box,tmp_view_data);
-      
+        if(i == file_tree_data->ft_item_select_line){
+            bkgdset(COLOR_PAIR(COLOR_BLACK));
+        }
+
         i++;
     }
 
