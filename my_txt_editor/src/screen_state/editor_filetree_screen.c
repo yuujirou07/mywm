@@ -386,10 +386,6 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             i++;
             continue;
         }
-        
-        if(i == file_tree_data->ft_item_select_line){
-            bkgdset(COLOR_PAIR(COLOR_WHITE));
-        }
 
         const char *ext_icon =
             get_file_ext_code(
@@ -432,7 +428,7 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             tmp_view_data->table_ptr->s_data.d_name,
             name_len_max
         );
-
+      
         i++;
     }
 
