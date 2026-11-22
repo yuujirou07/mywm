@@ -120,11 +120,12 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
         
         if(tmp_item != NULL){
             enum select_state state = ft_item_open_event(ctx,tmp_item);
+            //通常ファイルなら編集画面に移動する
             if(state == file){
-                
+                editor_set_screen_state(ctx->state,edit_screen_mode);
+                my_cur_set(ctx->state,true);
             }
         }
-
     }
 
     if(ch == CTRL('n')){
