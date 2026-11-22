@@ -258,6 +258,8 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
         }
     }
 
+
+    
     //エディター画面下スクロール処理
     if(event->bstate & BUTTON5_PRESSED && can_scroll_down){
 
@@ -309,18 +311,17 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
     //エディター画面上スクロール処理
     }else if ((event->bstate & BUTTON4_PRESSED) && state->scr.scr_start_num > 0) {
         wint_t chr;
-        
         nodelay(stdscr,true);
         MEVENT tmp_msev;
         //スクロール処理はスタックがたまるため一時的にノンブロッキングにして
         //溜まっているスクロールスタックをループで処理する
         do{
-            int before_scr_start_num = state->scr.scr_start_num;
+            const int before_scr_start_num = state->scr.scr_start_num;
             editor_scroll_logical_line(
                 state,
                 -state->settings_data->editor_scroll_sensitivity
             );
-            
+
             int scrolled_num = before_scr_start_num - state->scr.scr_start_num;
             // 下スクロールの逆。実際にスクロールした行数だけ既存分を下げ、
             // 新しく見える最上行からscrolled_num行分を解析する。
@@ -364,34 +365,26 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
         BUTTON1_CLICKED | 
         BUTTON1_DOUBLE_CLICKED)){
 
-        int x = event->x;
-        int y = event->y;
-
+        const int x = event->x;
+        const int y = event->y;
       
-        if(box_contains_point(ctx->state->file_tree_data.ft_box,(struct pos){event->x,event->y})){
-            editor_set_screen_state(state,filetree_screen_mode);
-            ft_mouse_event(ctx);
-            return;
-        }
-        else{
-            struct box tmp_write_area_box = 
-                {(struct pos){
-                    ctx->state->write_area.x_start,
-                    ctx->state->write_area.y_start
-                },
-                    ctx->state->write_area.w,
-                    ctx->state->write_area.h
-                };
-            if(box_contains_point(tmp_write_area_box,(struct pos){x,y})){
-                struct pos write_area_pos;
-                write_area_pos.y = y - state->write_area.y_start;
-                write_area_pos.x = x - state->write_area.x_start;
-                int line_num = state->scr.scr_start_num + write_area_pos.y;
-                if(state->file_data.description_line_end < line_num){
-                    line_num = *state->str.line;
-                }
-                editor_set_cursor(state,line_num,write_area_pos.x);
+        const struct box tmp_write_area_box = 
+            {(struct pos){
+                ctx->state->write_area.x_start,
+                ctx->state->write_area.y_start
+            },
+                ctx->state->write_area.w,
+                ctx->state->write_area.h
+            };
+        if(box_contains_point(tmp_write_area_box,(struct pos){x,y})){
+            struct pos write_area_pos;
+            write_area_pos.y = y - state->write_area.y_start;
+            write_area_pos.x = x - state->write_area.x_start;
+            int line_num = state->scr.scr_start_num + write_area_pos.y;
+            if(state->file_data.description_line_end < line_num){
+                line_num = *state->str.line;
             }
+            editor_set_cursor(state,line_num,write_area_pos.x);
         }
     }
     else{
