@@ -661,17 +661,12 @@ int load_settings_program(struct editor_input_context *restrict ctx,char *restri
     if(ctx == NULL || src_path == NULL){
         return -1;
     }
-
     //JSONでルートパスが設定されているか確認
-    if(ctx->state->settings_data->editor_settings_program.root_src_path != NULL){
-        //dlファイルパス設定
-        int rt = add_dl_path(
-            ctx,
-            ctx->state->settings_data->
-                editor_settings_program.root_src_path
-        );
-        if(rt == 0){
-            init_settings_src(&ctx->editor_api,ctx);
-        }
-    } 
+    //dlファイルパス設定
+    const int rt = add_dl_path(ctx,src_path);
+    if(rt == 0){
+        init_settings_src(&ctx->editor_api,ctx);
+    }
+    
+    return 0;
 }

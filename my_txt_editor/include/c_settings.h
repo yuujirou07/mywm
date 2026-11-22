@@ -60,5 +60,6 @@ static inline MY_TXT_EDITOR_SCREEN_MODE comb_screen_state_To_my_txt_editor_scree
     return UNKNOWN_MODE;
 }
 
+int load_settings_program(struct editor_input_context *restrict ctx,char *restrict src_path);
 
 #endif

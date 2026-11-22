@@ -385,25 +385,18 @@ int main(int argc, char *argv[])
 
     //設定プログラムファイルロード　
     if(state.settings_data->editor_settings_program.enabled){
-        //JSONでルートパスが設定されているか確認
-        if(state.settings_data->editor_settings_program.root_src_path != NULL){
-            //dlファイルパス設定
-            int rt = add_dl_path(
-                &input_context,
-                state.settings_data->editor_settings_program.root_src_path
-            );
-            if(rt == 0){
-                init_settings_src(&input_context.editor_api,&input_context);
-            }
-        }   
+        load_settings_program(
+            &input_context,
+            state.settings_data->editor_settings_program.root_src_path
+        );
     }
     
     
-    int load_icon_rt = 0;
-    
-    load_icon_rt = 
-        load_icon_data(ICON_SETTINGS_PATH,
-                &settings_data.icon_data);
+    int load_icon_rt = 
+        load_icon_data(
+            ICON_SETTINGS_PATH,
+            &settings_data.icon_data
+        );
 
     if(load_icon_rt != 0){
         error_log("can not load icon data");
@@ -419,9 +412,7 @@ int main(int argc, char *argv[])
     
     wint_t ch = 0;
     int input_result = 0;
-    
-
-    
+        
     while (running) {
         
         //もしlspを使用する設定だったら
@@ -441,21 +432,19 @@ int main(int argc, char *argv[])
         }
         
         //補完候補があるか確認し、あれば補完ウィンドウを有効にする
-
         //補完機能が有効か
         if(state.settings_data->auto_complete_settings_data.auto_complete_enabled){
             //補完ウィンドウの表示フラグがたっているか
-            if(state.edit_input_complete_data.show){
+            if(state.edit_input_complete_data.show &&
+                editor_get_screen_state(&state) == edit_screen_mode){
                 //補完ウィンドウ表示フラグがたっているのに補完候補が0ならバグとして認識し、補完ウィンドウ表示フラグをfalseに戻す
-                if(state.edit_input_complete_data.comp_world_candidacy_part_data.comp_w_cand_part_d_count <= 0){
+                if(state.edit_input_complete_data.
+                    comp_world_candidacy_part_data.
+                        comp_w_cand_part_d_count <= 0){
                     state.edit_input_complete_data.show = false;
                 }
                 else{
                     state.render_flags |= RENDER_EDIT_COMPLETE_WINDOW;
-                }
-                //編集画面以外では描画しない
-                if(editor_get_screen_state(&state) != edit_screen_mode){
-                   state.render_flags &= ~RENDER_EDIT_COMPLETE_WINDOW;
                 }
             }
         }
