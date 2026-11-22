@@ -14,6 +14,7 @@ static bool is_within_double_click(struct timespec st);
 static double get_time_elapsed_MS(struct timespec time);
 static int file_tree_outline_first_click_process(struct editor_state *state);
 static bool editor_click_move_cursor(struct editor_state *state, const MEVENT *ev);
+static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev);
 
 // ctxのマウスイベントでツリーの開閉・ファイル読込・境界のドラッグ開始・編集画面への移行を処理する。
 // 返り値: 常に0。イベントはgetmouseで取得済みとし、必要な再描画と構文情報更新を要求する。
@@ -101,40 +102,7 @@ int ft_mouse_event(struct editor_input_context *ctx){
         ft_box.w--;
         // ファイルツリー内クリック時の処理
         if(box_contains_point(ft_box,(struct pos){ev->x,ev->y})){
-            for(int i = 0;i < state->file_tree_data.item_view_count_num;i++){
-                ft_item_view_data *item =
-                    &state->file_tree_data.item_view_data[i];
-                if(item->screen_y != ev->y){
-                    continue;
-                }
-
-                enum select_state path_state =
-                    get_path_state(item->table_ptr->absolute_path);
-                    
-                if(path_state == folder){
-                    item->is_open = !item->is_open;
-                    state->render_flags |= RENDER_EDIT_SCREEN_BASE;
-                    state->render_flags |= RENDER_FILETREE;
-                }
-                else if(path_state == file){
-                    struct file_browse_select_state select_state;
-                    load_file(state,NULL,0
-                        ,item->table_ptr->absolute_path,
-                        &select_state);
-                    
-                    if(select_state.select_state == file){
-                        load_screen_size(state);
-                        editor_set_cursor(state,0,0);
-                        state->render_flags |= RENDER_FILE_DATA;
-                        state->render_flags |= RENDER_EDIT_SCREEN_BASE;
-                        state->render_flags |= RENDER_FILETREE;
-                        if(state->settings_data->built_in_syntax){
-                            set_syntax_data(&ctx->syntax_data,ctx);
-                        }
-                    }
-                }
-                break;
-            }
+           ft_mouse_click_event(ctx,*ev); 
         }
         else{
             editor_click_move_cursor(state,ev);
@@ -280,4 +248,49 @@ static double get_time_elapsed_MS(struct timespec time){
     clock_gettime(CLOCK_MONOTONIC,&last_click_time);
     //ダブルクリックのミリ秒の差取得
     return comb_time_interval_ms(time,last_click_time);
+}
+
+static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev){
+
+    struct editor_state *state = ctx->state;
+
+    for(int i = 0;i < state->file_tree_data.item_view_count_num;i++){
+        ft_item_view_data *item =
+            &state->file_tree_data.item_view_data[i];
+        if(item->screen_y != mev.y){
+            continue;
+        }
+
+        enum select_state path_state =
+            get_path_state(item->table_ptr->absolute_path);
+            
+        if(path_state == folder){
+            item->is_open = !item->is_open;
+            state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+            state->render_flags |= RENDER_FILETREE;
+        }
+        else if(path_state == file){
+            struct file_browse_select_state select_state;
+            load_file(state,NULL,0
+                ,item->table_ptr->absolute_path,
+                &select_state);
+            
+            if(select_state.select_state == file){
+                load_screen_size(state);
+                editor_set_cursor(state,0,0);
+                state->render_flags |= RENDER_FILE_DATA;
+                state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+                state->render_flags |= RENDER_FILETREE;
+                if(state->settings_data->built_in_syntax){
+                    set_syntax_data(&ctx->syntax_data,ctx);
+                }
+            }
+        }
+        break;
+    }
+
+
+
+
+    return;
 }
