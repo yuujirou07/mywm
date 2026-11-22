@@ -254,6 +254,14 @@ static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev){
 
     struct editor_state *state = ctx->state;
 
+    int j = 0;
+    int item_num = state->file_tree_data.item_view_count_num;
+    ft_item_view_data *tmp_item_data = state->file_tree_data.item_view_data;
+    while(j < item_num && tmp_item_data[j].screen_y != mev.y){
+        j++;
+    }
+
+
     for(int i = 0;i < state->file_tree_data.item_view_count_num;i++){
         ft_item_view_data *item =
             &state->file_tree_data.item_view_data[i];
