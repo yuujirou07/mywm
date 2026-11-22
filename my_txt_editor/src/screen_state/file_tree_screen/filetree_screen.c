@@ -95,6 +95,10 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
         }
     }
 
+    if(ch == KEY_ENTER){
+        
+    }
+
     if(ch == CTRL('n')){
         // ツリーを出したキーと同じキーで閉じる。
         hide_filetree(ctx);

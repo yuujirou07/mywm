@@ -256,20 +256,19 @@ static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev){
 
     struct editor_state *state = ctx->state;
 
-    int j = 0;
+    
     const int item_num = state->file_tree_data.item_view_count_num;
     ft_item_view_data *tmp_item_data = state->file_tree_data.item_view_data;
-
-    bool is_found = false;
+    //クリックした位置にアイテムがあるか調べる
+    int j = -1;
     for(int i = 0;i < item_num;i++){
         if(tmp_item_data[i].screen_y == mev.y){
-            is_found = true;
             j = i;
             break;
         }
     }
 
-    if(is_found == false){
+    if(j < 0){
         return;
     }
 
@@ -279,38 +278,3 @@ static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev){
 
     return;
 }
-
-void ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data){
-
-    ft_item_view_data *item = item_data;
-    struct editor_state *state = ctx->state;
-
-    enum select_state path_state =
-        get_path_state(item->table_ptr->absolute_path);
-        
-    if(path_state == folder){
-        item->is_open = !item->is_open;
-        state->render_flags |= RENDER_EDIT_SCREEN_BASE;
-        state->render_flags |= RENDER_FILETREE;
-    }
-    else if(path_state == file){
-        struct file_browse_select_state select_state;
-        load_file(state,NULL,0
-            ,item->table_ptr->absolute_path,
-            &select_state);
-        
-        if(select_state.select_state == file){
-            load_screen_size(state);
-            editor_set_cursor(state,0,0);
-            state->render_flags |= RENDER_FILE_DATA;
-            state->render_flags |= RENDER_EDIT_SCREEN_BASE;
-            state->render_flags |= RENDER_FILETREE;
-            if(state->settings_data->built_in_syntax){
-                set_syntax_data(&ctx->syntax_data,ctx);
-            }
-        }
-    }
-    return;
-}
-
-
