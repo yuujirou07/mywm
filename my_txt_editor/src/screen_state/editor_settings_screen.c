@@ -232,9 +232,9 @@ void draw_settings_screen(struct editor_input_context *ctx){
 
     for(int c = 0; c < col_count;c++){
         //列の左端。マーカーはこの位置、名前はその2つ右に置く。
-        int col_pos_x = items_pos_x + c * col_w;
-        int mark_pos_x = col_pos_x;
-        int item_pos_x = col_pos_x + 2;
+        const int col_pos_x = items_pos_x + c * col_w;
+        const int mark_pos_x = col_pos_x;
+        const int item_pos_x = col_pos_x + 2;
         //キーは列の右端から桁数と余白1つ分だけ内側へ寄せる。
         int key_pos_x = col_pos_x + col_w - 1 - SETTINGS_ITEM_KEY_WIDTH - 1;
 
