@@ -70,9 +70,9 @@ short get_color_pair(struct editor_input_context *ctx,int fg,int bg){
 }
 
 
-int set_background_color(short color,int x,int y){
+int set_cell_bg_color(short color,int x,int y,int n){
 
-
+    
 
 
 }
