@@ -239,14 +239,96 @@ void draw_file_data(struct editor_state *state){
     }
 }
 
+// 表示開始行がmoved行(正で下方向)動いた分だけ構文情報をずらし、新しく見える行を解析し直す。
+// 引数: ctx=構文情報と画面状態、moved=実際に動いた行数(0なら何もしない)。 返り値: なし。組み込み構文が無効なら何もしない。
+static void sync_syntax_after_scroll(struct editor_input_context *ctx,int moved){
+    struct editor_state *state = ctx->state;
+    if(!state->settings_data->built_in_syntax || moved == 0)return;
+
+    const int h = state->write_area.h;
+    int amount = moved > 0 ? moved : -moved;
+    // 構文情報は画面相対行で持つ。下へ動くと既存分は上(負)へ、上へ動くと下(正)へずれる。
+    scroll_syntax_pos_data(&ctx->syntax_data,-moved,h);
+
+    // 下へ動けば最下行側、上へ動けば最上行側のamount行が新しく見える。
+    if(amount > h)amount = h;
+    int first_line = moved > 0 ? h - amount : 0;
+    for(int line = first_line;line < first_line + amount;line++){
+        update_line_syntax_data(ctx,line);
+    }
+}
+
+// マウスホイール1回分と、溜まっている同方向のホイール入力をまとめてスクロールする。
+// 引数: ctx=編集画面の状態、scroll_up=trueで上、falseで下。 返り値: なし。
+// 別種の入力が来たら押し戻してループを抜け、nodelayは必ず元(ブロッキング)へ戻す。
+static void scroll_editor_by_wheel(struct editor_input_context *ctx,bool scroll_up){
+    struct editor_state *state = ctx->state;
+    const mmask_t same_dir_ev = scroll_up
+        ? (BUTTON4_PRESSED | BUTTON4_CLICKED)
+        : (BUTTON5_PRESSED | BUTTON5_CLICKED);
+    const int sensitivity = state->settings_data->editor_scroll_sensitivity;
+    wint_t chr;
+    MEVENT tmp_msev;
+
+    //スクロール入力は溜まりやすいため、一時的にノンブロッキングにして溜まった分をループで消化する
+    nodelay(stdscr,true);
+    do{
+        const int before_scr_start_num = state->scr.scr_start_num;
+        editor_scroll_logical_line(state,scroll_up ? -sensitivity : sensitivity);
+        sync_syntax_after_scroll(ctx,state->scr.scr_start_num - before_scr_start_num);
+
+        if(get_wch(&chr) == ERR){
+            break;
+        }
+        if(chr == KEY_MOUSE){
+            // 同方向のホイールなら続けて消化し、それ以外のマウス入力は戻して終了する。
+            if(getmouse(&tmp_msev) == OK && !(tmp_msev.bstate & same_dir_ev)){
+                ungetmouse(&tmp_msev);
+                break;
+            }
+        }
+        else{
+            unget_wch(chr);
+            break;
+        }
+    }while(1);
+    nodelay(stdscr,false);
+}
+
+static void editor_click_event(struct editor_input_context *ctx,MEVENT *mev){
+    
+    struct editor_state *state = ctx->state;
+
+    const int x = mev->x;
+    const int y = mev->y;
+    
+    const struct box tmp_write_area_box = 
+        {(struct pos){
+            ctx->state->write_area.x_start,
+            ctx->state->write_area.y_start
+        },
+            ctx->state->write_area.w,
+            ctx->state->write_area.h
+        };
+    if(box_contains_point(tmp_write_area_box,(struct pos){x,y})){
+        struct pos write_area_pos;
+        write_area_pos.y = y - state->write_area.y_start;
+        write_area_pos.x = x - state->write_area.x_start;
+        int line_num = state->scr.scr_start_num + write_area_pos.y;
+        if(state->file_data.description_line_end < line_num){
+            line_num = *state->str.line;
+        }
+        editor_set_cursor(state,line_num,write_area_pos.x);
+    }
+    return;
+}
+
+
 // ctxの取得済みマウスイベントでスクロール・本文クリック・ツリーへの移行を処理する。
 // 返り値: なし。ホイールは表示開始行だけ、本文クリックは論理カーソルを動かし、最後にカーソル表示可否を更新する。
 void editor_screen_mouse_event(struct editor_input_context *ctx){
     MEVENT *event = &ctx->mouse_event;
     struct editor_state *state = ctx->state;
-
-    const int line_limit = editor_line_limit(state);
-    const bool can_scroll_down = state->scr.scr_start_num + state->write_area.h < line_limit;
 
     //ファイルツリー領域でのマウスイベント判定
     //ファイルツリー内でマウスがスクロールや
@@ -260,64 +342,13 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
             return;
         }
     }
-
-    //下スクロール
+    //ホイールの向き(上下)ごとのイベントマスク
     const mmask_t button5_ev = BUTTON5_CLICKED | BUTTON5_PRESSED;
-    //上スクロール
     const mmask_t button4_ev = BUTTON4_CLICKED | BUTTON4_PRESSED;
 
-    //エディター画面の上下スクロール処理(上下共通)。上下同時に立っている場合は上を優先する。
+    //ホイールスクロール処理(上下共通)。上下同時に立っている場合は上を優先する。
     if(event->bstate & (button5_ev | button4_ev)){
-        const bool scroll_up = (event->bstate & button4_ev) != 0;
-        //続けて消化する同方向のホイールイベント
-        const mmask_t same_dir_ev = scroll_up ? button4_ev : button5_ev;
-        wint_t chr;
-        MEVENT tmp_msev;
-
-        //スクロール入力は溜まりやすいため、一時的にノンブロッキングにして
-        //溜まっているスクロールスタックをループで処理する
-        nodelay(stdscr,true);
-        do{
-            const int before_scr_start_num = state->scr.scr_start_num;
-            int scroll_sence = state->settings_data->editor_scroll_sensitivity;
-            //上スクロールならマイナスに切り替える
-            if(scroll_up){scroll_sence = -scroll_sence;}
-            editor_scroll_logical_line(state,scroll_sence);
-
-            //実際に動いた行数(下が正)
-            const int moved = state->scr.scr_start_num - before_scr_start_num;
-
-            // 構文情報は画面相対行で持つ。下へ動けば既存分は上(負)へ、上へ動けば下(正)へずらし、
-            // 新しく見える端(下なら最下行側、上なら最上行側)のmoved行分だけ解析し直す。
-            if(state->settings_data->built_in_syntax && moved != 0){
-                const int h = state->write_area.h;
-                int amount = moved > 0 ? moved : -moved;
-                scroll_syntax_pos_data(&ctx->syntax_data,-moved,h);
-                if(amount > h)amount = h;
-                const int first_line = moved > 0 ? h - amount : 0;
-                for(int line = first_line;line < first_line + amount;line++){
-                    update_line_syntax_data(ctx,line);
-                }
-            }
-
-            if(get_wch(&chr) == ERR){
-                break;
-            }
-
-            if(chr == KEY_MOUSE){
-                //同方向のホイールなら続けて消化し、それ以外のマウス入力は戻して終了する
-                if(getmouse(&tmp_msev) == OK && !(tmp_msev.bstate & same_dir_ev)){
-                    ungetmouse(&tmp_msev);
-                    break;
-                }
-            }
-            else{
-                unget_wch(chr);
-                break;
-            }
-        }while(1);
-
-        nodelay(stdscr,false);
+        scroll_editor_by_wheel(ctx,(event->bstate & button4_ev) != 0);
     }
 
     //マウスクリック処理
@@ -326,27 +357,7 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
         BUTTON1_CLICKED | 
         BUTTON1_DOUBLE_CLICKED)){
 
-        const int x = event->x;
-        const int y = event->y;
-      
-        const struct box tmp_write_area_box = 
-            {(struct pos){
-                ctx->state->write_area.x_start,
-                ctx->state->write_area.y_start
-            },
-                ctx->state->write_area.w,
-                ctx->state->write_area.h
-            };
-        if(box_contains_point(tmp_write_area_box,(struct pos){x,y})){
-            struct pos write_area_pos;
-            write_area_pos.y = y - state->write_area.y_start;
-            write_area_pos.x = x - state->write_area.x_start;
-            int line_num = state->scr.scr_start_num + write_area_pos.y;
-            if(state->file_data.description_line_end < line_num){
-                line_num = *state->str.line;
-            }
-            editor_set_cursor(state,line_num,write_area_pos.x);
-        }
+     
     }
     else{
         return;
