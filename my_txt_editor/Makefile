@@ -19,7 +19,10 @@ SRC := src/main.c \
 	src/screen_state/editor_make_file_screen.c \
 	src/screen_state/editor_start_menu_screen.c \
 	src/screen_state/editor_settings_screen.c \
-	src/screen_state/editor_filetree_screen.c \
+	src/screen_state/file_tree_screen/filetree_data.c \
+	src/screen_state/file_tree_screen/filetree_screen.c \
+	src/screen_state/file_tree_screen/filetree_draw.c \
+	src/screen_state/file_tree_screen/filetree_mouse.c \
 	src/screen_state/editor_command_mode.c \
 	src/editor_func.c \
 	src/editor_draw.c \
