@@ -250,55 +250,55 @@ static double get_time_elapsed_MS(struct timespec time){
     return comb_time_interval_ms(time,last_click_time);
 }
 
+
+
 static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev){
 
     struct editor_state *state = ctx->state;
 
     int j = 0;
-    int item_num = state->file_tree_data.item_view_count_num;
+    const int item_num = state->file_tree_data.item_view_count_num;
     ft_item_view_data *tmp_item_data = state->file_tree_data.item_view_data;
-    while(j < item_num && tmp_item_data[j].screen_y != mev.y){
-        j++;
+
+    bool is_found = false;
+    for(int i = 0;i < item_num;i++){
+        if(tmp_item_data[i].screen_y == mev.y){
+            is_found = true;
+            j = i;
+            break;
+        }
     }
 
+    if(is_found == false){
+        return;
+    }
 
-    for(int i = 0;i < state->file_tree_data.item_view_count_num;i++){
-        ft_item_view_data *item =
-            &state->file_tree_data.item_view_data[i];
-        if(item->screen_y != mev.y){
-            continue;
-        }
+    ft_item_view_data *const item = &tmp_item_data[j];
 
-        enum select_state path_state =
-            get_path_state(item->table_ptr->absolute_path);
-            
-        if(path_state == folder){
-            item->is_open = !item->is_open;
+    enum select_state path_state =
+        get_path_state(item->table_ptr->absolute_path);
+        
+    if(path_state == folder){
+        item->is_open = !item->is_open;
+        state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+        state->render_flags |= RENDER_FILETREE;
+    }
+    else if(path_state == file){
+        struct file_browse_select_state select_state;
+        load_file(state,NULL,0
+            ,item->table_ptr->absolute_path,
+            &select_state);
+        
+        if(select_state.select_state == file){
+            load_screen_size(state);
+            editor_set_cursor(state,0,0);
+            state->render_flags |= RENDER_FILE_DATA;
             state->render_flags |= RENDER_EDIT_SCREEN_BASE;
             state->render_flags |= RENDER_FILETREE;
-        }
-        else if(path_state == file){
-            struct file_browse_select_state select_state;
-            load_file(state,NULL,0
-                ,item->table_ptr->absolute_path,
-                &select_state);
-            
-            if(select_state.select_state == file){
-                load_screen_size(state);
-                editor_set_cursor(state,0,0);
-                state->render_flags |= RENDER_FILE_DATA;
-                state->render_flags |= RENDER_EDIT_SCREEN_BASE;
-                state->render_flags |= RENDER_FILETREE;
-                if(state->settings_data->built_in_syntax){
-                    set_syntax_data(&ctx->syntax_data,ctx);
-                }
+            if(state->settings_data->built_in_syntax){
+                set_syntax_data(&ctx->syntax_data,ctx);
             }
         }
-        break;
     }
-
-
-
-
     return;
 }
