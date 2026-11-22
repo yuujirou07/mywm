@@ -28,6 +28,7 @@ int ft_init_file_tree(file_tree_data *file_tree){
 
     file_tree->ft_box = (struct box){(struct pos){0,0},0,0};
     file_tree->ft_search_box = (struct box){(struct pos){0,0},0,0};
+    file_tree->ft_item_box = (struct box){(struct pos){0,0},0,0};
     file_tree->root_node = NULL;
     file_tree->is_show = false;
     file_tree->outline_click_data.outline_click_count = 0;
@@ -159,6 +160,7 @@ void hide_filetree(struct editor_input_context *ctx){
 
     state->file_tree_data.is_show = false;
     state->file_tree_data.ft_box = (struct box){(struct pos){0,0},0,0};
+    state->file_tree_data.ft_item_box = (struct box){(struct pos){0,0},0,0};
     editor_apply_write_area(state);
     editor_sync_split_line(ctx);
 
@@ -235,10 +237,17 @@ int ft_set_file_tree_item_select_line(file_tree_data *file_tree_data,int line_nu
 }
 
 
-// filetree_dataの枠を画面上の矩形filetree_boxへ値コピーする。
-// 返り値: 常に0。範囲検査・描画・編集領域の更新は行わない。
+// filetree_dataの枠を画面上の矩形filetree_boxへ値コピーし、項目領域ft_item_boxも枠から検索欄の高さを除いて求め直す。
+// 返り値: 常に0。範囲検査・描画・編集領域の更新は行わない。検索欄の高さが枠以上なら項目領域の高さは0になる。
 int set_filetree_box(file_tree_data *filetree_data,struct box filetree_box){
+    int search_h = filetree_data->ft_search_box.h;
+    if(search_h < 0)search_h = 0;
+    if(search_h > filetree_box.h)search_h = filetree_box.h;
+
     filetree_data->ft_box = filetree_box;
+    filetree_data->ft_item_box = filetree_box;
+    filetree_data->ft_item_box.pos.y += search_h;
+    filetree_data->ft_item_box.h -= search_h;
     return 0;
 }
 
@@ -278,7 +287,7 @@ static void ft_update_filetree_data(struct editor_input_context *ctx,
                                 struct table *table,int table_num,
                                 int layer,int *file_h){
                                     
-    struct box box = filetree_data->ft_box;
+    struct box box = filetree_data->ft_item_box;
 
     for(int i = 0;i < table_num;i++){
         // スクロール分ずらした枠内の相対行
@@ -719,9 +728,9 @@ int ft_mouse_event(struct editor_input_context *ctx){
                 if(msev.bstate & (BUTTON5_CLICKED | BUTTON5_PRESSED)){
                     
                     //表示するアイテム数がファイルツリー内に収まらず、かつ末尾まで表示しきっていない場合にのみスクロールする
-                    if(tmp_file_tree->item_view_count_num > tmp_file_tree->ft_box.h && 
+                    if(tmp_file_tree->item_view_count_num > tmp_file_tree->ft_item_box.h && 
                         tmp_file_tree->item_view_count_num > 
-                            tmp_file_tree->scroll_y + tmp_file_tree->ft_box.h){
+                            tmp_file_tree->scroll_y + tmp_file_tree->ft_item_box.h){
 
                         tmp_file_tree->scroll_y++;
                     }

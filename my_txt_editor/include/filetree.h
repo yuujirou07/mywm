@@ -37,6 +37,7 @@ typedef struct{
 typedef struct{
     struct box ft_search_box; // 検索欄として予約する画面上の矩形。
     struct box ft_box; // ファイルツリー全体の外枠。
+    struct box ft_item_box; // 項目を並べる領域。ft_boxから検索欄の高さ(ft_search_box.h)を除いた矩形で、set_filetree_boxが更新する。
     struct root_node *root_node; // create_tree()で確保し、close_tree()で解放するツリーの根。
     ft_item_view_data *item_view_data; // この構造体が所有する項目状態の動的配列。
     
