@@ -406,7 +406,8 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             mvaddstr(
                 tmp_view_data->screen_y,
                 tmp_view_data->screen_x,
-                dir_open_state_icon);
+                dir_open_state_icon
+            );
         }
         //ディレクトリではない場合アイコンを表示する
         else{
