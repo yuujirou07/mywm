@@ -103,6 +103,7 @@ int ft_mouse_event(struct editor_input_context *ctx){
         // ファイルツリー内クリック時の処理
         if(box_contains_point(ft_box,(struct pos){ev->x,ev->y})){
            ft_mouse_click_event(ctx,*ev); 
+
         }
         else{
             editor_click_move_cursor(state,ev);
@@ -275,6 +276,6 @@ static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev){
     ft_item_view_data *const item = &tmp_item_data[j];
     
     ft_item_open_event(ctx,item);
-
+    state->file_tree_data.ft_item_select_line = item->screen_y;
     return;
 }
