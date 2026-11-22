@@ -261,77 +261,41 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
         }
     }
 
-    //エディター画面下スクロール処理
-    if(event->bstate & BUTTON5_PRESSED && can_scroll_down){
+    //下スクロール
+    const mmask_t button5_ev = BUTTON5_CLICKED | BUTTON5_PRESSED;
+    //上スクロール
+    const mmask_t button4_ev = BUTTON4_CLICKED | BUTTON4_PRESSED;
 
-        
+    //エディター画面の上下スクロール処理(上下共通)。上下同時に立っている場合は上を優先する。
+    if(event->bstate & (button5_ev | button4_ev)){
+        const bool scroll_up = (event->bstate & button4_ev) != 0;
+        //続けて消化する同方向のホイールイベント
+        const mmask_t same_dir_ev = scroll_up ? button4_ev : button5_ev;
         wint_t chr;
         MEVENT tmp_msev;
 
-        nodelay(stdscr,true);
-        //エディタースクロールスタック解消ループ処理
-        do{
-            int before_scr_start_num = state->scr.scr_start_num;
-            //文字のスクロール処理 
-            editor_scroll_logical_line(
-                state,state->settings_data->editor_scroll_sensitivity);
-            int scrolled_num = state->scr.scr_start_num - before_scr_start_num;
-            // 構文情報は画面相対行で持つため、実際にスクロールした行数だけずらし、
-            // 新しく見える最下行からscrolled_num行分を解析する。
-            if(state->settings_data->built_in_syntax && scrolled_num > 0){
-                scroll_syntax_pos_data(
-                    &ctx->syntax_data,-scrolled_num,state->write_area.h);
-                int first_line = state->write_area.h - scrolled_num;
-                if(first_line < 0)first_line = 0;
-                for(int line = first_line;line < state->write_area.h;line++){
-                    update_line_syntax_data(ctx,line);
-                }
-            }
-
-            if(get_wch(&chr) == ERR){
-                break;
-            }
-
-            if(chr == KEY_MOUSE){
-                if(getmouse(&tmp_msev) == OK && 
-                    !(tmp_msev.bstate & (BUTTON5_PRESSED | BUTTON5_CLICKED))){
-                    ungetmouse(&tmp_msev);
-                    break;
-                }
-            }
-            else{
-                unget_wch(chr);
-                break;
-            }
-            
-        }while(1);
-
-        nodelay(stdscr,false);
-    
-    
-    //エディター画面上スクロール処理
-    }else if ((event->bstate & BUTTON4_PRESSED) && state->scr.scr_start_num > 0) {
-        wint_t chr;
-        nodelay(stdscr,true);
-        MEVENT tmp_msev;
-        //スクロール処理はスタックがたまるため一時的にノンブロッキングにして
+        //スクロール入力は溜まりやすいため、一時的にノンブロッキングにして
         //溜まっているスクロールスタックをループで処理する
+        nodelay(stdscr,true);
         do{
             const int before_scr_start_num = state->scr.scr_start_num;
-            editor_scroll_logical_line(
-                state,
-                -state->settings_data->editor_scroll_sensitivity
-            );
+            int scroll_sence = state->settings_data->editor_scroll_sensitivity;
+            //上スクロールならマイナスに切り替える
+            if(scroll_up){scroll_sence = -scroll_sence;}
+            editor_scroll_logical_line(state,scroll_sence);
 
-            int scrolled_num = before_scr_start_num - state->scr.scr_start_num;
-            // 下スクロールの逆。実際にスクロールした行数だけ既存分を下げ、
-            // 新しく見える最上行からscrolled_num行分を解析する。
-            if(state->settings_data->built_in_syntax && scrolled_num > 0){
-                scroll_syntax_pos_data(
-                    &ctx->syntax_data,scrolled_num,state->write_area.h);
-                int last_line = scrolled_num;
-                if(last_line > state->write_area.h)last_line = state->write_area.h;
-                for(int line = 0;line < last_line;line++){
+            //実際に動いた行数(下が正)
+            const int moved = state->scr.scr_start_num - before_scr_start_num;
+
+            // 構文情報は画面相対行で持つ。下へ動けば既存分は上(負)へ、上へ動けば下(正)へずらし、
+            // 新しく見える端(下なら最下行側、上なら最上行側)のmoved行分だけ解析し直す。
+            if(state->settings_data->built_in_syntax && moved != 0){
+                const int h = state->write_area.h;
+                int amount = moved > 0 ? moved : -moved;
+                scroll_syntax_pos_data(&ctx->syntax_data,-moved,h);
+                if(amount > h)amount = h;
+                const int first_line = moved > 0 ? h - amount : 0;
+                for(int line = first_line;line < first_line + amount;line++){
                     update_line_syntax_data(ctx,line);
                 }
             }
@@ -339,23 +303,21 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
             if(get_wch(&chr) == ERR){
                 break;
             }
-            
+
             if(chr == KEY_MOUSE){
-                if(getmouse(&tmp_msev) == OK && 
-                    !(tmp_msev.bstate & (BUTTON4_PRESSED | BUTTON4_CLICKED))){
+                //同方向のホイールなら続けて消化し、それ以外のマウス入力は戻して終了する
+                if(getmouse(&tmp_msev) == OK && !(tmp_msev.bstate & same_dir_ev)){
                     ungetmouse(&tmp_msev);
                     break;
                 }
-            }    
+            }
             else{
                 unget_wch(chr);
                 break;
             }
-
         }while(1);
-            
+
         nodelay(stdscr,false);
-    
     }
 
     //マウスクリック処理
