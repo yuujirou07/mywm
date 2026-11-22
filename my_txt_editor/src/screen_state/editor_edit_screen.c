@@ -52,6 +52,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
         struct box tmp_ft_box = 
             {(struct pos){0,0},x/10,y};
         show_filetree(ctx,tmp_ft_box);
+        my_cur_set(state,false);
     }
     else if(ch == CTRL('u')){
         editor_set_screen_state(state,editor_command_mode);
@@ -297,7 +298,7 @@ static void scroll_editor_by_wheel(struct editor_input_context *ctx,bool scroll_
     nodelay(stdscr,false);
 }
 
-static void editor_click_event(struct editor_input_context *ctx,MEVENT *mev){
+static void editor_mouse_click_event(struct editor_input_context *ctx,MEVENT *mev){
     
     struct editor_state *state = ctx->state;
 

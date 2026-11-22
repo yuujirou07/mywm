@@ -50,7 +50,7 @@ typedef struct{
     bool is_grabed; // 枠線をマウスで掴み、幅を変更中ならtrue。
     ft_outline_click_data outline_click_data;//枠線のクリック判定 ダブルクリックなどマウスでのサイズ変更イベントに使う
     side ft_side; // ファイルツリーを接続する画面端。
-    int ft_item_select_line;
+    int ft_item_select_line;//選択アイテム行
 }file_tree_data;
 
 
