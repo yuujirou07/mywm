@@ -8,6 +8,7 @@
 #include "filetree.h"
 #include "ftj.h"
 #include "editor_screen.h"
+#include"editor_color.h"
 
 
 // ctxのツリーを画面上のft_boxに表示する状態へ変更し、編集領域・ステータスバー・カーソルを合わせる。
@@ -123,7 +124,10 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
             //通常ファイルなら編集画面に移動する
             if(state == file){
                 editor_set_screen_state(ctx->state,edit_screen_mode);
+                set_cell_color_pair(PAIR_TEXT,item_box.pos.x,tmp_item->screen_y,item_box.w - 1);
                 my_cur_set(ctx->state,true);
+                ctx->state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+                ctx->state->render_flags |= RENDER_FILETREE;
             }
         }
     }
