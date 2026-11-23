@@ -2,7 +2,9 @@
 #define FILETREE_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <time.h>
+#include <wchar.h>
 #include"editor_types.h"
 
 #define FILETREE_DEFAULT_SIZE_W 10 // ファイルツリーの既定幅（端末セル数）。
@@ -35,14 +37,23 @@ typedef struct{
     struct timespec first_click_time; // 連続クリックの1回目の時刻。
 }ft_outline_click_data;
 
+
+
+
+typedef struct{
+    wchar_t serch_str[256];
+    struct box ft_search_box;
+    bool is_search_mode;
+}ft_search_data;
+
+
 // ファイルツリー画面の形状、ツリー本体、項目ごとの表示状態。
 typedef struct{
-    struct box ft_search_box; // 検索欄として予約する画面上の矩形。
     struct box ft_box; // ファイルツリー全体の外枠。
-    struct box ft_item_box; // 項目を並べる領域。ft_boxから検索欄の高さ(ft_search_box.h)を除いた矩形で、set_filetree_boxが更新する。
+    struct box ft_item_box; // 項目を並べる領域。ft_boxから検索欄の高さ(ft_search_data.ft_search_box.h)を除いた矩形で、set_filetree_boxが更新する。
     struct root_node *root_node; // create_tree()で確保し、close_tree()で解放するツリーの根。
     ft_item_view_data *item_view_data; // この構造体が所有する項目状態の動的配列。
-    
+    ft_search_data ft_search_data;
     int item_view_count_num; // item_view_dataに格納済みの有効要素数。
     int item_view_data_allocate_num; // item_view_dataの確保済み要素数。item_view_count_num以上。
     int drawing_item_num;//ファイルツリーに表示しているメンバ数

@@ -3,6 +3,7 @@
 
 
 
+#include "editor.h"
 #include"editor_color.h"
 
 
@@ -211,10 +212,10 @@ void draw_box(struct box box){
 
 // queueの矩形全体を消去してから枠を順に描き、件数を0へ戻す。
 // 引数: ctx=色表を持つcontext、queue=有効な枠キュー、win=枠描画関数へ渡すウィンドウ。返り値: なし。
-static void flush_box_queue(struct editor_input_context *ctx,struct box_queue *queue){
+static void flush_box_queue(struct box_queue *queue){
 
     for(int i = 0; i < queue->count; i++){
-        clear_box_area(ctx,queue->box[i]);
+        clear_box_area(queue->box[i]);
         draw_box(queue->box[i]);
     }
     queue->count = 0;
@@ -422,7 +423,7 @@ void update_screen(struct editor_input_context *ctx){
             draw_file_browse(ctx);
         }
         if(flags & RENDER_BOX){
-            flush_box_queue(ctx,&state->draw_box_queue);
+            flush_box_queue(&state->draw_box_queue);
         }
         if(flags & RENDER_LINE_JUMP){
            draw_line_jump(state);
@@ -444,7 +445,6 @@ void update_screen(struct editor_input_context *ctx){
             } 
         }
     }
-
     set_cur_pos(state);
     ctx->state->render_flags = RENDER_NONE;
 }
@@ -532,7 +532,7 @@ int draw_editor_complete_word_box(struct editor_input_context *ctx){
     //補完ウィンドウが動く前に消しておく
     if(state->edit_input_complete_data.box.h > 0 && 
         state->edit_input_complete_data.box.w > 0){
-        clear_box_area(ctx,complete_box_screen(state));
+        clear_box_area(complete_box_screen(state));
     }
 
     struct box old_box = {0};
@@ -602,7 +602,7 @@ int draw_editor_complete_word_box(struct editor_input_context *ctx){
             set_syntax_color_line(ctx,old_box.pos.y,old_box.h);
         }
     }
-    clear_box_area(ctx,complete_box_screen(state));
+    clear_box_area(complete_box_screen(state));
     draw_box(complete_box_screen(state));
     state->render_flags |= RENDER_BOX;
     return 0;
@@ -611,7 +611,7 @@ int draw_editor_complete_word_box(struct editor_input_context *ctx){
 
 // 画面上を空白で消す。
 // 返り値: 幅・高さが2以下なら-1、それ以外0。ncursesの描画失敗は通知しない。
-int clear_box_area(struct editor_input_context *ctx,struct box b){
+int clear_box_area(struct box b){
     if(b.h <= 2 || b.w <= 2)return -1;
     attr_t clear_attr = COLOR_PAIR(PAIR_TEXT);
     for(int i = 0;i < b.h;i++){

@@ -464,9 +464,7 @@ int main(int argc, char *argv[])
         //画面更新元(この関数外では画面を更新しない)
         update_screen(&input_context);
         
-        if(editor_get_screen_state(&state) == edit_screen_mode || 
-            editor_get_screen_state(&state) == filetree_screen_mode){
-                
+        if(editor_get_screen_state(&state) == edit_screen_mode){ 
             if(state.settings_data->built_in_syntax){
                 apply_syntax_color(&input_context,input_context.syntax_data);
             }

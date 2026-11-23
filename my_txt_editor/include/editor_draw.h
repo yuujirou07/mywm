@@ -42,7 +42,7 @@ void draw_make_file_dialog(struct editor_input_context *ctx);
 void draw_file_browse(struct editor_input_context *ctx);
 int set_clear_box(struct clear_box_data *clear_box_data,struct box box);
 int clear_status_bar_outline(struct editor_state *state);
-int clear_box_area(struct editor_input_context *ctx,struct box b);
+int clear_box_area(struct box b);
 struct box complete_box_screen(struct editor_state *state);
 int draw_editor_complete_word_box(struct editor_input_context *ctx);
 int draw_edit_complete_world(struct editor_state *state);

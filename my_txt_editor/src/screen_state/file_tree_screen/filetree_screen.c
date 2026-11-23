@@ -1,9 +1,11 @@
 #include <ncurses.h>
 #include <stdlib.h>
 #include <math.h>
+#include <wchar.h>
 #include <wctype.h>
 
 #include "editor.h"
+#include "editor_func.h"
 #include "editor_log.h"
 #include "filetree.h"
 #include "ftj.h"
@@ -82,8 +84,10 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
     (void)input_result;
     struct editor_state *state = ctx->state;
     file_tree_data *tmp_file_tree = &state->file_tree_data;
-    if(state->cursor.is_cur_show)my_cur_set(state,false);
-
+    if(state->cursor.is_cur_show && 
+        !tmp_file_tree->ft_search_data.is_search_mode){
+        my_cur_set(state,false);
+    }
 
     
     if(ch == (wchar_t)L'j' || ch == (wchar_t)L'k'){
@@ -101,7 +105,6 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
             state->render_flags |= RENDER_FILETREE;
         }
     }
-
 
     if(ch == KEY_ENTER || ch == L'\n'){
         int item_view_num = state->file_tree_data.item_view_count_num;
@@ -131,6 +134,16 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
             }
         }
     }
+
+    if(ch == (wchar_t)L'i'){
+        struct pos cur_pos = 
+            (struct pos){0,0};
+
+        cur_pos_push(cur_pos,state);
+        my_cur_set(state,true);
+        tmp_file_tree->ft_search_data.is_search_mode = true;
+    }
+
 
     if(ch == CTRL('n')){
         // ツリーを出したキーと同じキーで閉じる。

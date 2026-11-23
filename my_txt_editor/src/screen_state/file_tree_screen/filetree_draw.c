@@ -76,7 +76,7 @@ int draw_filetree(struct editor_input_context *ctx,file_tree_data *filetree_data
     }
 
     //前に表示されていたツリーをクリアする
-    clear_box_area(ctx,box);
+    clear_box_area(box);
 
 
     //開発用

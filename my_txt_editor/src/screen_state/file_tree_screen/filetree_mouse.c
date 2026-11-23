@@ -4,6 +4,7 @@
 #include <wctype.h>
 
 #include "editor.h"
+#include "editor_color.h"
 #include "editor_log.h"
 #include "filetree.h"
 #include "ftj.h"
@@ -140,7 +141,7 @@ int ft_mouse_event(struct editor_input_context *ctx){
             file_tree_data *tmp_file_tree = &state->file_tree_data;
 
             nodelay(stdscr,true);
-            
+
             MEVENT msev = *ev;
             wint_t wint;
 

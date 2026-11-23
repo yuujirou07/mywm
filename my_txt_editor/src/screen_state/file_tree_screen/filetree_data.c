@@ -16,7 +16,7 @@ int ft_init_file_tree(file_tree_data *file_tree){
     }
 
     file_tree->ft_box = (struct box){(struct pos){0,0},0,0};
-    file_tree->ft_search_box = (struct box){(struct pos){0,0},0,0};
+    file_tree->ft_search_data.ft_search_box = (struct box){(struct pos){0,0},0,0};
     file_tree->ft_item_box = (struct box){(struct pos){0,0},0,0};
     file_tree->root_node = NULL;
     file_tree->is_show = false;
@@ -45,6 +45,7 @@ int get_root_file_tree_data(file_tree_data *file_tree,char *path){
     file_tree->draw_file_member_start_num = 0;
     file_tree->scroll_y = 0;
     file_tree->ft_item_select_line = 0;
+    file_tree->ft_search_data.is_search_mode = false;
     if(mem_num == 0)return 0;
 
     file_tree->item_view_data = malloc(sizeof(ft_item_view_data) * mem_num);
@@ -127,7 +128,7 @@ int ft_set_file_tree_item_select_line(file_tree_data *file_tree_data,int line_nu
 // filetree_dataの枠を画面上の矩形filetree_boxへ値コピーし、項目領域ft_item_boxも枠から検索欄の高さを除いて求め直す。
 // 返り値: 常に0。範囲検査・描画・編集領域の更新は行わない。検索欄の高さが枠以上なら項目領域の高さは0になる。
 int set_filetree_box(file_tree_data *filetree_data,struct box filetree_box){
-    int search_h = filetree_data->ft_search_box.h;
+    int search_h = filetree_data->ft_search_data.ft_search_box.h;
     if(search_h < 0)search_h = 0;
     if(search_h > filetree_box.h)search_h = filetree_box.h;
 
