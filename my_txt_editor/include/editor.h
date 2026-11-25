@@ -13,7 +13,7 @@
 
 #include"default_settings.h"
 #include "editor_commands.h"
-#include "kbd_input_log.h"
+#include "keyboard/keyboard.h"
 #include"lsp_src/lsp_communication.h"
 #include "editor_types.h"
 #include "settings_screen.h"
@@ -270,7 +270,7 @@ struct editor_state {
     editor_command_mode_data   command_mode_data;//コマンドモードデータ      
     file_tree_data             file_tree_data; // ファイルツリーの形状、所有ツリー、項目の表示状態。
     edit_input_complete_data   edit_input_complete_data;//入力補完データ
-    key_bord_data              key_bord_data; //入力関連データ
+    key_board_data             key_board_data; //入力関連データ
     int                        render_flags; // update_screen()へ渡す再描画要求。
     bool                       mylsp_use; // 起動引数でLSP使用を要求されたならtrue。
 };
@@ -350,40 +350,6 @@ struct ask_make_file_mode_context {
     int screen_center_y; // 画面中央のy座標(画面座標)。
     struct pos screen_center_pos; // 画面中央のx/y座標(画面座標)。
 };
-
-// ユーザー設定が登録したキーマップ1件。ch[0]・ch[1]の2キー列をmodeの画面で入力すると、action_funcを呼ぶ。
-typedef struct{
-    wchar_t ch[2]; // 2キーのショートカット。ch[0]が先に押したキー。
-    MY_TXT_EDITOR_SCREEN_MODE mode; // このキーマップを有効にする画面。
-    EDITOR_ACTION action_func; // 一致したときに呼ぶ処理。呼出し可能な関数であること。
-}key_map_data;
-
-// key_map_dataの動的配列。api_key_mapping()が追加し、確保・解放はmain()側が行う。
-typedef struct{
-    key_map_data *key_mapp_list; // 登録済みキーマップの配列。未確保ならNULL。
-    int key_map_num; // 登録済みの件数。KEY_MAPPING_MAX_NUMを超えない。
-    int key_map_allocate_num; // 配列へ確保済みの要素数。
-}key_map_list_data;
-
-// キー1文字の入力イベントへ登録する処理1件。
-typedef struct{
-    wchar_t chr; // 対象の入力文字。
-    MY_TXT_EDITOR_SCREEN_MODE mode; // このイベントを有効にする画面。
-    EDITOR_ACTION action_func; // 入力されたときに呼ぶ処理。
-}key_event_data;
-
-// key_event_dataの一覧。現状は1件分のメンバしか持たず、一覧としての確保・追加は未実装。
-typedef struct{
-    key_event_data *key_event_data; // 登録された入力イベント。
-    int key_map_num; // 登録済みの件数。
-    int key_map_allocate_num; // 確保済みの要素数。
-}key_event_list_data;
-
-// ユーザー設定の入力(キーマップ、今後はマウスイベントも)をまとめて管理する。
-typedef struct{
-    key_map_list_data key_maps; // ユーザーが登録したキーマップの一覧。
-    key_event_list_data key_events; // ユーザーが登録した入力イベントの一覧。
-}editor_input_manager;
 
 // 読み込んだ共有ライブラリのdlopenハンドル配列。
 // dl_handles_list_numが使用数、dl_handles_list_allocate_numが確保数。

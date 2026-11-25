@@ -77,29 +77,9 @@ static MY_TXT_EDITOR_RESULT api_key_mapping(void *userdata,wchar_t key1,wchar_t 
     }
 
 
-    //キーマップ最大登録数ガード
-    if(ctx->input_manager.key_maps.key_map_num >= KEY_MAPPING_MAX_NUM){
-        error_log("over flow key map tabele");
+    if(key_map_list_add(&ctx->input_manager.key_maps,key1,key2,mode,action) != 0){
         return API_ERR_NO_MEMORY;
     }
-
-    //メモリの拡張処理
-    if(ctx->input_manager.key_maps.key_map_allocate_num <= ctx->input_manager.key_maps.key_map_num){
-        key_map_data *tmp_key_mapps = 
-            realloc(ctx->input_manager.key_maps.key_mapp_list,
-                sizeof(key_map_data) * (ctx->input_manager.key_maps.key_map_num * 2)); 
-            if(tmp_key_mapps == NULL){
-                error_log(can not realloc);
-                return API_ERR_NO_MEMORY;
-            }
-            ctx->input_manager.key_maps.key_mapp_list = tmp_key_mapps;
-            ctx->input_manager.key_maps.key_map_allocate_num = ctx->input_manager.key_maps.key_map_num * 2;
-    }
-    ctx->input_manager.key_maps.key_mapp_list[ctx->input_manager.key_maps.key_map_num].ch[0] = key1;
-    ctx->input_manager.key_maps.key_mapp_list[ctx->input_manager.key_maps.key_map_num].ch[1] = key2;
-    ctx->input_manager.key_maps.key_mapp_list[ctx->input_manager.key_maps.key_map_num].mode = mode;
-    ctx->input_manager.key_maps.key_mapp_list[ctx->input_manager.key_maps.key_map_num].action_func = action;
-    ctx->input_manager.key_maps.key_map_num++;
     return API_OK;
 }
 
@@ -145,7 +125,7 @@ void init_settings_src(MY_TXT_EDITOR_API *const api,struct editor_input_context 
 
 // ctxの登録一覧でchrの2文字と一致する全項目を探し、それぞれの処理へapiを渡して実行する。
 // 返り値: なし。chrは2要素以上で、登録関数・ctx・apiは有効であること。不一致は何もしない。
-void check_key_mapps_entry(struct editor_input_context *ctx,wchar_t chr[2],MY_TXT_EDITOR_API *api){
+void check_key_maps_entry(struct editor_input_context *ctx,wchar_t chr[2],MY_TXT_EDITOR_API *api){
     if(api == NULL || ctx == NULL)return;
 
     screen_state editor_screen_state = editor_get_screen_state(ctx->state);
@@ -153,16 +133,16 @@ void check_key_mapps_entry(struct editor_input_context *ctx,wchar_t chr[2],MY_TX
     
     for(int i = 0;i < ctx->input_manager.key_maps.key_map_num;i++){
         //キーが押されているか
-        if(ctx->input_manager.key_maps.key_mapp_list[i].ch[0] == chr[0] &&
-            ctx->input_manager.key_maps.key_mapp_list[i].ch[1] == chr[1]){
+        if(ctx->input_manager.key_maps.key_map_list[i].ch[0] == chr[0] &&
+            ctx->input_manager.key_maps.key_map_list[i].ch[1] == chr[1]){
                 
             screen_state combed_screen_state = 
                 comb_my_txt_editor_screen_mode_To_screen_state(
-                    ctx->input_manager.key_maps.key_mapp_list[i].mode
+                    ctx->input_manager.key_maps.key_map_list[i].mode
                 );
             //設定したスクリーンステートだったら実行する
             if(editor_screen_state == combed_screen_state){
-                ctx->input_manager.key_maps.key_mapp_list[i].action_func(api);
+                ctx->input_manager.key_maps.key_map_list[i].action_func(api);
             }
         }
     }
@@ -180,52 +160,20 @@ static MY_TXT_EDITOR_RESULT add_key_input_event_handle(void *userdata,wchar_t ch
 
     struct editor_input_context *ctx = userdata;
 
-    if(ctx->input_manager.key_events.key_event_data == NULL){
-        ctx->input_manager.key_events.key_map_allocate_num = 32;
-        ctx->input_manager.key_events.key_map_num = 0;
-        ctx->input_manager.key_events.key_event_data = 
-            malloc(sizeof(key_event_data) * ctx->input_manager.key_events.key_map_allocate_num);
+    if(key_event_list_add(&ctx->input_manager.key_events,chr,mode,action) != 0){
+        return API_ERR_NO_MEMORY;
     }
-    else if(ctx->input_manager.key_events.key_map_allocate_num <= ctx->input_manager.key_events.key_map_num){
-        key_event_data *tmp_key_event_data = 
-            realloc(
-                ctx->input_manager.key_events.key_event_data,
-                ctx->input_manager.key_events.key_map_num * 2
-            );
-        if(tmp_key_event_data == NULL){
-            error_log("argument error");
-            return API_ERR_NO_MEMORY;
-        }
-
-        ctx->input_manager.key_events.key_event_data = tmp_key_event_data;
-        ctx->input_manager.key_events.key_map_allocate_num  = 
-            ctx->input_manager.key_events.key_map_num * 2;
-    }
-
-    key_event_data *tmp_key_event = 
-        &ctx->input_manager.key_events.key_event_data[ctx->input_manager.key_events.key_map_num];
-    
-    tmp_key_event->chr = chr;
-    tmp_key_event->mode = mode;
-    tmp_key_event->action_func = action;
-    ctx->input_manager.key_events.key_map_num++;
     return API_OK;
 }
 
 // ctxが持つキー入力イベント登録用の配列を解放する。
 // 返り値: 成功時0、ctxがNULLなら-1。
-int destoroy_key_input_event_handle(struct editor_input_context *ctx){
+int destroy_key_input_event_handle(struct editor_input_context *ctx){
     if(ctx == NULL){
         return -1;
     }
 
-    if(ctx->input_manager.key_events.key_event_data != NULL && 
-            ctx->input_manager.key_events.key_map_allocate_num > 0){
-        free(ctx->input_manager.key_events.key_event_data);
-    }    
-
-    
-
+    key_event_list_destroy(&ctx->input_manager.key_events);
     return 0;
 }
 
@@ -283,7 +231,7 @@ int check_user_settings_event(struct editor_input_context *ctx){
                         tmp_key_data_arry[tmp_key_data_arry_num - 2].key,
                         tmp_key_data_arry[tmp_key_data_arry_num - 1].key
                     };
-                check_key_mapps_entry(ctx,chr,&ctx->editor_api);
+                check_key_maps_entry(ctx,chr,&ctx->editor_api);
             }
         }
         if(tmp_key_data_arry[tmp_key_data_arry_num - 1].input_result == OK){
@@ -297,10 +245,10 @@ int check_user_settings_event(struct editor_input_context *ctx){
 }
 
 
-// key_mapp_dataの先頭キーを0へ書き換える。現実装では登録アクションを呼ばない。
-// 返り値: 常に0。key_mapp_dataは非NULLとする。
-int call_user_key_mapping_event(key_map_data *key_mapp_data){
-    *key_mapp_data->ch = 0;
+// key_map_ptrの先頭キーを0へ書き換える。現実装では登録アクションを呼ばない。
+// 返り値: 常に0。key_map_ptrは非NULLとする。
+int call_user_key_mapping_event(key_map_data *key_map_ptr){
+    *key_map_ptr->ch = 0;
     return 0;
 }
 
@@ -437,11 +385,11 @@ static int check_input_handle(struct editor_input_context *ctx,wchar_t chr){
 
     screen_state editor_screen_state = editor_get_screen_state(ctx->state);
 
-    for(int i = 0; i < ctx->input_manager.key_events.key_map_num;i++){
-        if(ctx->input_manager.key_events.key_event_data[i].chr == chr &&
+    for(int i = 0; i < ctx->input_manager.key_events.key_event_num;i++){
+        if(ctx->input_manager.key_events.key_event_list[i].chr == chr &&
             editor_screen_state ==
-                comb_my_txt_editor_screen_mode_To_screen_state(ctx->input_manager.key_events.key_event_data[i].mode)){
-            ctx->input_manager.key_events.key_event_data[i].action_func(&ctx->editor_api);
+                comb_my_txt_editor_screen_mode_To_screen_state(ctx->input_manager.key_events.key_event_list[i].mode)){
+            ctx->input_manager.key_events.key_event_list[i].action_func(&ctx->editor_api);
         }
     }
     return 0;

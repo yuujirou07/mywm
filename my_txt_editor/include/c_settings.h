@@ -11,7 +11,7 @@ struct editor_input_context;
 void connect_api_mem_data(MY_TXT_EDITOR_API *api, struct editor_input_context *ctx);
 void init_settings_src(MY_TXT_EDITOR_API *api, struct editor_input_context *ctx);
 
-void check_key_mapps_entry(struct editor_input_context *ctx,wchar_t chr[2],MY_TXT_EDITOR_API *api);
+void check_key_maps_entry(struct editor_input_context *ctx,wchar_t chr[2],MY_TXT_EDITOR_API *api);
 
 int add_dl_path(struct editor_input_context *ctx,char *dl_path);
 int check_user_settings_event(struct editor_input_context *ctx);
@@ -19,7 +19,7 @@ int destroy_dl_path(struct editor_input_context *ctx);
 
 int add_dl_handle_ptr(void **dl_handle_ptr,DL_handle_data *handle_data);
 
-int destoroy_key_input_event_handle(struct editor_input_context *ctx);
+int destroy_key_input_event_handle(struct editor_input_context *ctx);
 
 
 // 公開API用の画面モードを内部のscreen_stateへ変換する。

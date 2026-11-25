@@ -635,11 +635,7 @@ int init_input_context(struct editor_input_context *ctx,struct editor_state *sta
     ctx->state       = state;
     state->input_ctx = ctx;
 
-    ctx->input_manager.key_maps.key_map_allocate_num = 16;
-    ctx->input_manager.key_maps.key_mapp_list =
-        malloc(sizeof(key_map_data) * ctx->input_manager.key_maps.key_map_allocate_num);
-    if(ctx->input_manager.key_maps.key_mapp_list == NULL){
-        error_log("malloc");
+    if(key_map_list_init(&ctx->input_manager.key_maps) != 0){
         return -1;
     }
     return 0;

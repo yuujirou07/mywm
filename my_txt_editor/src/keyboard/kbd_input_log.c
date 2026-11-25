@@ -1,4 +1,4 @@
-#include "kbd_input_log.h"
+#include "keyboard/kbd_input_log.h"
 #include "path_util.h"
 #include <stdlib.h>
 #include "editor_log.h"
@@ -11,51 +11,51 @@ FILE *key_log_file = NULL;
 // 履歴は設定上限までで打ち止めにし、長時間使ってもメモリが増え続けないようにしている。
 // 返り値: 追加できたら0。記録数が設定上限(key_log_buffer_size)に達している場合と、確保・再確保に失敗した場合は-1。
 int KL_add(struct editor_state *state,wchar_t ch,int result,screen_state screen_state){
-    if(state->key_bord_data.Key_log_data.key_count >= 
+    if(state->key_board_data.key_log_data.key_count >= 
             state->settings_data->key_log_settings.key_log_buffer_size){
         return -1; 
     }
 
-    if(state->key_bord_data.Key_log_data.key_log == NULL){
-        state->key_bord_data.Key_log_data.key_allocate_num = KEY_LOG_ALLOCATE_NUM;
-        state->key_bord_data.Key_log_data.key_count = 0;
-        state->key_bord_data.Key_log_data.key_log = 
+    if(state->key_board_data.key_log_data.key_log == NULL){
+        state->key_board_data.key_log_data.key_allocate_num = KEY_LOG_ALLOCATE_NUM;
+        state->key_board_data.key_log_data.key_count = 0;
+        state->key_board_data.key_log_data.key_log = 
             malloc(sizeof(key_data) * 
-                state->key_bord_data.Key_log_data.key_allocate_num);
+                state->key_board_data.key_log_data.key_allocate_num);
 
-        if(state->key_bord_data.Key_log_data.key_log == NULL){
+        if(state->key_board_data.key_log_data.key_log == NULL){
             error_log("malloc");
             return -1;
         }
     }
-    else if(state->key_bord_data.Key_log_data.key_allocate_num <= 
-        state->key_bord_data.Key_log_data.key_count){
+    else if(state->key_board_data.key_log_data.key_allocate_num <= 
+        state->key_board_data.key_log_data.key_count){
         size_t tmp_realloc_num = 
-            (state->key_bord_data.Key_log_data.key_count * 2 >= 
+            (state->key_board_data.key_log_data.key_count * 2 >= 
                 state->settings_data->key_log_settings.key_log_buffer_size)?
                 state->settings_data->key_log_settings.key_log_buffer_size:
-                state->key_bord_data.Key_log_data.key_count * 2;
+                state->key_board_data.key_log_data.key_count * 2;
         
 
         key_data *tmp_key_data = 
             realloc(
-                state->key_bord_data.Key_log_data.key_log,
+                state->key_board_data.key_log_data.key_log,
                 sizeof(key_data) * tmp_realloc_num
             );
         if(tmp_key_data == NULL){
             error_log("malloc");
             return -1;
         }
-        state->key_bord_data.Key_log_data.key_log = tmp_key_data;
-        state->key_bord_data.Key_log_data.key_allocate_num = tmp_realloc_num;
+        state->key_board_data.key_log_data.key_log = tmp_key_data;
+        state->key_board_data.key_log_data.key_allocate_num = tmp_realloc_num;
     }
 
     key_data *tmp_key_log = 
-        &state->key_bord_data.Key_log_data.key_log[state->key_bord_data.Key_log_data.key_count];
+        &state->key_board_data.key_log_data.key_log[state->key_board_data.key_log_data.key_count];
     tmp_key_log->screen_state = screen_state;
     tmp_key_log->input_result = result;
     tmp_key_log->key = ch;
-    state->key_bord_data.Key_log_data.key_count++;
+    state->key_board_data.key_log_data.key_count++;
     return 0;
 }
 
@@ -64,11 +64,11 @@ int KL_add(struct editor_state *state,wchar_t ch,int result,screen_state screen_
 // 引数: state=キー履歴を持つエディタ状態、n=件数の出力先。 返り値: 履歴配列の先頭(読み取り専用、件数は*n)。履歴が空ならNULLで*nは0。
 // 所有権: 配列はstateが所有する。KL_add()で再確保されると無効になるので、取得後すぐに使う。
 const key_data *KL_GetLog(struct editor_state *state,size_t *n){
-    *n = state->key_bord_data.Key_log_data.key_count;
+    *n = state->key_board_data.key_log_data.key_count;
     if(*n == 0){
         return NULL;
     }
-    return state->key_bord_data.Key_log_data.key_log;
+    return state->key_board_data.key_log_data.key_log;
 }
 
 
@@ -98,7 +98,7 @@ int KL_get_key_data_log(struct editor_state *state,key_data **key,size_t *n){
         return -1;
     }
 
-    *key = state->key_bord_data.Key_log_data.key_log;
-    *n = state->key_bord_data.Key_log_data.key_count;
+    *key = state->key_board_data.key_log_data.key_log;
+    *n = state->key_board_data.key_log_data.key_count;
     return 0;
 }

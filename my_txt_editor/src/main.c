@@ -327,9 +327,9 @@ int main(int argc, char *argv[])
     input_context.start_menu_screen.startup_start_time = startup_timer ? &startup_start_time : NULL;
     input_context.start_menu_screen.startup_log_path = startup_timer ? startuptime_log_file_path_name : NULL;
 
-    input_context.state->key_bord_data.Key_log_data.key_allocate_num = 0;
-    input_context.state->key_bord_data.Key_log_data.key_count  = 0;
-    input_context.state->key_bord_data.Key_log_data.key_log  = NULL;
+    input_context.state->key_board_data.key_log_data.key_allocate_num = 0;
+    input_context.state->key_board_data.key_log_data.key_count  = 0;
+    input_context.state->key_board_data.key_log_data.key_log  = NULL;
 
     if(init_command_mode(&state) != 0){
         error_log("command mode init error");
@@ -502,9 +502,9 @@ int main(int argc, char *argv[])
         free(state.settings_data->editor_settings_program.root_src_path);
     }
 
-    free(input_context.input_manager.key_maps.key_mapp_list);
+    key_map_list_destroy(&input_context.input_manager.key_maps);
     destroy_dl_path(&input_context);
-    destoroy_key_input_event_handle(&input_context);
+    destroy_key_input_event_handle(&input_context);
     destory_command_mode(&state);
 
     lsp_server_data_destroy(&input_context.lsp_server_data);
@@ -527,8 +527,8 @@ static void end_process(struct editor_state *state){
 
     //キーログ解放
     if(state->settings_data->key_log_settings.use_key_log){
-        if(state->key_bord_data.Key_log_data.key_allocate_num > 0){
-            free(state->key_bord_data.Key_log_data.key_log);
+        if(state->key_board_data.key_log_data.key_allocate_num > 0){
+            free(state->key_board_data.key_log_data.key_log);
         }
     }
     

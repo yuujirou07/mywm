@@ -29,8 +29,8 @@ typedef struct{
 
 // キーボード入力に関する状態。現在はキー入力ログのみを持つ。
 typedef struct{
-    key_log_data Key_log_data;
-}key_bord_data;
+    key_log_data key_log_data;
+}key_board_data;
 
 int KL_add(struct editor_state *state,wchar_t ch,int result,screen_state screen_state);
 int KL_write_file();

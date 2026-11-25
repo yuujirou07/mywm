@@ -32,7 +32,9 @@ SRC := src/main.c \
 	src/editor_mouse.c \
 	src/json_read.c \
 	src/editor_log.c \
-	src/kbd_input_log.c \
+	src/keyboard/kbd_input_log.c \
+	src/keyboard/key_map.c \
+	src/keyboard/key_event.c \
 	src/path_util.c \
 	src/ftj.c \
 	src/lsp_src/lsp_communication.c \
