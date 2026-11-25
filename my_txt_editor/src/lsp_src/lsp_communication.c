@@ -114,6 +114,9 @@ void lsp_process_init(struct lsp_process *lsp)
     lsp->to_server_fd = LSP_INVALID_FD;
     lsp->from_server_fd = LSP_INVALID_FD;
     lsp->initialized = false;
+    lsp->epfd = -1;
+    lsp->lsp_root_uri = NULL;
+    memset(&lsp->ev, 0, sizeof(lsp->ev));
     lsp->update_data.file_update_counter = 0;
     lsp->update_data.path_name[0] = NUL;
     lsp->lsp_language_id[0] = NUL;
@@ -199,6 +202,10 @@ void lsp_close_server(struct lsp_process *lsp)
         return;
     }
 
+    if(lsp->epfd >= 0){
+        close(lsp->epfd);
+        lsp->epfd = -1;
+    }
     if(lsp->to_server_fd != LSP_INVALID_FD){
         close(lsp->to_server_fd);
         lsp->to_server_fd = LSP_INVALID_FD;

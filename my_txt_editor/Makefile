@@ -35,7 +35,8 @@ SRC := src/main.c \
 	src/kbd_input_log.c \
 	src/path_util.c \
 	src/ftj.c \
-	src/lsp_src/language_server_communication.c \
+	src/lsp_src/lsp_communication.c \
+	src/lsp_src/lsp_settings.c \
 	src/settings_parse_src/editor_settings_parse.c \
 	src/settings_parse_src/settings_items_parse.c \
 	src/settings_parse_src/editor_icon_parse.c \

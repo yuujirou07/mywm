@@ -12,9 +12,9 @@
 #include"editor_log.h"
 #include"path_util.h"
 #include"editor_color.h"
+#include"lsp_settings.h"
 
 static void end_process(struct editor_state *state);
-static void lsp_poll_events(int *epfd, struct lsp_process *lsp, int timeout_ms);
 
 
 // argc/argvの起動指定を読み、ncursesと編集状態を初期化して入力・描画ループを実行する。
@@ -293,59 +293,18 @@ int main(int argc, char *argv[])
         }
     }
     
-    
-    /* ファイルディスクリプタと紐付けるイベント情報 */
-    struct epoll_event  ev;
-    int epfd = -1;
+    input_context.win = win;
 
-    struct lsp_process lsp;
-
-    lsp_process_init(&lsp);
-    if(state.settings_data->lsp.lsp_launch_startup_editor){
-        
-        char root_uri[(PATH_MAX * 3) + sizeof("file://")];
-        char *lsp_argv[] = {"clangd", NULL};
-        
-        initialize_id(&lsp.id_data);
-
-        if(lsp_path_to_file_uri(root_uri, sizeof(root_uri), state.file_browse.path_name) == -1){
-            error_log_write("cant make lsp root uri :(");
+    // 起動時にLSPを起動する設定なら、カレントディレクトリをルートとして起動する。
+    if(is_lsp_enabled(&state) && state.settings_data->lsp.lsp_launch_startup_editor){
+        struct lsp_process *lsp = lsp_run(state.file_browse.path_name,state.settings_data->lsp.lsp_language);
+        if(lsp != NULL && lsp_server_data_add(&input_context.lsp_server_data,lsp) != 0){
+            lsp_close_server(lsp);
+            free(lsp->lsp_root_uri);
+            free(lsp);
         }
-        else if(lsp_start_server(&lsp, "clangd", lsp_argv) == -1){
-            error_log_write("cant start lsp server :(");
-        }
-        else if(lsp_send_initialize(lsp.to_server_fd,lsp.id_data.used_id_history[lsp.id_data.id_storage_counter++],
-                    getpid(),root_uri ) == -1){
-
-            error_log_write("cant send lsp initialize :(");
-            lsp_close_server(&lsp);
-           
-        }
-        else{
-            /* epollインスタンスを作成 */
-            epfd = epoll_create(FDS_N);
-            if(epfd < 0){
-                error_log_write("cant create lsp epoll\n");
-            }
-            else{
-                /* listen用ソケットに紐付けるイベント情報を設定する */
-                memset(&ev, 0, sizeof(struct epoll_event)); /* イベント情報の初期化 */
-                ev.events = EPOLLIN;    /* 入力待ち（読み込み待ち） */
-                ev.data.fd = lsp.from_server_fd;
-                /* epollインスタンスに、sd_listenと上記のイベント情報とを追加する */
-                if(epoll_ctl(epfd, EPOLL_CTL_ADD,lsp.from_server_fd, &ev) == -1){
-                    error_log_write("cant add lsp fd to epoll\n");
-                    close(epfd);
-                    epfd = -1;
-                }
-            }
-        }
-        set_lsp_use_language(&lsp,state.settings_data->lsp.lsp_language);
     }
     
-
-    input_context.win = win;
-    input_context.lsp_data = &lsp;
     editor_set_env_lang(&input_context,C);
     input_context.edit_screen.line_start_pos.x = state.write_area.x_start - 1;
     input_context.edit_screen.line_start_pos.y = state.write_area.y_start;
@@ -416,9 +375,8 @@ int main(int argc, char *argv[])
     while (running) {
         
         //もしlspを使用する設定だったら
-        if(epfd >= 0 && state.settings_data->lsp.lsp_use){
-            lsp_poll_events(&epfd, &lsp, settings_data.lsp.lsp_epoll_timeout_ms);
-            error_log_write(lsp.from_server_msg_buff);
+        if(is_lsp_enabled(&state) && is_lsp_running(&input_context)){
+            lsp_poll_all(&input_context.lsp_server_data,settings_data.lsp.lsp_epoll_timeout_ms);
         }
 
         if(open_start_menu && start_menu != NULL){
@@ -549,9 +507,7 @@ int main(int argc, char *argv[])
     destoroy_key_input_event_handle(&input_context);
     destory_command_mode(&state);
 
-    if(epfd >= 0)
-        close(epfd);
-    lsp_close_server(&lsp);
+    lsp_server_data_destroy(&input_context.lsp_server_data);
     end_process(&state);
 
     fputs(CURSOR_SHAPE[CURSOR_DEFAULT_MODE],stdout);
@@ -588,37 +544,6 @@ static void end_process(struct editor_state *state){
     clear();
     refresh();
     endwin();
-}
-
-// *epfdでtimeout_msミリ秒待機し、lspの受信メッセージを処理・解放する。
-// 返り値: なし。epoll_wait失敗時はfdを閉じて*epfdを-1にする。
-static void lsp_poll_events(int *epfd, struct lsp_process *lsp, int timeout_ms)
-{
-    /* epoll_waitの結果の格納先 */
-    struct epoll_event events[FDS_N];
-
-    int n_events = epoll_wait(*epfd, events, FDS_N, timeout_ms);
-    if(n_events < 0){
-        error_log_write("lsp epoll_wait error\n");
-        close(*epfd);
-        *epfd = -1;
-        return;
-    }
-
-    for(int i = 0; i < n_events; i++){
-        /* ディスクリプタが不正の場合 */
-        if(events[i].data.fd < 0)continue;
-        if(events[i].data.fd != lsp->from_server_fd)continue;
-
-        char *msg = lsp_read_message(lsp->from_server_fd);
-        if(msg == NULL){
-            // 1件分の読み取りに失敗したら、壊れたストリームを読み続けないよう残りのイベントも打ち切る。
-            //lspとの通信エラーが起きたことを画面に表示する
-            break;
-        }
-        lsp_handle_message(lsp, msg);
-        free(msg);
-    }
 }
 
 // 指定した画面座標へNUL終端文字列を描画する。

@@ -4,6 +4,7 @@
 #include <linux/limits.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <sys/epoll.h>
 #include <sys/types.h>
 
 #define MSG_BUFF_SIZE_MAX 2048 // LSP送受信ログ用の固定バッファ長。
@@ -46,17 +47,28 @@ struct txt_update_data{
     int file_update_counter; // 文書変更ごとに増やすLSPのversion値。
 };
 
+// 起動中の言語サーバーの可変長配列。各要素のlsp_processはこの配列が所有する。
+// lsp_proc_numが使用数、lsp_proc_allocate_numが確保数。
+typedef struct {
+    struct lsp_process **lsp_proc_list;
+    size_t lsp_proc_num;
+    size_t lsp_proc_allocate_num;
+}lsp_server_data;
+
 // 言語サーバープロセスと双方向パイプの所有状態。
 struct lsp_process {
     pid_t pid; // 起動した言語サーバーのプロセスID。未起動時は負値。
     int to_server_fd; // 言語サーバーの標準入力へ書き込むファイルディスクリプタ。
     int from_server_fd; // 言語サーバーの標準出力から読むファイルディスクリプタ。
     bool initialized; // initialize応答を正常に受信済みならtrue。
+    int epfd; // from_server_fdを監視するepollインスタンスのfd。未作成・クローズ済みは-1。
+    struct epoll_event ev; // from_server_fdをepollへ登録する際のイベント情報。
     struct txt_update_data update_data; // didChange用の文書状態。
     struct lsp_send_receve_id_data id_data; // 送信要求へ割り当てるID列。
     char from_server_msg_buff[MSG_BUFF_SIZE_MAX]; // 受信内容のログ・確認用NUL終端バッファ。
     char to_server_msg_buff[MSG_BUFF_SIZE_MAX]; // 送信内容のログ・確認用NUL終端バッファ。
     char lsp_language_id[32]; // didOpenで送る言語IDのNUL終端文字列。
+    char *lsp_root_uri; // initializeへ渡したルートURI(ヒープ所有)。未設定はNULL。
 };
 
 

@@ -126,7 +126,7 @@ struct make_file_mode_status{
 
 // ファイルブラウザで決定された項目名と種別。
 struct file_browse_select_state{
-    enum select_state select_state; // 選択項目がファイル・フォルダ・エラーのどれか。
+    enum path_type select_state; // 選択項目がファイル・フォルダ・エラーのどれか。
     char select_name[NAME_MAX + 1]; // 選択された項目名。
 };
 
@@ -413,7 +413,7 @@ struct editor_input_context {
     WINDOW *win; // ncursesの標準描画先への借用ポインタ。
     MEVENT mouse_event; // 直近のマウスイベント。
     struct editor_state *state; // エディタ全体の状態への借用ポインタ。
-    struct lsp_process *lsp_data; // 言語サーバー状態への借用ポインタ。未使用時はNULL。
+    lsp_server_data lsp_server_data; // 起動中の言語サーバー一覧(所有)。未起動時は空。
     syntax syntax_data; // 構文着色状態と、その所有する着色情報。
     struct edit_screen_context edit_screen; // 編集画面の配置情報。
     struct ask_make_file_mode_context ask_make_file_mode; // 新規作成ダイアログの配置情報。

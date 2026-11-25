@@ -2,6 +2,7 @@
 #define PATH_UTIL_H
 
 #include <stddef.h>
+#include "editor_types.h"
 
 
 //自分の実行可能データのシンボリックリンク
@@ -25,4 +26,9 @@ char *editor_path_from_exe_dir(char *buf, size_t buf_size, const char *relative)
 
 int get_self_path(char *path,size_t s);
 char *get_path_dirname(char *path);
+enum path_type get_path_type(const char *path);
+
+enum path_type get_path_type(const char *path);
+
+
 #endif

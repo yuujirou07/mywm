@@ -6,6 +6,7 @@
 #include <wctype.h>
 
 #include "editor.h"
+#include "path_util.h"
 #include "editor_func.h"
 #include "editor_log.h"
 #include "editor_types.h"
@@ -100,9 +101,9 @@ static void ft_open_select_item(struct editor_input_context *ctx){
     }
     
     if(tmp_item != NULL){
-        enum select_state state = ft_item_open_event(ctx,tmp_item);
+        enum path_type state = ft_item_open_event(ctx,tmp_item);
         //通常ファイルなら編集画面に移動する
-        if(state == file){
+        if(state == PATH_TYPE_FILE){
             editor_set_screen_state(ctx->state,edit_screen_mode);
             set_cell_color_pair(PAIR_TEXT,item_box.pos.x,tmp_item->screen_y,item_box.w - 1);
             my_cur_set(ctx->state,true);
@@ -152,25 +153,25 @@ int change_file_tree_width(struct editor_input_context *ctx,int width){
 
 // item_dataの項目を開く。ディレクトリなら開閉を切り替え、ファイルなら読み込んで編集画面の表示を更新する。
 // 引数: ctx=編集状態・構文情報を持つcontext、item_data=開く項目(table_ptrは有効であること)。 返り値: なし。必要な再描画フラグを立てる。
-enum select_state ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data){
+enum path_type ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data){
 
     ft_item_view_data *item = item_data;
     struct editor_state *state = ctx->state;
 
-    enum select_state path_state =
-        get_path_state(item->table_ptr->absolute_path);
+    enum path_type path_state =
+        get_path_type(item->table_ptr->absolute_path);
         
-    if(path_state == folder){
+    if(path_state == PATH_TYPE_DIR){
         item->is_open = !item->is_open;
         state->render_flags |= RENDER_FILETREE;
     }
-    else if(path_state == file){
+    else if(path_state == PATH_TYPE_FILE){
         struct file_browse_select_state select_state;
         load_file(state,NULL,0
             ,item->table_ptr->absolute_path,
             &select_state);
         
-        if(select_state.select_state == file){
+        if(select_state.select_state == PATH_TYPE_FILE){
             load_screen_size(state);
             editor_set_cursor(state,0,0);
             state->render_flags |= RENDER_FILE_DATA;

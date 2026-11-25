@@ -3,6 +3,7 @@
 #include "editor_func.h"
 #include "editor_screen.h"
 #include "editor_types.h"
+#include "lsp_src/lsp_settings.h"
 
 static void send_lsp_did_change(struct editor_input_context *ctx);
 
@@ -64,7 +65,10 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
     }
     //デバッグ用
     else if(ch == CTRL(' ')){
-       lsp_send_completion(ctx->lsp_data->to_server_fd,state);
+       struct lsp_process *lsp = lsp_get_active(ctx);
+       if(lsp != NULL){
+           lsp_send_completion(lsp->to_server_fd,state);
+       }
     }
     if (ch == KEY_MOUSE) {
         handle_mouse(ctx, 0);
@@ -168,7 +172,7 @@ static void send_lsp_did_change(struct editor_input_context *ctx){
 
 
     struct editor_state *state = ctx->state;
-    struct lsp_process *lsp = ctx->lsp_data;
+    struct lsp_process *lsp = lsp_get_active(ctx);
     char uri[(PATH_MAX * 3) + sizeof("file://")];
     char *text;
     int next_version;

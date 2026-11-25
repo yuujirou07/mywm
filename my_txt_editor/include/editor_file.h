@@ -32,7 +32,6 @@ void file_select_line_update(struct file_select_line *file_select_line,int line)
 void input_mode_tmp_path(char *path,enum flags flags);
 const wchar_t *now_open_path_name(struct dir_table *path,enum flags flags);
 int check_dir_mem(struct dir_table *dir_table,int size);
-enum select_state get_path_state(const char *path);
 int now_input_path_open(struct editor_state *state,struct editor_input_context *ctx);
 int file_browser_show_mem_start_num(int start_num,enum flags flags);
 

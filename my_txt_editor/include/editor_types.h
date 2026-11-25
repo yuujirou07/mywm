@@ -67,11 +67,16 @@ enum screen_state{
 typedef enum screen_state screen_state;
 
 // ファイルブラウザで判定した項目種別。
-enum select_state{
-    file,  // 通常ファイル。
-    folder,// ディレクトリ。
-    unkown,// 種別を判定できない項目。
-    error, // stat等の判定処理に失敗した状態。
+enum path_type{
+    PATH_TYPE_FILE,  // 通常ファイル。
+    PATH_TYPE_DIR,// ディレクトリ。
+    PATH_TYPE_CHR, // キャラクタデバイス(S_ISCHR)。
+    PATH_TYPE_BLK, // ブロックデバイス(S_ISBLK)。
+    PATH_TYPE_FIFO,// 名前付きパイプ(S_ISFIFO)。
+    PATH_TYPE_LNK, // シンボリックリンク(S_ISLNK)。statはリンク先を見るため、判定にはlstatが必要。
+    PATH_TYPE_SOCK,// ソケット(S_ISSOCK)。
+    PATH_TYPE_UNKOWN,// 種別を判定できない項目。
+    PATH_TYPE_ERROR, // stat等の判定処理に失敗した状態。
 };
 
 

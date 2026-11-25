@@ -81,7 +81,7 @@ int load_dir_table(struct editor_state *state,struct dir_entry **table,int *tabl
 void load_file(struct editor_state *state,struct dir_entry *table,int table_num,
                     char *path_name,struct file_browse_select_state *select_state){
     select_state->select_name[0] = NUL;
-    select_state->select_state = error;
+    select_state->select_state = PATH_TYPE_ERROR;
     if(path_name == NULL || path_name[0] == NUL){
         return;
     }
@@ -92,7 +92,7 @@ void load_file(struct editor_state *state,struct dir_entry *table,int table_num,
         int path_len = snprintf(path_name_buff,sizeof(path_name_buff),"%s",path_name);
         if(path_len < 0 || (size_t)path_len >= sizeof(path_name_buff)){
             editor_error_screen(state,"path too long");
-            select_state->select_state = error;
+            select_state->select_state = PATH_TYPE_ERROR;
             return;
         }
         file_name = strrchr(path_name_buff,'/');
@@ -101,7 +101,7 @@ void load_file(struct editor_state *state,struct dir_entry *table,int table_num,
     else{
         if(state->file_browse.select_line.now_line < 0 ||
            state->file_browse.select_line.now_line >= table_num){
-            select_state->select_state = error;
+            select_state->select_state = PATH_TYPE_ERROR;
             return;
         }
 
@@ -114,7 +114,7 @@ void load_file(struct editor_state *state,struct dir_entry *table,int table_num,
                                 path_name, separator, file_name);
         if(path_len < 0 || (size_t)path_len >= sizeof(path_name_buff)){
             editor_error_screen(state, "path too long");
-            select_state->select_state = error;
+            select_state->select_state = PATH_TYPE_ERROR;
             return;
         }
     }
@@ -130,7 +130,7 @@ void load_file(struct editor_state *state,struct dir_entry *table,int table_num,
             editor_error_screen(state,"file name too long");
             return;
         }
-        select_state->select_state = folder;
+        select_state->select_state = PATH_TYPE_DIR;
         memcpy(select_state->select_name,file_name,file_name_size + 1);
         return;
     }
@@ -144,7 +144,7 @@ void load_file(struct editor_state *state,struct dir_entry *table,int table_num,
         editor_error_screen(state,"can not open file");
         return;
     }
-    select_state->select_state = file;
+    select_state->select_state = PATH_TYPE_FILE;
     //初回はNULLなので除外する
     // 新しいファイルを開けた後で旧FILEを閉じる。開けなかったときに現在のファイルを失わないため。
     if(state->file_data.now_open_file != NULL){
@@ -915,29 +915,6 @@ int check_dir_mem(struct dir_table *dir_table,int size){
     return dir_mem_counter;
 }
 
-// パスの実体をstat()で調べ、ファイルまたはディレクトリへ分類する。
-// 引数: path=判定するNUL終端パス。 返り値: 通常ファイルならfile、ディレクトリならfolder、その他はunkown、NULLならerror。
-enum select_state get_path_state(const char *path){
-    if(path == NULL)return error;
-   
-    struct stat stat_state = {0};
-    int stat_rt = stat(path,&stat_state);
-    if(stat_rt == -1){
-        char *error_msg = strerror(errno);
-        if(strlen(error_msg) + 1 > ERROR_MSG_SIZE_MAX){
-            error_msg[ERROR_MSG_SIZE_MAX - 1] = NUL;
-        }
-       return unkown;
-    }
-    if(stat_state.st_mode & S_IFREG){
-        return file;
-    }
-    else if(stat_state.st_mode & S_IFDIR){
-        return folder;
-    }
-    else return unkown;
-}
-
 // パス入力欄の完成済みパスを開き、種類(ファイルやディレクトリ)に応じて画面状態を更新する。
 // 引数: state=読込先の編集状態、ctx=ファイルブラウザと描画状態を持つ入力context。 返り値: 成功時0、引数不正・判定失敗時-1。完成パスが無い場合はtrue。
 int now_input_path_open(struct editor_state *state,struct editor_input_context *ctx){
@@ -949,8 +926,8 @@ int now_input_path_open(struct editor_state *state,struct editor_input_context *
 
     struct file_browse_select_state select_state;
     load_file(state,NULL,0,dir_info.path_name,&select_state);
-    if(select_state.select_state == unkown || select_state.select_state == error)return -1;
-    if(select_state.select_state == folder){
+    if(select_state.select_state == PATH_TYPE_UNKOWN || select_state.select_state == PATH_TYPE_ERROR)return -1;
+    if(select_state.select_state == PATH_TYPE_DIR){
         char *last_slash_ptr = strrchr(dir_info.path_name,'/');
         if(last_slash_ptr == NULL){
 
@@ -972,7 +949,7 @@ int now_input_path_open(struct editor_state *state,struct editor_input_context *
                 sizeof(char) * ((last_slash_ptr+2) - &dir_info.path_name[0]));
         }
     }
-    else if(select_state.select_state == file){
+    else if(select_state.select_state == PATH_TYPE_FILE){
         load_screen_size(state);
         editor_set_cursor(state,0,0);
         restore_edit_screen(state);

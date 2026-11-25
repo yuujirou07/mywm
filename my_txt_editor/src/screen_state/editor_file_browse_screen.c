@@ -6,6 +6,8 @@
 #include "editor_screen.h"
 #include "editor_color.h"
 #include "editor_types.h"
+#include "path_util.h"
+#include "lsp_src/lsp_settings.h"
 
 // ファイルブラウザ画面の移動・選択・復帰を処理する。
 // 引数: ctx=入力context(state->file_browseにファイル一覧・現在パスが入っている)、input_result=get_wch()の結果、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
@@ -113,7 +115,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                     file_browse->dir_name_table_num,
                     file_browse->path_name, &select_state);
             
-            if(select_state.select_name[0] != NUL && select_state.select_state == folder){
+            if(select_state.select_name[0] != NUL && select_state.select_state == PATH_TYPE_DIR){
                 struct dir_table now_path = {
                     .path_name = file_browse->path_name,
                 };
@@ -141,21 +143,22 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                 file_browse->path_input_mode = false;
 
             }
-            if(state->file_data.now_open_file != NULL && select_state.select_state == file){
+            if(state->file_data.now_open_file != NULL && select_state.select_state == PATH_TYPE_FILE){
                 load_screen_size(state);
                 char uri[(PATH_MAX * 3) + sizeof("file://")];
+                struct lsp_process *lsp = lsp_get_active(ctx);
 
-                if(state->settings_data->lsp.lsp_use && ctx->lsp_data != NULL &&
-                    ctx->lsp_data->initialized && ctx->lsp_data->to_server_fd >= 0 &&
+                if(state->settings_data->lsp.lsp_use && lsp != NULL &&
+                    lsp->initialized && lsp->to_server_fd >= 0 &&
                     lsp_path_to_file_uri(uri, sizeof(uri), state->file_data.now_open_path_name) == 0 &&
-                    lsp_send_did_open(ctx->lsp_data->to_server_fd, uri,
-                        ctx->lsp_data->lsp_language_id,
+                    lsp_send_did_open(lsp->to_server_fd, uri,
+                        lsp->lsp_language_id,
                             state->str.chr_file_all_str_data) == 0){
 
-                    snprintf(ctx->lsp_data->update_data.path_name,
-                            sizeof(ctx->lsp_data->update_data.path_name), "%s",
+                    snprintf(lsp->update_data.path_name,
+                            sizeof(lsp->update_data.path_name), "%s",
                             state->file_data.now_open_path_name);
-                    ctx->lsp_data->update_data.file_update_counter = 1;
+                    lsp->update_data.file_update_counter = 1;
                 }
                 //ここでディレクトリ移動
                 chdir(file_browse->path_name);
@@ -214,8 +217,8 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
             char_old_path[converted] = NUL;
 
             //現在入力されているパスが存在したら開く
-            enum select_state path_state = get_path_state(char_old_path);
-            if(path_state == file){
+            enum path_type path_state = get_path_type(char_old_path);
+            if(path_state == PATH_TYPE_FILE){
                 now_input_path_open(state,ctx);
                 return true;
             }

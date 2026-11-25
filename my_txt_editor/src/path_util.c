@@ -1,6 +1,10 @@
 #include <linux/limits.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include<sys/stat.h>
+
+
 #include "path_util.h"
 #include "editor_log.h"
 #include "editor_types.h"
@@ -85,3 +89,38 @@ char *get_path_dirname(char *path){
 }
 
 
+// pathの種別を判定する。シンボリックリンクはリンク先を辿らず、PATH_TYPE_LNKとして返す。
+// 返り値: 対応する種別。pathがNULL・存在しない・lstat失敗はPATH_TYPE_ERROR、判定できない種別はPATH_TYPE_UNKOWN。
+enum path_type get_path_type(const char *path){
+    if(path == NULL){
+        return PATH_TYPE_ERROR;
+    }
+
+    struct stat path_state = {0};
+    if(lstat(path,&path_state) != 0){
+        return PATH_TYPE_ERROR;
+    }
+
+    if(S_ISDIR(path_state.st_mode)){
+        return PATH_TYPE_DIR;
+    }
+    if(S_ISREG(path_state.st_mode)){
+        return PATH_TYPE_FILE;
+    }
+    if(S_ISLNK(path_state.st_mode)){
+        return PATH_TYPE_LNK;
+    }
+    if(S_ISCHR(path_state.st_mode)){
+        return PATH_TYPE_CHR;
+    }
+    if(S_ISBLK(path_state.st_mode)){
+        return PATH_TYPE_BLK;
+    }
+    if(S_ISFIFO(path_state.st_mode)){
+        return PATH_TYPE_FIFO;
+    }
+    if(S_ISSOCK(path_state.st_mode)){
+        return PATH_TYPE_SOCK;
+    }
+    return PATH_TYPE_UNKOWN;
+}
