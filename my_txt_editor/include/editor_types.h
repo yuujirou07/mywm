@@ -1,8 +1,13 @@
 #ifndef EDITOR_TYPES_H
 #define EDITOR_TYPES_H
 
+#ifndef NUL
+    #define NUL '\0'
+#endif
 
-
+#ifndef WNUL
+    #define WNUL L'\0'
+#endif
 
 // 解析対象の言語。現在はコメント開始文字列の切り替えに使用する。
 typedef enum{

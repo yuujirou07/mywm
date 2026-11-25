@@ -107,9 +107,15 @@ int draw_filetree(struct editor_input_context *ctx,file_tree_data *filetree_data
         0,
         &file_h
     );
-
+    
     ft_draw_filetree_data(ctx,filetree_data);
     
+    if(filetree_data->ft_search_data.is_search_mode){
+        
+
+
+    }
+
     return 0;
 }
 

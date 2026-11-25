@@ -1,4 +1,5 @@
 #include <ncurses.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <math.h>
 #include <wchar.h>
@@ -7,6 +8,7 @@
 #include "editor.h"
 #include "editor_func.h"
 #include "editor_log.h"
+#include "editor_types.h"
 #include "filetree.h"
 #include "ftj.h"
 #include "editor_screen.h"
@@ -78,94 +80,56 @@ void hide_filetree(struct editor_input_context *ctx){
 }
 
 
+// 選択行の項目を開き、通常ファイルなら編集画面へ移る。
+// 引数: ctx=ファイルツリーを持つ入力context。 返り値: なし。
+static void ft_open_select_item(struct editor_input_context *ctx){
+    struct editor_state *state = ctx->state;
+    int item_view_num = state->file_tree_data.item_view_count_num;
+    //選択行(項目領域内の0始まりの行)を画面のy座標へ変換する。
+    //項目領域の先頭1行は項目を置かない(項目はview_h=1から並ぶ)ため+1する。
+    const struct box item_box = state->file_tree_data.ft_item_box;
+    int select_line = item_box.pos.y + 1 + state->file_tree_data.ft_item_select_line;
+    ft_item_view_data *tmp_item_data_list = state->file_tree_data.item_view_data;
+
+    ft_item_view_data *tmp_item = NULL;
+    for(int i = 0;i < item_view_num;i++){
+        if(tmp_item_data_list[i].screen_y == select_line){
+            tmp_item = &tmp_item_data_list[i];
+            break;
+        }
+    }
+    
+    if(tmp_item != NULL){
+        enum select_state state = ft_item_open_event(ctx,tmp_item);
+        //通常ファイルなら編集画面に移動する
+        if(state == file){
+            editor_set_screen_state(ctx->state,edit_screen_mode);
+            set_cell_color_pair(PAIR_TEXT,item_box.pos.x,tmp_item->screen_y,item_box.w - 1);
+            my_cur_set(ctx->state,true);
+            ctx->state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+            ctx->state->render_flags |= RENDER_FILETREE;
+        }
+    }
+}
+
+
 // ctxのツリー画面でchの開閉・幅変更・マウス操作・行ジャンプを処理する。input_resultは未使用。
 // 返り値: qによる終了要求はfalse、それ以外はtrue。ctxの各画面状態とウィンドウは設定済みとする。
 bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int input_result){
     (void)input_result;
     struct editor_state *state = ctx->state;
     file_tree_data *tmp_file_tree = &state->file_tree_data;
+
     if(state->cursor.is_cur_show && 
         !tmp_file_tree->ft_search_data.is_search_mode){
         my_cur_set(state,false);
     }
 
-    
-    if(ch == (wchar_t)L'j' || ch == (wchar_t)L'k'){
-        if(tmp_file_tree->item_view_count_num > 
-            tmp_file_tree->ft_item_select_line){
-            int next_select_line = tmp_file_tree->ft_item_select_line+1;
-            if(ch == (wchar_t)L'k'){
-                next_select_line -= 2;
-            }
-            
-            ft_set_file_tree_item_select_line(
-                tmp_file_tree,
-                next_select_line
-            );
-            state->render_flags |= RENDER_FILETREE;
-        }
+    if(tmp_file_tree->ft_search_data.is_search_mode){
+        ft_handle_search_mode(ctx,ch);
     }
-
-    if(ch == KEY_ENTER || ch == L'\n'){
-        int item_view_num = state->file_tree_data.item_view_count_num;
-        //選択行(項目領域内の0始まりの行)を画面のy座標へ変換する。
-        //項目領域の先頭1行は項目を置かない(項目はview_h=1から並ぶ)ため+1する。
-        const struct box item_box = state->file_tree_data.ft_item_box;
-        int select_line = item_box.pos.y + 1 + state->file_tree_data.ft_item_select_line;
-        ft_item_view_data *tmp_item_data_list = state->file_tree_data.item_view_data;
-
-        ft_item_view_data *tmp_item = NULL;
-        for(int i = 0;i < item_view_num;i++){
-            if(tmp_item_data_list[i].screen_y == select_line){
-                tmp_item = &tmp_item_data_list[i];
-                break;
-            }
-        }
-        
-        if(tmp_item != NULL){
-            enum select_state state = ft_item_open_event(ctx,tmp_item);
-            //通常ファイルなら編集画面に移動する
-            if(state == file){
-                editor_set_screen_state(ctx->state,edit_screen_mode);
-                set_cell_color_pair(PAIR_TEXT,item_box.pos.x,tmp_item->screen_y,item_box.w - 1);
-                my_cur_set(ctx->state,true);
-                ctx->state->render_flags |= RENDER_EDIT_SCREEN_BASE;
-                ctx->state->render_flags |= RENDER_FILETREE;
-            }
-        }
-    }
-
-    if(ch == (wchar_t)L'i'){
-        struct pos cur_pos = 
-            (struct pos){0,0};
-
-        cur_pos_push(cur_pos,state);
-        my_cur_set(state,true);
-        tmp_file_tree->ft_search_data.is_search_mode = true;
-    }
-
-
-    if(ch == CTRL('n')){
-        // ツリーを出したキーと同じキーで閉じる。
-        hide_filetree(ctx);
-        return true;
-    }
-    else if(ch == CTRL('h')){
-        editor_set_screen_state(state,line_jump_mode);
-        reset_jump_mode(state);
-        state->render_flags |= RENDER_LINE_JUMP;
-    }
-    if(ch == 'q')return false;
-    if(ch == KEY_MOUSE){
-        handle_mouse(ctx,0);
-    }
-    
-    //ファイルツリーの横幅変更処理
-    if(ch == '>' || ch == '<' || ch == KEY_LEFT || ch == KEY_RIGHT){
-        int size_fiff = (ch == '<')?-1:(ch == KEY_LEFT)?-1:1;
-        //画面外にいくかの判定をつける
-        int ft_w = ctx->state->file_tree_data.ft_box.w + size_fiff;
-        change_file_tree_width(ctx,ft_w);
+    else{
+        ft_handle_normal_mode(ctx,ch);
     }
 
     return true;
@@ -218,4 +182,109 @@ enum select_state ft_item_open_event(struct editor_input_context *ctx,ft_item_vi
         }
     }
     return path_state;
+}
+
+
+int ft_resize_by_key(struct editor_input_context *ctx,wchar_t wchr){
+
+    if(wchr == '>' || wchr == '<' || wchr == KEY_LEFT || wchr == KEY_RIGHT){
+        int size_fiff = (wchr == '<')?-1:(wchr == KEY_LEFT)?-1:1;
+        //画面外にいくかの判定をつける
+        int ft_w = ctx->state->file_tree_data.ft_box.w + size_fiff;
+        change_file_tree_width(ctx,ft_w);
+        return 0;
+    }
+    return -1;
+}
+
+
+
+int ft_enter_search_mode(struct editor_state *state){
+    struct pos cur_pos = 
+        (struct pos){0,0};
+
+    cur_pos_push(cur_pos,state);
+    my_cur_set(state,true);
+    state->file_tree_data.ft_search_data.is_search_mode = true;
+    return 0;     
+}
+
+
+int ft_move_select_line(file_tree_data *file_tree,int diff){
+    if(file_tree->item_view_count_num > 
+        file_tree->ft_item_select_line){
+
+        int next_select_line = file_tree->ft_item_select_line + diff;
+        
+        ft_set_file_tree_item_select_line(
+            file_tree,
+            next_select_line
+        );
+    }
+    return 0;
+}
+
+int ft_handle_normal_mode(struct editor_input_context *ctx,wchar_t wchr){
+
+    struct editor_state *state = ctx->state;
+    file_tree_data *tmp_file_tree = &state->file_tree_data;
+
+    if(wchr == (wchar_t)L'j' || wchr == (wchar_t)L'k'){
+            ft_move_select_line(tmp_file_tree,(wchr == (wchar_t)L'k')?-1:1);
+            state->render_flags |= RENDER_FILETREE;
+    }
+
+    if((wchr == KEY_ENTER || wchr == L'\n') && 
+        !tmp_file_tree->ft_search_data.is_search_mode){
+        ft_open_select_item(ctx);
+    }
+
+    if(wchr == (wchar_t)L'i'){
+        ft_enter_search_mode(state);
+    }
+
+    if(wchr == CTRL('n')){
+        // ツリーを出したキーと同じキーで閉じる。
+        hide_filetree(ctx);
+        return true;
+    }
+    else if(wchr == CTRL('h')){
+        editor_set_screen_state(state,line_jump_mode);
+        reset_jump_mode(state);
+        state->render_flags |= RENDER_LINE_JUMP;
+    }
+    if(wchr == 'q')return false;
+    if(wchr == KEY_MOUSE){
+        handle_mouse(ctx,0);
+    }
+    
+    //ファイルツリーの横幅変更処理
+    if(wchr == '>' || wchr == '<' || 
+        wchr == KEY_LEFT || wchr == KEY_RIGHT){
+        ft_resize_by_key(ctx,wchr);
+    }
+    return 0;    
+}
+
+int ft_handle_search_mode(struct editor_input_context *ctx,wchar_t wchr){
+
+    struct editor_state *state = ctx->state;
+    file_tree_data *tmp_file_tree = &state->file_tree_data;
+
+
+    if(wchr == iswalnum(wchr)){
+        const size_t serch_str_len = wcslen(tmp_file_tree->ft_search_data.serch_str);
+        //文字数がオーバーフローしていないかの判定
+        if(serch_str_len >= 
+            (sizeof(tmp_file_tree->ft_search_data.serch_str) /
+                sizeof(tmp_file_tree->ft_search_data.serch_str[0]))){
+            return 0;
+        }
+
+
+        tmp_file_tree->ft_search_data.serch_str[serch_str_len] = wchr;
+        tmp_file_tree->ft_search_data.serch_str[serch_str_len + 1] = WNUL;
+    }
+
+    return 0;
 }

@@ -21,6 +21,7 @@
 
 struct ft_path_click_data;
 struct editor_input_context;
+struct editor_state;
 
 // ツリー内の1項目について、開閉状態・階層・直近の描画位置を保持する。
 typedef struct{
@@ -97,4 +98,15 @@ int ft_get_max_layer_item_view_data(ft_item_view_data *item_view_data,int item_v
 int ft_set_file_tree_item_select_line(file_tree_data *file_tree_data,int line_num);
 
 enum select_state ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data);
+
+
+int ft_resize_by_key(struct editor_input_context *ctx,wchar_t wchr);
+
+int ft_enter_search_mode(struct editor_state *state);
+
+int ft_handle_normal_mode(struct editor_input_context *ctx,wchar_t wchr);
+
+int ft_move_select_line(file_tree_data *file_tree,int diff);
+
+int ft_handle_search_mode(struct editor_input_context *ctx,wchar_t wchr);
 #endif
