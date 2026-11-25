@@ -381,9 +381,6 @@ int main(int argc, char *argv[])
 
         if(open_start_menu && start_menu != NULL){
             editor_set_screen_state(&state, start_menu_screen_mode);
-        }
-
-        if(editor_get_screen_state(&state) == start_menu_screen_mode){
             running = editor_handle_screen_input(&input_context, OK, 0);
             if(running == false)break;
             continue;
