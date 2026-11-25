@@ -43,7 +43,7 @@ void init_syntax_colors(void){
 
 // word_typeに対応する構文色ペア番号を返す。事前にinit_syntax_colorsを呼ぶ。
 // 返り値: 色非対応は0、分類不正・ペア不足は本文色、それ以外はPAIR_SYNTAX_BASE+word_type。
-short syntax_color_pair(struct editor_input_context *ctx,syntax_type word_type){
+short syntax_color_pair(syntax_type word_type){
     if(!has_colors())return 0;
     //suntax_typeが要素数より上の値かの条件分岐
     if((unsigned int)word_type >= sizeof(syntax_colors) / sizeof(syntax_colors[0])){
@@ -337,7 +337,7 @@ void set_syntax_color_line(struct editor_input_context *ctx,uint16_t line,uint16
             while(end < len && end < view_cols && cells[end] == 0)end++;
 
             
-            short syntax_color = syntax_color_pair(ctx,tmp_syntax_data.type);
+            short syntax_color = syntax_color_pair(tmp_syntax_data.type);
             color_text_cells(state,
                 syntax_box.pos.y + state->write_area.y_start,
                 col + state->write_area.x_start,
@@ -407,7 +407,7 @@ int apply_syntax_color(struct editor_input_context *ctx,syntax syntax){
 
         else if(area->pos.y >= state->write_area.h || area->pos.y + area->h - 1 >= state->write_area.h)continue;
 
-        short syntax_color = syntax_color_pair(ctx,data->type); 
+        short syntax_color = syntax_color_pair(data->type); 
         color_text_cells(state,state->write_area.y_start + area->pos.y,
             state->write_area.x_start + area->pos.x,
             area->w,syntax_color);

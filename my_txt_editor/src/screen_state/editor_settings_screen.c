@@ -140,7 +140,7 @@ static int settings_item_name_width(const char *name){
 
 // 設定画面のbox上辺中央へタイトルを重ねる。draw_boxの後に呼ぶ。
 // 返り値: なし。タイトルと左右余白が枠幅に収まらなければ描画しない。
-static void draw_settings_title(struct editor_input_context *ctx,struct box box){
+static void draw_settings_title(struct box box){
     const char *title = " Settings ";
     int title_len = (int)strlen(title);
     if(box.w < title_len + 2)return;
@@ -204,7 +204,7 @@ void draw_settings_screen(struct editor_input_context *ctx){
     settings_screen_data st_scr_data = state->settings_screen_data;
 
     draw_box(st_scr_data.box);
-    draw_settings_title(ctx,st_scr_data.box);
+    draw_settings_title(st_scr_data.box);
 
     int item_num = st_scr_data.settings_item_data_num;
     int inner_w = st_scr_data.box.w - 2;

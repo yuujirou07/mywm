@@ -337,9 +337,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    if(KL_open_key_log_file(KEY_EVENT_LOG_PATH) != 0){
-    
-    }
+    KL_open_key_log_file(KEY_EVENT_LOG_PATH);
     
 
     //設定プログラムファイルロード　
@@ -378,7 +376,7 @@ int main(int argc, char *argv[])
         if(is_lsp_enabled(&state) && is_lsp_running(&input_context)){
             lsp_poll_all(&input_context.lsp_server_data,settings_data.lsp.lsp_epoll_timeout_ms);
         }
-        
+
         //スタートメニュー実行判定
         if(open_start_menu && start_menu != NULL){
             editor_set_screen_state(&state, start_menu_screen_mode);
