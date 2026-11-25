@@ -6,7 +6,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include<cjson/cJSON.h>
-#include "lsp_src/language_server_communication.h"
+#include "lsp_src/lsp_communication.h"
 #include "editor.h"
 #include "editor_log.h"
 #include "editor_types.h"

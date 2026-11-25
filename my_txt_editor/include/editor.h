@@ -14,7 +14,7 @@
 #include"default_settings.h"
 #include "editor_commands.h"
 #include "kbd_input_log.h"
-#include"lsp_src/language_server_communication.h"
+#include"lsp_src/lsp_communication.h"
 #include "editor_types.h"
 #include "settings_screen.h"
 #include "start_menu.h"
