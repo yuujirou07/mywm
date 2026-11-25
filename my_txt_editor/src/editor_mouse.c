@@ -1,5 +1,6 @@
 #include "editor_mouse.h"
 #include "editor.h"
+#include "editor_log.h"
 
 
 
@@ -95,4 +96,39 @@ struct pos editor_pos_to_buffer_pos(
                 struct editor_state *state,
                 struct pos editor_pos){
     return(struct pos){editor_pos.x,state->scr.scr_start_num + editor_pos.y};
+}
+
+int SetCursorModeScreen(struct editor_state *state,screen_state screen_state){
+    switch(screen_state){
+        case edit_screen_mode:
+            SetCursorMode(state,CURSOR_INPUT_MODE);
+            SetCursorColor(state,CURSOR_COLOR_WHITE);
+            break;
+        default:
+            SetCursorMode(state,CURSOR_DEFAULT_MODE);
+            SetCursorColor(state,CURSOR_COLOR_DEFAULT);
+            break;
+    }
+    return 0;
+}
+
+
+int SetCursorMode(struct editor_state *state,CURSOR_MODE CurMode){
+    state->cursor.CurMode = CurMode;
+    fputs(CURSOR_SHAPE[state->cursor.CurMode],stdout);
+    fflush(stdout);
+    return 0;
+}
+
+int SetCursorColor(struct editor_state *state,CURSOR_COLOR color){
+
+    if((sizeof(CURSOR_COLOR_ESC)/sizeof(CURSOR_COLOR_ESC[0])) <= color){
+        error_log("cursor color error");
+        return -1;
+    }
+
+    state->cursor.Color = color;
+    fputs(CURSOR_COLOR_ESC[color],stdout);
+    fflush(stdout);
+    return 0;
 }

@@ -291,7 +291,6 @@ static inline enum screen_state editor_get_screen_state(struct editor_state *sta
 }
 
 
-int SetCursorModeScreen(struct editor_state *state,screen_state screen_state);
 
 // stateの履歴へnext_stateを追加する。同じ画面への連続遷移は記録せず、満杯なら最古を捨てる。
 // 返り値: なし。stateの履歴件数と配列が初期化済みであること。
@@ -687,9 +686,6 @@ void my_mvaddstr(struct pos pos,char *str);
 
 
 int get_write_screen_pos_chr(struct editor_state *state,struct pos pos,char *chr);
-int SetCursorMode(struct editor_state *state,CURSOR_MODE CurMode);
-int SetCursorColor(struct editor_state *state,CURSOR_COLOR color);
 
-int SetCursorModeScreen(struct editor_state *state,screen_state screen_state);
 
 #endif

@@ -4,6 +4,7 @@
 #include <ncurses.h>
 #include <stdbool.h>
 #include "editor_types.h"
+#include "default_settings.h"
 
 
 #define MOUSE_DOUBLE_CLICK_INTERVAL 290.0
@@ -24,5 +25,8 @@ struct pos editor_pos_to_buffer_pos(
                 struct editor_state *state,
                 struct pos editor_pos);
 bool screen_pos_to_box_pos(struct box b1,struct pos p1,struct pos *rt1);
+int SetCursorModeScreen(struct editor_state *state,screen_state screen_state);
+int SetCursorMode(struct editor_state *state,CURSOR_MODE CurMode);
+int SetCursorColor(struct editor_state *state,CURSOR_COLOR color);
 
 #endif
