@@ -11,6 +11,7 @@
 #include "path_util.h"
 #include"string.h"
 #include "editor_screen.h"
+#include "editor_types.h"
 
 static MY_TXT_EDITOR_RESULT api_save_file(void *userdata);
 static void *load_current_settings_obj_c_file(struct editor_input_context *ctx);
@@ -382,12 +383,12 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
         size_t jointed_msg_len = log_msg_len + full_path_len + 1;
 
         char editor_msg[jointed_msg_len];
-        editor_msg[0] = '\0';
+        editor_msg[0] = NUL;
 
         memcpy(editor_msg,log_msg,log_msg_len);
         memcpy(editor_msg + log_msg_len,full_path,full_path_len);
 
-        editor_msg[log_msg_len + full_path_len] = '\0';
+        editor_msg[log_msg_len + full_path_len] = NUL;
         editor_log_msg(editor_msg);
 
         //dl path追加

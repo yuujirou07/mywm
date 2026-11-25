@@ -9,6 +9,7 @@
 #include "lsp_src/language_server_communication.h"
 #include "editor.h"
 #include "editor_log.h"
+#include "editor_types.h"
 
 #define LSP_INVALID_FD (-1) // 言語サーバーとのパイプが未接続であることを表す値。
 #define LSP_HEADER_MAX 8192 // 受信するLSPヘッダーの最大バイト数。
@@ -36,7 +37,7 @@ static int lsp_write_all(int fd, const char *data, size_t len)
 }
 
 // fdからlenバイトをdataへ読む。短い読込みは続行し、EINTRは再試行する。
-// 返り値: 完了0、読込失敗・途中EOFは-1。成功時はdata[len]に'\0'を書くため、len+1バイトの領域が必要。
+// 返り値: 完了0、読込失敗・途中EOFは-1。成功時はdata[len]にNULを書くため、len+1バイトの領域が必要。
 static int lsp_read_all(int fd, char *data, size_t len)
 {
     size_t read_size = 0;
@@ -54,7 +55,7 @@ static int lsp_read_all(int fd, char *data, size_t len)
         }
         read_size += (size_t)result;
     }
-    data[len] = '\0';
+    data[len] = NUL;
     return 0;
 }
 
@@ -64,7 +65,7 @@ static size_t lsp_parse_content_length(const char *header)
 {
     const char *line = header;
 
-    while(*line != '\0'){
+    while(*line != NUL){
         const char *line_end = strstr(line, "\r\n");
         size_t line_len = line_end != NULL ? (size_t)(line_end - line) : strlen(line);
 
@@ -114,8 +115,8 @@ void lsp_process_init(struct lsp_process *lsp)
     lsp->from_server_fd = LSP_INVALID_FD;
     lsp->initialized = false;
     lsp->update_data.file_update_counter = 0;
-    lsp->update_data.path_name[0] = '\0';
-    lsp->lsp_language_id[0] = '\0';
+    lsp->update_data.path_name[0] = NUL;
+    lsp->lsp_language_id[0] = NUL;
 }
 
 // commandをargv（NULLならcommandだけ）でfork/execし、pidと標準入出力のパイプを未接続のlspへ保存する。
@@ -226,27 +227,27 @@ int lsp_path_to_file_uri(char *uri, size_t uri_size, const char *path)
         return -1;
     }
 
-    for(size_t i = 0; prefix[i] != '\0'; i++){
+    for(size_t i = 0; prefix[i] != NUL; i++){
         if(pos + 1 >= uri_size){
-            uri[0] = '\0';
+            uri[0] = NUL;
             return -1;
         }
         uri[pos++] = prefix[i];
     }
 
-    for(size_t i = 0; path[i] != '\0'; i++){
+    for(size_t i = 0; path[i] != NUL; i++){
         unsigned char ch = (unsigned char)path[i];
 
         if(lsp_is_uri_safe(ch)){
             if(pos + 1 >= uri_size){
-                uri[0] = '\0';
+                uri[0] = NUL;
                 return -1;
             }
             uri[pos++] = (char)ch;
         }
         else{
             if(pos + 3 >= uri_size){
-                uri[0] = '\0';
+                uri[0] = NUL;
                 return -1;
             }
             uri[pos++] = '%';
@@ -255,7 +256,7 @@ int lsp_path_to_file_uri(char *uri, size_t uri_size, const char *path)
         }
     }
 
-    uri[pos] = '\0';
+    uri[pos] = NUL;
     return 0;
 }
 
@@ -366,7 +367,7 @@ char *lsp_read_message(int fd){
 }
 
 // 受信済みのLSPメッセージ1件を種類別に振り分ける。initialize応答にはinitialized通知を返し、診断通知はエラーログへ書き出す。
-// 引数: lsp=送信先fdとinitialized状態を持つLSPプロセス、msg='\0'終端のJSON文字列。 返り値: なし。
+// 引数: lsp=送信先fdとinitialized状態を持つLSPプロセス、msg=NUL終端のJSON文字列。 返り値: なし。
 void lsp_handle_message(struct lsp_process *lsp, char *msg){
     cJSON *root;
     cJSON *jsonrpc;

@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include "path_util.h"
 #include "editor_log.h"
+#include "editor_types.h"
 
 // 実行ファイル(build/main)の1つ上=プロジェクト直下を基準に、relativeを連結してbuf_sizeバイトのbufへ書く。
 // 返り値: 成功時buf、引数不正・位置取得失敗・長さ超過はNULL。bufは呼び出し側所有で、プラグイン内でも本体が基準。
@@ -19,7 +20,7 @@ char *editor_path_from_exe_dir(char *buf, size_t buf_size, const char *relative)
         return NULL;
     }
 
-    exe_path[len] = '\0';
+    exe_path[len] = NUL;
 
     // 実行ファイル名とbuildディレクトリ名を落として、プロジェクト直下(my_txt_editor/)にする
     for(int i = 0;i < 2;i++){
@@ -27,7 +28,7 @@ char *editor_path_from_exe_dir(char *buf, size_t buf_size, const char *relative)
         if(slash == NULL){
             return NULL;
         }
-        *slash = '\0';
+        *slash = NUL;
     }
 
     int written = snprintf(buf, buf_size, "%s/%s", exe_path, relative);
@@ -54,7 +55,7 @@ int get_self_path(char *path,size_t s){
         return -1;
     }
 
-    tmp_path[path_len] = '\0';
+    tmp_path[path_len] = NUL;
 
     size_t need_len = (size_t)path_len + 1;
 
@@ -79,7 +80,7 @@ char *get_path_dirname(char *path){
         return NULL;
     }
     
-    slash[1] = '\0';
+    slash[1] = NUL;
     return path;
 }
 

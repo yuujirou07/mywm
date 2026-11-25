@@ -2,6 +2,7 @@
 #include"editor_log.h"
 #include"path_util.h"
 #include"editor.h"
+#include "editor_types.h"
 
 struct option_data{
         char *option_name;
@@ -167,7 +168,7 @@ int draw_option(struct pos screen_max_pos,struct pos *option_start_pos,
         skt[0]= '[';
         //skt[1] in loop
         skt[2]= ']';
-        skt[3]= '\0';
+        skt[3]= NUL;
 
         for(int i = 0; i < option_list_counter;i++){
                 skt[1] = option_data[i].short_cut_key;

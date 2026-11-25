@@ -116,7 +116,7 @@ int load_icon_data(const char *relative_path,icon_data *icon_data_ptr){
 
         ext_icon *lib =
             &icon_data_ptr->icon_lib[icon_data_ptr->icon_lib_num];
-        //strlen+1で終端の'\0'までコピーする。
+        //strlen+1で終端のNULまでコピーする。
         memcpy(lib->file_ext,ext_item->valuestring,
             strlen(ext_item->valuestring) + 1);
         memcpy(lib->icon_code,icon_item->valuestring,

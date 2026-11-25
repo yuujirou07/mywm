@@ -1,5 +1,6 @@
 #include "editor_color.h"
 #include "editor_screen.h"
+#include "editor_types.h"
 
 // start menu pluginを実行し、選択結果に対応する画面へ遷移する。
 // 引数: ctx=pluginと各遷移先の状態を持つcontext、ch=dispatcherとの共通形式用で未使用。 返り値: 入力ループを続けるならtrue、pluginが終了を要求したらfalse。
@@ -53,7 +54,7 @@ bool handle_start_menu_input(struct editor_input_context *ctx, wint_t ch){
         clear();
         state->scr.scr_start_num = 0;
 
-        state->file_data.now_open_path_name[0] = '\0';
+        state->file_data.now_open_path_name[0] = NUL;
         editor_set_cursor(state, 0, 0);
         editor_sync_cursor(state);
         state->render_flags |= RENDER_EDIT_SCREEN_BASE;

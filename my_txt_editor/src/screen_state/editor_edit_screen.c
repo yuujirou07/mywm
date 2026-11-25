@@ -2,6 +2,7 @@
 #include <string.h>
 #include "editor_func.h"
 #include "editor_screen.h"
+#include "editor_types.h"
 
 static void send_lsp_did_change(struct editor_input_context *ctx);
 
@@ -13,7 +14,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
     struct editor_state *state = ctx->state;
     WINDOW *win = ctx->win;
 
-    if(state->file_data.now_open_path_name[0] != '\0' && state->settings_data->show_status_bar){
+    if(state->file_data.now_open_path_name[0] != NUL && state->settings_data->show_status_bar){
         state->render_flags |= RENDER_EDIT_SCREEN_BASE;
         state->render_flags |= RENDER_FILETREE;
     }

@@ -5,6 +5,7 @@
 #include "editor_log.h"
 #include "editor_screen.h"
 #include "editor_color.h"
+#include "editor_types.h"
 
 // ファイルブラウザ画面の移動・選択・復帰を処理する。
 // 引数: ctx=入力context(state->file_browseにファイル一覧・現在パスが入っている)、input_result=get_wch()の結果、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
@@ -34,7 +35,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
         size_t now_open_path_len = strlen(file_browse->path_name);
         char tmp_now_open_path[now_open_path_len + 2];
         strcpy(tmp_now_open_path,file_browse->path_name);
-        char joint_str[2] = {'/','\0'};
+        char joint_str[2] = {'/',NUL};
         strcat(tmp_now_open_path,joint_str);
         struct dir_table now_path = {.path_name = tmp_now_open_path};
         now_open_path_name(&now_path,set);
@@ -87,10 +88,10 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                     return 1;
                 }
                 if(strchr(file_browse->path_name,'/') == child_dir){
-                    *(child_dir+1) = '\0';
+                    *(child_dir+1) = NUL;
                 }
                 else{
-                    *(child_dir) = '\0';
+                    *(child_dir) = NUL;
                 }
                 
 
@@ -112,7 +113,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                     file_browse->dir_name_table_num,
                     file_browse->path_name, &select_state);
             
-            if(select_state.select_name[0] != '\0' && select_state.select_state == folder){
+            if(select_state.select_name[0] != NUL && select_state.select_state == folder){
                 struct dir_table now_path = {
                     .path_name = file_browse->path_name,
                 };
@@ -176,10 +177,10 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
             memcpy(tmp_path,path,sizeof(wchar_t) * (path_len+1));
             char mb_path[PATH_MAX];
             if(path_len > 0){
-                tmp_path[path_len-1] = L'\0';
+                tmp_path[path_len-1] = WNUL;
                 size_t char_path_len = 0;
                 if((char_path_len = wcstombs(mb_path, tmp_path, sizeof(mb_path))) != (size_t)-1){
-                    mb_path[char_path_len] = '\0';
+                    mb_path[char_path_len] = NUL;
                     struct dir_table now_path = {.path_name = mb_path};
                     now_open_path_name(&now_path,set);
                     state->render_flags |= RENDER_FILE_BROWSE;
@@ -190,7 +191,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
             wchar_t tmp_path[path_len + 2];
             memcpy(tmp_path,path,sizeof(wchar_t) * (path_len+1));
             tmp_path[path_len] = ch;
-            tmp_path[path_len + 1] = L'\0';
+            tmp_path[path_len + 1] = WNUL;
             char mb_path[PATH_MAX];
             if(wcstombs(mb_path, tmp_path, sizeof(mb_path)) != (size_t)-1){
                 struct dir_table now_path = {.path_name = mb_path};
@@ -198,7 +199,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                 state->render_flags |= RENDER_FILE_BROWSE;
             }
         }
-        else if(ch == '\t' || ch == '\0' || ch == '\r' || ch == '\n' || ch == KEY_ENTER){
+        else if(ch == '\t' || ch == NUL || ch == '\r' || ch == '\n' || ch == KEY_ENTER){
             
             const wchar_t *path = now_open_path_name(NULL,get);
             if(path == NULL)return true;
@@ -210,7 +211,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                 fputs(err,stderr);
                 return true;
             }
-            char_old_path[converted] = '\0';
+            char_old_path[converted] = NUL;
 
             //現在入力されているパスが存在したら開く
             enum select_state path_state = get_path_state(char_old_path);
@@ -239,7 +240,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
         
             char *last_slash = strrchr(char_old_path,'/');
             if(last_slash != NULL){
-                *(last_slash+1) = '\0';
+                *(last_slash+1) = NUL;
             }
 
             char char_path[PATH_MAX];
@@ -292,7 +293,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                         file_browse->dir_name_table[i].d_type = table[i].d_type;
                     }
                     else{
-                        file_browse->dir_name_table[i].name[0] = '\0';
+                        file_browse->dir_name_table[i].name[0] = NUL;
                         file_browse->dir_name_table[i].d_type = DT_UNKNOWN;
                     }
                 }
@@ -382,7 +383,7 @@ void draw_box_inside_dir(struct editor_state *state,struct dir_entry *table){
     if(table == NULL || state->file_browse.area.w <= 0 || state->file_browse.area.h <= 0){return;}
     char clear[state->file_browse.area.w + 1];
     memset(clear,' ',state->file_browse.area.w * sizeof(char));
-    clear[state->file_browse.area.w] = '\0';
+    clear[state->file_browse.area.w] = NUL;
 
     // エントリ名は幅に関係なく丸ごと保持しているため、はみ出す分はここで詰める。
     // 描き始めがpos.x+1なので、使える幅は内側幅から1引いた分。
@@ -398,7 +399,7 @@ void draw_box_inside_dir(struct editor_state *state,struct dir_entry *table){
         if(last_slash != NULL){
             size_t dir_len = (last_slash == now_path.path_name) ? 1 : (size_t)(last_slash - now_path.path_name);
             memcpy(input_dir,now_path.path_name,dir_len);
-            input_dir[dir_len] = '\0';
+            input_dir[dir_len] = NUL;
             base_path = input_dir;
         }
     }
@@ -409,7 +410,7 @@ void draw_box_inside_dir(struct editor_state *state,struct dir_entry *table){
         if(max_len <= 0) continue;
 
         struct dir_entry *entry = &table[state->file_browse.select_line.now_logical_line + i];
-        if(entry->name[0] == '\0') continue;
+        if(entry->name[0] == NUL) continue;
 
         int draw_y = state->file_browse.area.pos.y + i;
         int draw_x = state->file_browse.area.pos.x + 3;

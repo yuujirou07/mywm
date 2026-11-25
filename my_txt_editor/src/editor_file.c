@@ -7,6 +7,7 @@
 #include "editor_log.h"
 #include "editor_screen.h"
 #include "json_read.h"
+#include "editor_types.h"
 
 // path_nameの全項目を呼び出し側所有の*tableへ読み、*table_rowsを必要時拡張する。stateはブラウザ状態。
 // start_num以降の可視件数を*table_num、全件数を*dir_numへ返す。返り値: 成功0、引数・読込・確保の失敗-1。
@@ -79,9 +80,9 @@ int load_dir_table(struct editor_state *state,struct dir_entry **table,int *tabl
 // 返り値: なし。種類・名前をselect_stateへ返し、成功時のFILEは旧FILEを閉じてstateが所有する。失敗はerror。
 void load_file(struct editor_state *state,struct dir_entry *table,int table_num,
                     char *path_name,struct file_browse_select_state *select_state){
-    select_state->select_name[0] = '\0';
+    select_state->select_name[0] = NUL;
     select_state->select_state = error;
-    if(path_name == NULL || path_name[0] == '\0'){
+    if(path_name == NULL || path_name[0] == NUL){
         return;
     }
 
@@ -326,7 +327,7 @@ bool editor_ensure_row_capacity(struct editor_state *state, int need_rows){
 // 全角文字はUTF-8で複数バイトだが、バイト数のまま数えれば実セル数(1〜2)以上になり、確保不足を起こさない。
 static size_t count_line_cells(const char *buff, int indent_range){
     size_t cells = 0;
-    for(const char *p = buff; *p != '\0'; p++){
+    for(const char *p = buff; *p != NUL; p++){
         if(*p == '\n' || *p == '\r'){
             continue;
         }
@@ -450,8 +451,8 @@ void load_all_lines(struct editor_state *state){
             continue;
         }
         int len = strlen(buf);
-        if(len > 0 && buf[len - 1] == '\n') buf[--len] = '\0';
-        if(len > 0 && buf[len - 1] == '\r') buf[--len] = '\0';
+        if(len > 0 && buf[len - 1] == '\n') buf[--len] = NUL;
+        if(len > 0 && buf[len - 1] == '\r') buf[--len] = NUL;
 
         memset(wide_buf, 0, sizeof(wide_buf));
         size_t converted = mbstowcs(wide_buf, buf, max_line_size - 1);
@@ -574,7 +575,7 @@ char *editor_buffer_to_utf8(struct editor_state *state)
         text[pos++] = '\n';
     }
 
-    text[pos] = '\0';
+    text[pos] = NUL;
     return text;
 }
 
@@ -584,7 +585,7 @@ void save_file(struct editor_state *state){
     if(state == NULL)return;
 
     const char *now_open_path_name = state->file_data.now_open_path_name;
-    if(now_open_path_name[0] == '\0'){
+    if(now_open_path_name[0] == NUL){
         if(state->settings_data->ask_make_file){
             editor_set_screen_state(state, ask_make_file_mode);
             return;
@@ -788,7 +789,7 @@ const wchar_t *now_open_path_name(struct dir_table *path,enum flags flags){
         free(now_open_path.path_name);
         now_open_path.path_name = saved_path;
         memcpy(now_open_path.d_name,name_start,name_size);
-        now_open_path.d_name[name_size] = '\0';
+        now_open_path.d_name[name_size] = NUL;
         now_open_path.d_type = DT_UNKNOWN;
 
         struct stat st;
@@ -811,10 +812,10 @@ const wchar_t *now_open_path_name(struct dir_table *path,enum flags flags){
         ? now_open_path.path_name : "";
     size_t converted = mbstowcs(wide_path,path_name,PATH_MAX - 1);
     if(converted == (size_t)-1){
-        wide_path[0] = L'\0';
+        wide_path[0] = WNUL;
         return NULL;
     }
-    wide_path[converted] = L'\0';
+    wide_path[converted] = WNUL;
     return wide_path;
 }
 
@@ -835,7 +836,7 @@ int check_dir_mem(struct dir_table *dir_table,int size){
     char char_path[PATH_MAX];
     size_t converted = wcstombs(char_path,path,sizeof(char_path) - 1);
     if(converted == (size_t)-1)return -1;
-    char_path[converted] = '\0';
+    char_path[converted] = NUL;
 
     char dir_name[PATH_MAX] = ".";
     char *last_slash = strrchr(char_path,'/');
@@ -846,13 +847,13 @@ int check_dir_mem(struct dir_table *dir_table,int size){
         //パスが(ルートディレクトリだったら)('/')
         if(last_slash == char_path){
             dir_name[0] = '/';
-            dir_name[1] = '\0';
+            dir_name[1] = NUL;
         }
         else{
             size_t dir_name_size = (size_t)(last_slash - char_path);
             //最後の'/'までコピーする
             memcpy(dir_name,char_path,dir_name_size);
-            dir_name[dir_name_size] = '\0';
+            dir_name[dir_name_size] = NUL;
         }
     }
     else{
@@ -924,7 +925,7 @@ enum select_state get_path_state(const char *path){
     if(stat_rt == -1){
         char *error_msg = strerror(errno);
         if(strlen(error_msg) + 1 > ERROR_MSG_SIZE_MAX){
-            error_msg[ERROR_MSG_SIZE_MAX - 1] = '\0';
+            error_msg[ERROR_MSG_SIZE_MAX - 1] = NUL;
         }
        return unkown;
     }
@@ -955,7 +956,7 @@ int now_input_path_open(struct editor_state *state,struct editor_input_context *
 
         }
         else{
-            *(last_slash_ptr + 1) = '\0';
+            *(last_slash_ptr + 1) = NUL;
             load_dir_table(
                 state,
                 &state->file_browse.dir_name_table,

@@ -2,6 +2,7 @@
 #include<string.h>
 #include "editor_color.h"
 #include"editor_log.h"
+#include "editor_types.h"
 
 
 
@@ -24,14 +25,14 @@ bool handle_settings_screen_input(struct editor_input_context *ctx,wint_t ch,int
         }
         else if(ch == KEY_BACKSPACE){
             if(screen_data->input_value_len > 0){
-                screen_data->input_value[--screen_data->input_value_len] = L'\0';
+                screen_data->input_value[--screen_data->input_value_len] = WNUL;
             }
         }
         else if(input_result == OK && iswprint(ch) &&
             screen_data->input_value_len < SETTINGS_INPUT_MAX - 1){
 
             screen_data->input_value[screen_data->input_value_len++] = ch;
-            screen_data->input_value[screen_data->input_value_len] = L'\0';
+            screen_data->input_value[screen_data->input_value_len] = WNUL;
         }
         state->render_flags |= RENDER_SETTINGS;
         return true;
@@ -41,7 +42,7 @@ bool handle_settings_screen_input(struct editor_input_context *ctx,wint_t ch,int
             if(screen_data->item_data[i].key_code == ch){
                 screen_data->value_input_mode = true;
                 screen_data->input_value_len = 0;
-                screen_data->input_value[0] = L'\0';
+                screen_data->input_value[0] = WNUL;
                 my_cur_set(state,true);
                 state->render_flags |= RENDER_SETTINGS;
                 int select_item_delta = i - screen_data->select_line;
@@ -68,7 +69,7 @@ bool handle_settings_screen_input(struct editor_input_context *ctx,wint_t ch,int
     if(ch == KEY_ENTER || ch == '\n' || ch == '\r'){
         screen_data->value_input_mode = true;
         screen_data->input_value_len = 0;
-        screen_data->input_value[0] = L'\0';
+        screen_data->input_value[0] = WNUL;
         my_cur_set(state,true);
         state->render_flags |= RENDER_SETTINGS;
     }
@@ -131,7 +132,7 @@ static int settings_item_name_width(const char *name){
     wchar_t wide_name[256];
     size_t converted = mbstowcs(wide_name,name,sizeof(wide_name)/sizeof(wide_name[0]) - 1);
     if(converted == (size_t)-1)return -1;
-    wide_name[converted] = L'\0';
+    wide_name[converted] = WNUL;
 
     int width = wcswidth(wide_name,converted);
     return (width < 0) ? -1 : width;
@@ -262,7 +263,7 @@ void draw_settings_screen(struct editor_input_context *ctx){
             }
 
             wchar_t key_code[SETTINGS_ITEM_KEY_WIDTH + 1] =
-                {L'[',(wchar_t)item.key_code,L']',L'\0'};
+                {L'[',(wchar_t)item.key_code,L']',WNUL};
             attr_t accent_attr = COLOR_PAIR(PAIR_ACCENT) | A_BOLD;
             attron(accent_attr);
             mvaddnwstr(scr_pos_y,key_pos_x,key_code,SETTINGS_ITEM_KEY_WIDTH);

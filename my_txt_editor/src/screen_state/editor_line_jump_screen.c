@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "editor_screen.h"
+#include "editor_types.h"
 
 // 行ジャンプ入力中の数字入力・確定・キャンセルを処理する。
 // 引数: ctx=ジャンプ後の再描画に必要なcontext、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
@@ -10,7 +11,7 @@ bool handle_line_jump_mode_input(struct editor_input_context *ctx, wint_t ch){
     if(ch >= '0' && ch <= '9' &&
        state->jump_mode_data.jump_line_num_counter < (int)sizeof(state->jump_mode_data.jump_line_num) - 1){
         state->jump_mode_data.jump_line_num[state->jump_mode_data.jump_line_num_counter++] = (char)ch;
-        state->jump_mode_data.jump_line_num[state->jump_mode_data.jump_line_num_counter] = '\0';
+        state->jump_mode_data.jump_line_num[state->jump_mode_data.jump_line_num_counter] = NUL;
         state->render_flags |= RENDER_LINE_JUMP;
     }
     else if(ch == CTRL('h')){
@@ -19,7 +20,7 @@ bool handle_line_jump_mode_input(struct editor_input_context *ctx, wint_t ch){
     }
     else if(ch == KEY_BACKSPACE && state->jump_mode_data.jump_line_num_counter > 0){
         state->jump_mode_data.jump_line_num_counter--;
-        state->jump_mode_data.jump_line_num[state->jump_mode_data.jump_line_num_counter] = '\0';
+        state->jump_mode_data.jump_line_num[state->jump_mode_data.jump_line_num_counter] = NUL;
         state->render_flags |= RENDER_LINE_JUMP;
     }
     else if(ch == KEY_ENTER || ch == '\n' || ch == '\r' || ch == ' '){

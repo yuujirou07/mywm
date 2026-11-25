@@ -5,6 +5,7 @@
 #include "json_read.h"
 #include "path_util.h"
 #include "settings_screen.h"
+#include "editor_types.h"
 
 // settings_items.jsonの"value"に書ける型名。並び順はsettinge_value_typeと対応する。
 static const char *value_type_str_list[] =
@@ -46,8 +47,8 @@ int load_settings_screen_items(settings_screen_data *settings_screen_data){
         cJSON *explanation = cJSON_GetObjectItemCaseSensitive(json_item,"explanation");
         cJSON *value_type  = cJSON_GetObjectItemCaseSensitive(json_item,"value");
         if(!cJSON_IsString(name) || !cJSON_IsString(key) ||
-            !cJSON_IsString(explanation) || key->valuestring[0] == '\0' ||
-            !cJSON_IsString(value_type) ||key->valuestring[1] != '\0'){
+            !cJSON_IsString(explanation) || key->valuestring[0] == NUL ||
+            !cJSON_IsString(value_type) ||key->valuestring[1] != NUL){
             cJSON_Delete(root);
             return -1;
         }

@@ -3,6 +3,7 @@
 #include<stdlib.h>
 #include "editor_log.h"
 #include"editor.h"
+#include "editor_types.h"
 
 
 // ctxの設定値で補完状態を初期化し、候補ポインタ配列と各文字列領域をstateへ確保する。
@@ -19,7 +20,7 @@ int init_edit_complete_data(struct editor_input_context *ctx){
     tmp_comp_data->now_select_complete_world_num = 0;
     tmp_comp_data->word_data.world_num = 0;
     tmp_comp_data->comp_world_candidacy_part_data.comp_w_cand_part_d_count = 0;
-    tmp_comp_data->comp_world_candidacy_part_data.complete_world_candidacy_part_str[0] = L'\0';
+    tmp_comp_data->comp_world_candidacy_part_data.complete_world_candidacy_part_str[0] = WNUL;
 
     //念の為二倍に確保しておく
     tmp_comp_data->word_data.world_allocate_num = 
@@ -40,7 +41,7 @@ int init_edit_complete_data(struct editor_input_context *ctx){
             error_log("malloc");
             return -1;
         }
-        tmp_comp_data->word_data.world[i][0] = L'\0';
+        tmp_comp_data->word_data.world[i][0] = WNUL;
     }
 
     tmp_comp_data->lang = get_env_language();
@@ -73,7 +74,7 @@ int set_edit_comp_candidacy_part_data(struct editor_state *state,wint_t ch){
                             comp_w_cand_part_d_count];
     
     tmp_str[0] = ch;
-    tmp_str[1] = L'\0';
+    tmp_str[1] = WNUL;
 
     state->edit_input_complete_data.
         comp_world_candidacy_part_data.
@@ -92,7 +93,7 @@ int reduce_edit_comp_candidacy_part_data(struct editor_state *state){
             complete_world_candidacy_part_str
                 [state->edit_input_complete_data.
                     comp_world_candidacy_part_data.
-                    comp_w_cand_part_d_count - 1] = L'\0';
+                    comp_w_cand_part_d_count - 1] = WNUL;
 
     state->edit_input_complete_data.
         comp_world_candidacy_part_data.
@@ -105,7 +106,7 @@ int reduce_edit_comp_candidacy_part_data(struct editor_state *state){
 int init_edit_comt_candidacy_part_data(struct editor_state *state){
     state->edit_input_complete_data.
         comp_world_candidacy_part_data.
-            complete_world_candidacy_part_str[0] = '\0';
+            complete_world_candidacy_part_str[0] = NUL;
 
     state->edit_input_complete_data.
         comp_world_candidacy_part_data.

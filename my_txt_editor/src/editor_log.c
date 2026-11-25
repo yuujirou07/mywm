@@ -4,6 +4,7 @@
 #include <linux/limits.h>
 #include<stdlib.h>
 #include <string.h>
+#include "editor_types.h"
 
 
 
@@ -115,7 +116,7 @@ void error_log_write(char *error_comment){
     // 大きなログ1件だけでスタックオーバーフローする可能性がある。
     char error_log[len + 1];    
     memmove(error_log, error_comment,sizeof(char ) * len);
-    error_log[len] = '\0';
+    error_log[len] = NUL;
     fputs(error_log,error_file);
     fflush(error_file);
     return;

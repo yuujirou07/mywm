@@ -5,6 +5,7 @@
 
 #include "editor.h"
 #include"editor_color.h"
+#include "editor_types.h"
 
 
 
@@ -288,7 +289,7 @@ void draw_status_bar_path(struct editor_state *state){
         ? state->status_bar->pos.y - 1 : state->status_bar->pos.y;
     
     char *draw_path = NULL; 
-    if(state->file_data.now_open_path_name[0] == '\0'){ 
+    if(state->file_data.now_open_path_name[0] == NUL){ 
         draw_path = "Unknown file";
     }
     else{
@@ -487,7 +488,7 @@ int clear_status_bar_outline(struct editor_state *state){
     struct box tmp_status_bar_box = *state->status_bar;
     char outline_str[tmp_status_bar_box.w + 1];
     memset(outline_str,' ',tmp_status_bar_box.w);
-    outline_str[tmp_status_bar_box.w] = '\0';
+    outline_str[tmp_status_bar_box.w] = NUL;
     for(int i = 0;i < tmp_status_bar_box.h;i++){
         if(i == 0 || i == tmp_status_bar_box.h){
             mvaddnstr(tmp_status_bar_box.pos.y + i,
@@ -496,7 +497,7 @@ int clear_status_bar_outline(struct editor_state *state){
                 tmp_status_bar_box.w);
         }
         else{
-            char wall_outline[2] = {' ','\0'};
+            char wall_outline[2] = {' ',NUL};
             mvaddnstr(tmp_status_bar_box.pos.y + i,
                 tmp_status_bar_box.pos.x,
                 wall_outline,sizeof(wall_outline));
@@ -630,7 +631,7 @@ int draw_edit_complete_world(struct editor_state *state){
     if(state->edit_input_complete_data.word_data.world_num <= 0)return 0;
     
     for(int i = 0;i < state->edit_input_complete_data.box.h - 2;i++){
-        if(cmp_data->world[i][0] == L'\0')continue;
+        if(cmp_data->world[i][0] == WNUL)continue;
         mvaddnwstr(tmp_cmp_box.pos.y + i,tmp_cmp_box.pos.x + 1,cmp_data->world[i],tmp_cmp_box.w - 2);
     }
     return 0;

@@ -21,7 +21,7 @@ struct editor_state;
 // 大きさが項目数で極端に変わらないようにする。
 #define SETTINGS_SCREEN_MIN_W 44
 #define SETTINGS_SCREEN_MIN_H 10
-#define SETTINGS_INPUT_MAX 64 // 設定値入力欄の要素数。終端L'\0'を含む。
+#define SETTINGS_INPUT_MAX 64 // 設定値入力欄の要素数。終端WNULを含む。
 
 // 設定画面で受け付ける値の型。
 typedef enum{

@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include <string.h>
 #include"ftj.h"
+#include "editor_types.h"
 
 
 
@@ -94,7 +95,7 @@ int check_child_num(DIR *dir){
 // 引数: table_ent=木の中のエントリ。absolute_pathが有効なディレクトリであること。
 // 返り値: 成功または読み込み済みなら0、NULL・空パス・読み込み失敗なら-1。
 int load_child_dir(struct table *table_ent){
-    if(table_ent == NULL || table_ent->absolute_path[0] == '\0')return -1;
+    if(table_ent == NULL || table_ent->absolute_path[0] == NUL)return -1;
     if(table_ent->c_table != NULL)return 0;
 
     struct root_node *child_root = create_tree(table_ent->absolute_path);

@@ -1,5 +1,6 @@
 #include <string.h>
 #include "editor_screen.h"
+#include "editor_types.h"
 
 // 未保存ファイル作成確認と新規ファイル名入力を処理する。
 // 引数: ctx=確認ダイアログと編集画面復帰に必要なcontext、input_result=get_wch()の結果、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
@@ -15,7 +16,7 @@ bool handle_ask_make_file_mode_input(struct editor_input_context *ctx, int input
 
             int index = state->make_file_mode_status.new_file_name_counter++;
             state->make_file_mode_status.new_file_name[index] = (char)ch;
-            state->make_file_mode_status.new_file_name[index + 1] = '\0';
+            state->make_file_mode_status.new_file_name[index + 1] = NUL;
             state->render_flags |= RENDER_MAKE_FILE;
             
         }
@@ -23,7 +24,7 @@ bool handle_ask_make_file_mode_input(struct editor_input_context *ctx, int input
             && state->make_file_mode_status.new_file_name_counter > 0){
             state->make_file_mode_status.new_file_name_counter--;
             state->make_file_mode_status.new_file_name[
-                state->make_file_mode_status.new_file_name_counter] = '\0';
+                state->make_file_mode_status.new_file_name_counter] = NUL;
             state->render_flags |= RENDER_MAKE_FILE;
         }
         else if(ch == KEY_ENTER || ch == '\n' || ch == '\r' || ch == ' '){
@@ -32,7 +33,7 @@ bool handle_ask_make_file_mode_input(struct editor_input_context *ctx, int input
                 return true;
             }
             state->make_file_mode_status.
-                new_file_name[state->make_file_mode_status.new_file_name_counter] = '\0';
+                new_file_name[state->make_file_mode_status.new_file_name_counter] = NUL;
 
             editor_set_screen_state(state, edit_screen_mode);
             memcpy(state->file_data.now_open_path_name,
