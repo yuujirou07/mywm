@@ -17,15 +17,21 @@ struct editor_input_context;
 
 
 
+// コマンドモードで入力中の文字列と、その文字数。
+// command_strは256要素の固定長バッファ。
 typedef struct{
     wchar_t command_str[256];
     size_t command_str_len;
 }command_str_data;
 
+// 登録されている1つのコマンド名(ワイド文字列)。
+// 256要素の固定長バッファで保持する。
 typedef struct{
     wchar_t command[256];
 }command_data;
 
+// command_dataの可変長配列。command_numが使用数、command_allocate_numが確保数。
+// コマンド候補の一覧として使う。
 typedef struct{
     command_data *command_list;
     size_t command_num;
@@ -33,6 +39,8 @@ typedef struct{
 }command_list_data;
 
 
+// コマンドモード全体の状態。
+// 入力中の文字列と、登録済みコマンド一覧をまとめて持つ。
 typedef struct{
     command_str_data command_str_data;
     command_list_data command_list_data;

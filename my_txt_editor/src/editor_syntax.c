@@ -307,6 +307,8 @@ int update_line_syntax_data(struct editor_input_context *ctx,int line){
 
 
 
+// 行lineからsize行分の範囲に入る構文色の領域を、画面上の表示範囲に収めて描画する。
+// 表示領域外や幅0以下の領域は読み飛ばす。
 void set_syntax_color_line(struct editor_input_context *ctx,uint16_t line,uint16_t size){
     syntax *tmp_syntax = &ctx->syntax_data;    
     struct editor_state *state = ctx->state;

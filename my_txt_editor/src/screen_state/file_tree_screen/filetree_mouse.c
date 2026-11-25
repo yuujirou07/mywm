@@ -199,6 +199,8 @@ int ft_mouse_event(struct editor_input_context *ctx){
 }
 
 
+// 1回目のクリック時刻stからの経過時間がダブルクリック判定間隔未満かを返す。
+// 返り値: 間隔未満ならtrue。
 static bool is_within_double_click(struct timespec st){
     //st_timeから関数実行時までの時間差取得
     return (trunc(get_time_elapsed_MS(st)) < MOUSE_DOUBLE_CLICK_INTERVAL);
@@ -230,6 +232,8 @@ static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev){
     return (out_line_pos_x == ev->x || out_line_pos_x - 1 == ev->x);
 }
 
+// ファイルツリー外枠の1回目のクリックを処理する。
+// ダブルクリックリサイズが無効なら即リサイズ開始、有効なら2回目判定用に時刻を記録する。常に0を返す。
 static int file_tree_outline_first_click_process(struct editor_state *state){
     //ダブルクリックリサイズが無効だった場合シングルクリックでリサイズを開始する
     if(FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE == false){
@@ -245,6 +249,8 @@ static int file_tree_outline_first_click_process(struct editor_state *state){
     return 0;
 }
 
+// 時刻timeから現在までの経過時間をミリ秒で返す。
+// 返り値: 経過ミリ秒(CLOCK_MONOTONIC基準)。
 static double get_time_elapsed_MS(struct timespec time){
     struct timespec last_click_time;
     clock_gettime(CLOCK_MONOTONIC,&last_click_time);
@@ -254,6 +260,8 @@ static double get_time_elapsed_MS(struct timespec time){
 
 
 
+// ファイルツリー内のマウスクリックを処理する。クリック行の項目を探して選択・操作する。
+// 返り値: なし。
 static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev){
 
     struct editor_state *state = ctx->state;

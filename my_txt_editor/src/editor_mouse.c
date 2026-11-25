@@ -98,6 +98,8 @@ struct pos editor_pos_to_buffer_pos(
     return(struct pos){editor_pos.x,state->scr.scr_start_num + editor_pos.y};
 }
 
+// 画面状態に合わせてカーソルの形状と色を設定する。
+// 編集画面では入力用カーソル(白)、それ以外は端末既定にする。常に0を返す。
 int SetCursorModeScreen(struct editor_state *state,screen_state screen_state){
     switch(screen_state){
         case edit_screen_mode:
@@ -113,6 +115,8 @@ int SetCursorModeScreen(struct editor_state *state,screen_state screen_state){
 }
 
 
+// カーソル形状を設定して端末へ出力し、stateへ保存する。
+// 返り値: 常に0。
 int SetCursorMode(struct editor_state *state,CURSOR_MODE CurMode){
     state->cursor.CurMode = CurMode;
     fputs(CURSOR_SHAPE[state->cursor.CurMode],stdout);
@@ -120,6 +124,8 @@ int SetCursorMode(struct editor_state *state,CURSOR_MODE CurMode){
     return 0;
 }
 
+// カーソル色を設定して端末へ出力し、stateへ保存する。
+// 返り値: 成功時0、colorが範囲外なら-1。
 int SetCursorColor(struct editor_state *state,CURSOR_COLOR color){
 
     if((sizeof(CURSOR_COLOR_ESC)/sizeof(CURSOR_COLOR_ESC[0])) <= color){

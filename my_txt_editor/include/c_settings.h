@@ -22,6 +22,8 @@ int add_dl_handle_ptr(void **dl_handle_ptr,DL_handle_data *handle_data);
 int destoroy_key_input_event_handle(struct editor_input_context *ctx);
 
 
+// 公開API用の画面モードを内部のscreen_stateへ変換する。
+// 返り値: 対応するscreen_state。未対応のモードは既定の画面状態を返す。
 static inline screen_state comb_my_txt_editor_screen_mode_To_screen_state(MY_TXT_EDITOR_SCREEN_MODE screen_mode){
     switch(screen_mode){
         case EDIT_MODE:

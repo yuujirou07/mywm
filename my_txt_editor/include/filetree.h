@@ -41,6 +41,8 @@ typedef struct{
 
 
 
+// ファイルツリーの検索状態。
+// 検索文字列、検索ボックスの領域、検索モード中かどうかを持つ。
 typedef struct{
     wchar_t serch_str[256];
     struct box ft_search_box;

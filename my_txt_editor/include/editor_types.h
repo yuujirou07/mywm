@@ -19,6 +19,8 @@ typedef enum{
 }language;
 
 
+// 上下左右の方向・辺を表す列挙。
+// 配置や位置指定(ステータスバーの表示側など)に使う。
 typedef enum{
     TOP,
     BOTTOM,

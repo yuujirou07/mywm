@@ -60,6 +60,8 @@ typedef enum{
     JSON_OBJ_NUM = 9,
 }settings_json_obj;
 
+// 設定JSONのルートキーの種類。SETTINGS_ROOT_KEY_STRの添字として使う。
+// 値は設定JSON上のキー名の並びと対応させる。
 typedef enum{
     ROOT_KEY_BUFFER = 0,
     ROOT_KEY_DISPLAY = 1,
@@ -72,6 +74,8 @@ typedef enum{
     ROOT_KEY_EDITOR_SCROLL_SENSITIVITY = 8,
 }settings_root_key;
 
+// 設定JSONのbufferセクション内キーの種類。
+// 行数・1行サイズ・読込量など編集バッファに関する設定を指す。
 typedef enum{
     BUFFER_KEY_MAX_LINES = 0,
     BUFFER_KEY_MAX_LINE_SIZE = 1,
@@ -79,6 +83,8 @@ typedef enum{
     BUFFER_KEY_LOAD_BUFFER_LINES = 3,
 }settings_buffer_key;
 
+// 設定JSONのdisplayセクション内キーの種類。
+// 行番号幅・ステータスバー・分割線・アイコン使用など表示に関する設定を指す。
 typedef enum{
     DISPLAY_KEY_LINE_NUMBER_SPACE = 0,
     DISPLAY_KEY_SHOW_STATUS_BAR = 1,
@@ -88,6 +94,8 @@ typedef enum{
     DISPLAY_KEY_USE_ICON = 5,
 }settings_display_key;
 
+// 設定JSONのeditorセクション内キーの種類。
+// インデント幅・ジャンプ時のカーソル位置・組込み構文・自動補完など編集動作の設定を指す。
 typedef enum{
     EDITOR_KEY_INDENT_RANGE = 0,
     EDITOR_KEY_JMP_SET_CUR_POS = 1,
@@ -95,11 +103,15 @@ typedef enum{
     EDITOR_KEY_AUTO_COMPLETE = 3,
 }settings_editor_key;
 
+// 設定JSONのauto_completeセクション内キーの種類。
+// 自動補完の有効可否と補完ウィンドウ設定を指す。
 typedef enum{
     AUTO_COMPLETE_KEY_ENABLED = 0,
     AUTO_COMPLETE_KEY_WINDOW = 1,
 }settings_auto_complete_key;
 
+// 設定JSONの補完ウィンドウ設定内キーの種類。
+// 表示可否・幅・高さ・表示位置モードを指す。
 typedef enum{
     WINDOW_KEY_SHOW = 0,
     WINDOW_KEY_WIDTH = 1,
@@ -107,16 +119,22 @@ typedef enum{
     WINDOW_KEY_POSITION_MODE = 3,
 }settings_window_key;
 
+// 設定JSONのkey_logセクション内キーの種類。
+// キー入力ログの有効可否とバッファサイズを指す。
 typedef enum{
     KEY_LOG_KEY_ENABLED = 0,
     KEY_LOG_KEY_BUFFER_SIZE = 1,
 }settings_key_log_key;
 
+// 設定JSONのlspセクション内キーの種類。
+// 起動時のLSP自動起動可否とepollのタイムアウト(ms)を指す。
 typedef enum{
     LSP_KEY_LAUNCH_STARTUP_EDITOR = 0,
     LSP_KEY_EPOLL_TIMEOUT_MS = 1,
 }settings_lsp_key;
 
+// 設定プログラム(共有ライブラリ)設定内キーの種類。
+// 有効可否・使用言語・ルートソースパスを指す。
 typedef enum{
     EDITOR_SETTINGS_PROGRAM_ENABLED  = 0,
     EDITOR_SETTINGS_PROGRAM_LANGUAGE = 1,
@@ -202,6 +220,8 @@ static const char *const *const SETTINGS_JSON_KEY_STR[JSON_OBJ_NUM] = {
 
 
 
+// 設定ファイルや補完で扱うプログラミング言語の種別。
+// settings_lang_LANG_NUMは言語数を表す番兵で、実際の言語としては使わない。
 typedef enum{
     settings_lang_C   = 0,
     settings_lang_LUA = 1,
@@ -210,6 +230,8 @@ typedef enum{
 }settings_lang;
 
 
+// 設定プログラムの記述言語の種別。
+// editor_settings_program_lang_LANG_NUMは言語数を表す番兵で、実際の言語としては使わない。
 typedef enum{
     editor_settings_program_lang_C = 0,
     editor_settings_program_lang_LUA = 1,
@@ -232,6 +254,8 @@ static const char *const CURSOR_SHAPE[] =
         "\033[0 q",
     };
 
+// 端末カーソルの形状モード。CURSOR_SHAPEの添字として使う。
+// 入力・通常・端末既定の3種類を持つ。
 typedef enum{
     CURSOR_INPUT_MODE   = 0,
     CURSOR_NORMAL_MODE  = 1,
@@ -247,6 +271,8 @@ static const char *const CURSOR_COLOR_ESC[] =
     };
 
 
+// 端末カーソルの色。CURSOR_COLOR_ESCの添字として使う。
+// 白と端末既定色の2種類を持つ。
 typedef enum{
     CURSOR_COLOR_WHITE   = 0,
     CURSOR_COLOR_DEFAULT = 1,
@@ -284,6 +310,8 @@ typedef struct{
 }key_log_settings;
 
 
+// 設定プログラムの有効可否・言語・ルートソースパスをまとめた設定。
+// root_src_pathの所有者は設定の読込み側で、この構造体は解放しない。
 typedef struct{
     bool enabled;
     editor_settings_program_lang language;

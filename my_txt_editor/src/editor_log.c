@@ -48,6 +48,8 @@ int set_error_log_file(const char *relative_path){
     return 0;
 }
 
+// ログファイルをexeのあるディレクトリからの相対パスで開く。すでに開いていれば開き直す。
+// 返り値: 成功時0、引数不正・パス解決失敗・オープン失敗は-1。
 int set_log_file(const char *relative_path){
     if(relative_path == NULL){
         error_log("argument error pal: NULL");
@@ -124,6 +126,8 @@ void error_log_write(char *error_comment){
 
 
 
+// メッセージと日時・出力元(ファイル名・行番号)を1行としてログファイルへ書き込む。
+// NULLの引数は"unknown"として扱う。ログファイル未オープン時は何も書かずに戻る。
 void editor_log(const char msg[],const char date[],const char time[],const char file[],int line){
     if(log_file == NULL){
         error_log("can not open editor log file");
@@ -156,6 +160,8 @@ void editor_log(const char msg[],const char date[],const char time[],const char 
 
 
 
+// 開いているログファイルを閉じる。
+// 返り値: 成功時0、未オープンまたはfclose失敗時は負の値。
 int close_editor_log(){
     if(log_file == NULL){
         wrp_stderr_puts("log_file is NULL so can not close log_file");

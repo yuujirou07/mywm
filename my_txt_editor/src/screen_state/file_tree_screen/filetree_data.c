@@ -10,6 +10,8 @@
 #include "editor_screen.h"
 
 
+// ファイルツリーのデータを初期状態(領域0・ツリー未作成・非表示)にする。
+// 返り値: 成功時0、file_treeがNULLなら-1。
 int ft_init_file_tree(file_tree_data *file_tree){
     if(file_tree == NULL){
         return -1;
@@ -110,6 +112,8 @@ ft_item_view_data *get_filetree_item_data(file_tree_data *file_tree,
 }
 
 
+// ファイルツリーの選択行をline_numに設定する。
+// 返り値: 成功時0、引数がNULL・負値、または描画領域・表示項目数以上の行なら-1。
 int ft_set_file_tree_item_select_line(file_tree_data *file_tree_data,int line_num){
     if(file_tree_data == NULL || line_num < 0){
         return -1;
@@ -232,6 +236,8 @@ int ft_get_sorted_screen_y_item_view_data(
 }
 
 
+// 表示項目の中で最も深い階層(layer)を返す。
+// 返り値: 最大階層。項目が0件以下なら0、item_view_dataがNULLなら-1。
 int ft_get_max_layer_item_view_data(ft_item_view_data *item_view_data,int item_view_num){
     if(item_view_data == NULL){
         return -1;

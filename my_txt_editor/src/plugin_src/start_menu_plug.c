@@ -4,6 +4,7 @@
 #include"editor.h"
 #include "editor_types.h"
 
+// スタートメニューの1項目。表示名、ショートカットキー、画面上の位置(x,y)と幅wを持つ。
 struct option_data{
         char *option_name;
         char short_cut_key;

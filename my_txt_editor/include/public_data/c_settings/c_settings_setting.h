@@ -15,6 +15,8 @@
 
 
 
+// 設定プログラムへ公開する画面モード。
+// 内部のscreen_stateとは別に、外部APIから見える画面の種類を表す。
 typedef enum{
     EDIT_MODE = 0,
     FILE_SEARCH_MODE = 1,
@@ -24,6 +26,8 @@ typedef enum{
     UNKNOWN_MODE = 5,
 }MY_TXT_EDITOR_SCREEN_MODE;
 
+// 設定プログラム向けAPI関数の結果コード。
+// API_OKが成功で、それ以外は画面モード不一致・引数不正・NULL・メモリ不足を表す。
 typedef enum{
     API_OK = 0,
     API_ERR_WRONG_MODE = 1,
@@ -48,6 +52,8 @@ typedef MY_TXT_EDITOR_RESULT (*UNDO_TEXT_INPUT)(const MY_TXT_EDITOR_API *api,siz
 typedef MY_TXT_EDITOR_RESULT (*REQUEST_CHANGE_SCREEN_MODE)(const MY_TXT_EDITOR_API *api,MY_TXT_EDITOR_SCREEN_MODE mode);
 typedef MY_TXT_EDITOR_RESULT (*LOAD_SETTINGS_SRC_FILE)(const MY_TXT_EDITOR_API *api,const wchar_t *src_path);
 
+// 設定プログラム(共有ライブラリ)へ渡すエディタ操作API。
+// userdataに本体側のコンテキストを持ち、各関数ポインタ経由で保存・入力登録・カーソル操作などを行う。
 struct MY_TXT_EDITOR_API{
     void * userdata;
     void *screen_state;

@@ -47,6 +47,8 @@ int destory_command_mode(struct editor_state *state){
     return 0;
 }
 
+// コマンドモード中の1文字入力を処理する。'q'で終了し、それ以外は入力文字列へ反映する。
+// 返り値: コマンドモードを続けるならtrue、'q'押下などで終了するならfalse(入力エラー時・ctxがNULLはtrue)。
 bool handle_command_mode(struct editor_input_context *ctx,wchar_t chr,int input_result){
     if(ctx == NULL){
         return true;
@@ -93,6 +95,8 @@ bool handle_command_mode(struct editor_input_context *ctx,wchar_t chr,int input_
 }
 
 
+// 入力中のコマンド文字列の末尾1文字をカーソル位置へ描画する。
+// 返り値: 成功時0、入力文字列が空なら-1。
 int draw_command_str(struct editor_input_context *ctx){
     struct editor_state *state = ctx->state;
     if(state->command_mode_data.command_str_data.command_str_len < 1){
@@ -120,6 +124,8 @@ int draw_command_str(struct editor_input_context *ctx){
 
 
 
+// コマンド文字列の末尾1文字を削除し、画面上の表示とカーソル位置も1文字分戻す。
+// 返り値: 常に0。文字列が空なら何もしない。
 int backspace_command_str(struct editor_input_context *ctx){
     struct editor_state *state = ctx->state;
 
@@ -148,6 +154,8 @@ int backspace_command_str(struct editor_input_context *ctx){
     return 0;
 }
 
+// コマンド文字列を全消去し、画面上の表示を消してカーソルを開始位置へ戻す。
+// 返り値: 常に0。
 int clear_command_str(struct editor_input_context *ctx){
     struct editor_state *state = ctx->state;
     command_str_data *command_str_data = &state->command_mode_data.command_str_data;
@@ -171,6 +179,8 @@ int clear_command_str(struct editor_input_context *ctx){
 
 
 
+// カーソルをステータスバー直上のコマンド入力位置へ移動し、入力用カーソルにする。
+// 返り値: 成功時0、ステータスバー非表示なら-1。
 int cursor_set_command_mode_position(struct editor_state *state){
     if(state->settings_data->show_status_bar == false){
         return -1;

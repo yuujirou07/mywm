@@ -195,6 +195,8 @@ struct cursor {
     CURSOR_COLOR Color;
 };
 
+// 入力された1文字と、その論理位置(行・桁)の組。
+// 入力履歴や補完で、どこに何を入力したかを記録するために使う。
 typedef struct{
     wint_t chr;//入力文字
     long line;//論理行
@@ -202,6 +204,8 @@ typedef struct{
 }input_data;
 
 
+// input_dataの可変長配列。input_data_numが使用数、input_data_allocate_numが確保数。
+// 要素数が確保数に達したら拡張する。
 typedef struct{
     input_data *input_data;
     size_t input_data_num;
@@ -381,12 +385,16 @@ typedef struct{
     key_event_list_data key_events; // ユーザーが登録した入力イベントの一覧。
 }editor_input_manager;
 
+// 読み込んだ共有ライブラリのdlopenハンドル配列。
+// dl_handles_list_numが使用数、dl_handles_list_allocate_numが確保数。
 typedef struct{
     void **dl_handles_list;
     size_t dl_handles_list_num;
     size_t dl_handles_list_allocate_num;
 }DL_handle_data;
 
+// 読込対象の共有ライブラリのパス文字列配列。
+// now_loading_lib_numが使用数、now_loading_lib_allocate_numが確保数。
 typedef struct{
     char **loading_dl_lib;
     size_t now_loading_lib_num;
@@ -473,9 +481,13 @@ static inline int editor_line_cap(struct editor_state *state, int line){
     return (state->str.line_cap[line] > 0) ? state->str.line_cap[line] : 0;
 }
 
+// 左上座標(x,y)と幅w・高さhからstruct boxを作る。
+// 値の範囲検査は行わず、そのまま格納する。
 static inline struct box create_box(int x,int y,int w,int h){
     return (struct box){(struct pos){x,y},w,h};
 }
+// 入力可能領域write_areaをstruct boxへ変換する。
+// 返り値: 開始座標と幅・高さを持つbox。
 static inline struct box comb_write_possible_area_to_box(struct write_possible_area write_area){
     return create_box(write_area.x_start,write_area.y_start,write_area.w,write_area.h);
 }

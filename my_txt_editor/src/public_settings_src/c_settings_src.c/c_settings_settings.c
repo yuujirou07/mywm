@@ -212,6 +212,8 @@ static MY_TXT_EDITOR_RESULT add_key_input_event_handle(void *userdata,wchar_t ch
     return API_OK;
 }
 
+// ctxが持つキー入力イベント登録用の配列を解放する。
+// 返り値: 成功時0、ctxがNULLなら-1。
 int destoroy_key_input_event_handle(struct editor_input_context *ctx){
     if(ctx == NULL){
         return -1;
@@ -425,6 +427,8 @@ int destroy_dl_path(struct editor_input_context *ctx){
     return 0;
 }
 
+// 入力文字chrと現在の画面に一致する登録済みキーイベントのコールバックを実行する。
+// 返り値: 成功時0、ctxがNULLなら-1。
 static int check_input_handle(struct editor_input_context *ctx,wchar_t chr){
     if(ctx == NULL){
         error_log("argument error");
@@ -461,6 +465,8 @@ MY_TXT_EDITOR_RESULT get_editor_screen_mode(const MY_TXT_EDITOR_API *api,MY_TXT_
 }
 
 
+// 公開API: 編集画面でテキストカーソルを指定行へ移動する。
+// 返り値: 成功時API_OK、引数不正はAPI_ERR_INVALID_ARG、編集画面以外はAPI_ERR_WRONG_MODE。
 static MY_TXT_EDITOR_RESULT set_text_cursor_row(const MY_TXT_EDITOR_API *api,int row){
     if(api == NULL || row < 0){
         return API_ERR_INVALID_ARG;
@@ -550,6 +556,8 @@ static MY_TXT_EDITOR_RESULT set_text_cursor_col(const MY_TXT_EDITOR_API *api,int
 }
 
 
+// 公開API: 直近n件の入力を取り消す予定の関数。現在は引数検査のみで取り消しは行わない。
+// 返り値: 成功時API_OK、引数不正はAPI_ERR_INVALID_ARG。
 static MY_TXT_EDITOR_RESULT undo_text_input(const MY_TXT_EDITOR_API *api,size_t n){
     if(api == NULL || n == 0){
         return API_ERR_INVALID_ARG;
@@ -566,6 +574,8 @@ static MY_TXT_EDITOR_RESULT undo_text_input(const MY_TXT_EDITOR_API *api,size_t 
 
 
 
+// 公開API: 指定した画面モードへの切り替えを要求し、画面状態の履歴へ追加する。
+// 返り値: 成功時API_OK、引数不正やUNKNOWN_MODEはAPI_ERR_INVALID_ARG。
 static MY_TXT_EDITOR_RESULT request_change_edior_screen_mode(
         const MY_TXT_EDITOR_API *api,MY_TXT_EDITOR_SCREEN_MODE mode){
     if(api == NULL || mode == UNKNOWN_MODE){
@@ -586,6 +596,8 @@ static MY_TXT_EDITOR_RESULT request_change_edior_screen_mode(
 
 
 
+// 公開API: ワイド文字列のパスを変換し、設定プログラムの読込パスとして登録する。
+// 返り値: 成功時API_OK、変換に失敗したらAPI_ERR_INVALID_ARG。
 static MY_TXT_EDITOR_RESULT load_settings_src_file(const MY_TXT_EDITOR_API *api,const wchar_t *src_path){
 
     struct editor_input_context *ctx = api->userdata;
@@ -624,6 +636,8 @@ static MY_TXT_EDITOR_RESULT load_settings_src_file(const MY_TXT_EDITOR_API *api,
 
 
 
+// dlopenで得たハンドルをhandle_dataの配列へ追加する。配列が満杯なら拡張する。
+// 返り値: 成功時0、引数がNULLなら-1。
 int add_dl_handle_ptr(void **dl_handle_ptr,DL_handle_data *handle_data){
     if(*dl_handle_ptr == NULL || handle_data == NULL){
         return -1;
@@ -658,6 +672,8 @@ int add_dl_handle_ptr(void **dl_handle_ptr,DL_handle_data *handle_data){
 }
 
 
+// src_pathの設定プログラムを読込パスへ登録し、成功したら設定APIを初期化する。
+// 返り値: 引数不正なら-1、それ以外は0(登録に失敗しても0を返す)。
 int load_settings_program(struct editor_input_context *restrict ctx,char *restrict src_path){
     if(ctx == NULL || src_path == NULL){
         return -1;

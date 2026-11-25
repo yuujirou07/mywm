@@ -681,6 +681,8 @@ int env_language_ctl(language *lang,enum flags flags){
 
 
 
+// 画面上の位置posにある文字を取得する。
+// 返り値: 成功時0、ファイル未オープンまたは領域外は-1。
 int get_write_screen_pos_chr(struct editor_state *state,struct pos pos,char *chr){
     if(state->file_data.is_open_file == false){
         chr = NULL;
@@ -708,12 +710,16 @@ int get_write_screen_pos_chr(struct editor_state *state,struct pos pos,char *chr
 }
 
 
+// 2つのtimespecの差(t2-t1)をミリ秒で返す。
+// 返り値: 経過ミリ秒。t2がt1より前なら負の値になる。
 double comb_time_interval_ms(struct timespec t1,struct timespec t2){
     return (double)((t2.tv_sec * 1000) - (t1.tv_sec * 1000)) + 
         (((double)t2.tv_nsec / 1000000) - ((double)t1.tv_nsec / 1000000));
 }
 
 
+// 文字列strの端末上の表示幅(桁数)を返す。
+// 返り値: 表示幅。NULLは0、マルチバイト変換に失敗したら-1。
 int str_display_width(const char *str){
     if(str == NULL){
         return 0;

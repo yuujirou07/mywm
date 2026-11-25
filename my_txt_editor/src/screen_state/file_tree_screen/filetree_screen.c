@@ -185,6 +185,8 @@ enum select_state ft_item_open_event(struct editor_input_context *ctx,ft_item_vi
 }
 
 
+// キー入力でファイルツリーの幅を変える。'<'・左キーで1桁縮め、'>'・右キーで1桁広げる。
+// 返り値: 幅変更キーなら0、それ以外は-1。
 int ft_resize_by_key(struct editor_input_context *ctx,wchar_t wchr){
 
     if(wchr == '>' || wchr == '<' || wchr == KEY_LEFT || wchr == KEY_RIGHT){
@@ -199,6 +201,8 @@ int ft_resize_by_key(struct editor_input_context *ctx,wchar_t wchr){
 
 
 
+// ファイルツリーの検索モードに入り、カーソルを検索欄へ移す。
+// 返り値: 常に0。
 int ft_enter_search_mode(struct editor_state *state){
     struct pos cur_pos = 
         (struct pos){0,0};
@@ -210,6 +214,8 @@ int ft_enter_search_mode(struct editor_state *state){
 }
 
 
+// ファイルツリーの選択行をdiffだけ移動する。範囲外へは動かさない。
+// 返り値: 常に0。
 int ft_move_select_line(file_tree_data *file_tree,int diff){
     if(file_tree->item_view_count_num > 
         file_tree->ft_item_select_line){
@@ -224,6 +230,8 @@ int ft_move_select_line(file_tree_data *file_tree,int diff){
     return 0;
 }
 
+// ファイルツリーの通常モードでの1文字入力を処理する。j/kで選択移動、Enterで選択項目を開く。
+// 返り値: 'q'押下ならfalse、それ以外はtrue/0(呼び出し側で真偽として扱う)。
 int ft_handle_normal_mode(struct editor_input_context *ctx,wchar_t wchr){
 
     struct editor_state *state = ctx->state;
@@ -266,6 +274,8 @@ int ft_handle_normal_mode(struct editor_input_context *ctx,wchar_t wchr){
     return 0;    
 }
 
+// ファイルツリーの検索モードでの1文字入力を処理し、検索文字列へ反映する。
+// 返り値: 常に0。
 int ft_handle_search_mode(struct editor_input_context *ctx,wchar_t wchr){
 
     struct editor_state *state = ctx->state;

@@ -300,6 +300,8 @@ static void scroll_editor_by_wheel(struct editor_input_context *ctx,bool scroll_
     nodelay(stdscr,false);
 }
 
+// 編集画面でのマウスクリックを処理する。クリック位置に応じてカーソル移動などを行う。
+// 返り値: なし。
 static void editor_mouse_click_event(struct editor_input_context *ctx,MEVENT *mev){
     
     struct editor_state *state = ctx->state;

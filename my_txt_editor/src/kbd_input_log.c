@@ -91,6 +91,8 @@ int KL_open_key_log_file(const char *relative_path){
     return 0;
 }
 
+// stateが持つキー入力ログの先頭ポインタと件数を取得する。
+// 返り値: 成功時0、引数がNULLなら-1。取得したログの所有権はstateにあり、解放しない。
 int KL_get_key_data_log(struct editor_state *state,key_data **key,size_t *n){
     if(state == NULL || key == NULL || n == NULL){
         return -1;
