@@ -139,10 +139,10 @@ int apply_completion_to_editor(syntax *syntax,struct editor_state *state){
         state->edit_input_complete_data.show){
         is_new_line = false;
         editor_input_str(
-                state,
-                state->edit_input_complete_data.
-                    word_data.world[state->edit_input_complete_data.
-                        now_select_complete_world_num]
+            state,
+            state->edit_input_complete_data.
+                word_data.world[state->edit_input_complete_data.
+                    now_select_complete_world_num]
         );
     }
     init_edit_comt_candidacy_part_data(state);

@@ -7,6 +7,7 @@
 #include<stdbool.h>
 #include <wchar.h>
 #include <wctype.h>
+#include "editor_syntax.h"
 
 #define COMPLETE_WORLD_CANDIDACY_PART_DATA_MAX_LEN 256 // 入力中の候補文字列の配列要素数。終端文字を含む。
 #define COMPLETE_WORLD_MAX_COUNT 256
@@ -90,6 +91,10 @@ int init_edit_comt_candidacy_part_data(struct editor_state *state);
 
 int set_complete_str(struct editor_state *state,wchar_t *wchr,int line_num);
 int reduce_edit_comp_candidacy_part_data(struct editor_state *state);
+
+// 選択中の補完候補を編集画面へ反映する。
+// 引数: syntax=スクロール時にずらす構文情報、state=補完状態と本文を持つエディタ状態。
+int apply_completion_to_editor(syntax *syntax,struct editor_state *state);
 
 
 #endif
