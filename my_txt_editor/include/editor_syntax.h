@@ -136,4 +136,5 @@ int update_line_syntax_data(syntax *syntax,struct editor_state *state,int line);
 
 void set_syntax_color_line(syntax *syntax,struct editor_state *state,uint16_t line,uint16_t size);
 
+int apply_completion_to_editor(syntax *syntax,struct editor_state *state);
 #endif

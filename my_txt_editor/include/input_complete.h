@@ -90,4 +90,6 @@ int init_edit_comt_candidacy_part_data(struct editor_state *state);
 
 int set_complete_str(struct editor_state *state,wchar_t *wchr,int line_num);
 int reduce_edit_comp_candidacy_part_data(struct editor_state *state);
+
+
 #endif

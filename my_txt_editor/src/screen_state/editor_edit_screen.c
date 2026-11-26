@@ -77,10 +77,12 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
         return true;
     }
     if (state->cursor.is_cur_show) {
-
+        
         if (ch == KEY_ENTER || ch == '\n' || ch == '\r') {
-            syntax *tmp_syntax = &ctx->syntax_data;
-            apply_completion_to_editor(tmp_syntax,);
+            if(state->settings_data->built_in_syntax){
+                syntax *tmp_syntax = &ctx->syntax_data;
+                apply_completion_to_editor(tmp_syntax,state);
+            }
         } else if (ch == '\t') {
             init_edit_comt_candidacy_part_data(state);
             handle_tab(win, state);
