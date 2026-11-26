@@ -131,3 +131,25 @@ int set_complete_str(struct editor_state *state,wchar_t *wchr,int line_num){
 }
 
 
+int apply_completion_to_editor(struct editor_input_context *ctx){
+    struct editor_state *state = ctx->state;
+    bool is_new_line = true;
+    if(state->edit_input_complete_data.
+        comp_world_candidacy_part_data.
+        comp_w_cand_part_d_count > 0 &&
+        state->edit_input_complete_data.show){
+        is_new_line = false;
+        editor_input_str(
+                state,
+                state->edit_input_complete_data.
+                    word_data.world[state->edit_input_complete_data.
+                        now_select_complete_world_num]
+        );
+    }
+    init_edit_comt_candidacy_part_data(state);
+           
+    if(is_new_line){
+        handle_newline(ctx);
+    }
+    return 0;
+}

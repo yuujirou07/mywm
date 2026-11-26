@@ -92,7 +92,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
                             state->edit_input_complete_data.
                                 word_data.world[state->edit_input_complete_data.
                                     now_select_complete_world_num]
-                        );
+                    );
                 }
                 init_edit_comt_candidacy_part_data(state);
             }
