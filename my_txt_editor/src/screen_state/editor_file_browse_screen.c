@@ -165,7 +165,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                 // 読み込み直後は先頭行の行頭から編集を始める。
                 editor_set_cursor(state, 0, 0);
                 restore_edit_screen(state);
-                set_syntax_data(&ctx->syntax_data,ctx);
+                set_syntax_data(&ctx->syntax_data,state);
                 
             }
         }
@@ -219,7 +219,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
             //現在入力されているパスが存在したら開く
             enum path_type path_state = get_path_type(char_old_path);
             if(path_state == PATH_TYPE_FILE){
-                now_input_path_open(state,ctx);
+                now_input_path_open(state,&ctx->syntax_data);
                 return true;
             }
             
@@ -262,7 +262,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                     state->render_flags |= RENDER_FILE_BROWSE;
             }
             if(candidate->d_type == DT_REG){
-                now_input_path_open(state,ctx);
+                now_input_path_open(state,&ctx->syntax_data);
                 return true;
             }
         }

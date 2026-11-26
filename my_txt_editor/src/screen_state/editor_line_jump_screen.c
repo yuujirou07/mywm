@@ -4,9 +4,8 @@
 #include "editor_types.h"
 
 // 行ジャンプ入力中の数字入力・確定・キャンセルを処理する。
-// 引数: ctx=ジャンプ後の再描画に必要なcontext、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
-bool handle_line_jump_mode_input(struct editor_input_context *ctx, wint_t ch){
-    struct editor_state *state = ctx->state;
+// 引数: syntax=ジャンプ後に再構築する構文情報、state=エディタ状態、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
+bool handle_line_jump_mode_input(syntax *syntax,struct editor_state *state, wint_t ch){
 
     if(ch >= '0' && ch <= '9' &&
        state->jump_mode_data.jump_line_num_counter < (int)sizeof(state->jump_mode_data.jump_line_num) - 1){
@@ -41,7 +40,7 @@ bool handle_line_jump_mode_input(struct editor_input_context *ctx, wint_t ch){
         reset_jump_mode(state);
         editor_set_screen_state(state, edit_screen_mode);
         if(state->settings_data->built_in_syntax){
-            set_syntax_data(&ctx->syntax_data,ctx);
+            set_syntax_data(syntax,state);
         }
     }
     return true;

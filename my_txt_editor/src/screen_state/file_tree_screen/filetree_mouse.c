@@ -15,7 +15,7 @@ static bool is_within_double_click(struct timespec st);
 static double get_time_elapsed_MS(struct timespec time);
 static int file_tree_outline_first_click_process(struct editor_state *state);
 static bool editor_click_move_cursor(struct editor_state *state, const MEVENT *ev);
-static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev);
+static void ft_mouse_click_event(syntax *syntax,struct editor_state *state,MEVENT mev);
 
 // ctxのマウスイベントでツリーの開閉・ファイル読込・境界のドラッグ開始・編集画面への移行を処理する。
 // 返り値: 常に0。イベントはgetmouseで取得済みとし、必要な再描画と構文情報更新を要求する。
@@ -103,7 +103,7 @@ int ft_mouse_event(struct editor_input_context *ctx){
         ft_box.w--;
         // ファイルツリー内クリック時の処理
         if(box_contains_point(ft_box,(struct pos){ev->x,ev->y})){
-           ft_mouse_click_event(ctx,*ev); 
+           ft_mouse_click_event(&ctx->syntax_data, state,*ev); 
 
         }
         else{
@@ -262,9 +262,8 @@ static double get_time_elapsed_MS(struct timespec time){
 
 // ファイルツリー内のマウスクリックを処理する。クリック行の項目を探して選択・操作する。
 // 返り値: なし。
-static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev){
+static void ft_mouse_click_event(syntax *syntax,struct editor_state *state,MEVENT mev){
 
-    struct editor_state *state = ctx->state;
 
     
     const int item_num = state->file_tree_data.item_view_count_num;
@@ -284,7 +283,7 @@ static void ft_mouse_click_event(struct editor_input_context *ctx,MEVENT mev){
 
     ft_item_view_data *const item = &tmp_item_data[j];
     
-    ft_item_open_event(ctx,item);
+    ft_item_open_event(syntax, state,item);
     // 選択行は項目領域内の0始まりの行で持つ(項目はft_item_boxの先頭から1行下に並ぶ)。
     state->file_tree_data.ft_item_select_line =
         item->screen_y - (state->file_tree_data.ft_item_box.pos.y + 1);

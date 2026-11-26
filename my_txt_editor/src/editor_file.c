@@ -916,9 +916,9 @@ int check_dir_mem(struct dir_table *dir_table,int size){
 }
 
 // パス入力欄の完成済みパスを開き、種類(ファイルやディレクトリ)に応じて画面状態を更新する。
-// 引数: state=読込先の編集状態、ctx=ファイルブラウザと描画状態を持つ入力context。 返り値: 成功時0、引数不正・判定失敗時-1。完成パスが無い場合はtrue。
-int now_input_path_open(struct editor_state *state,struct editor_input_context *ctx){
-    if(state == NULL || ctx == NULL)return -1;
+// 引数: state=読込先の編集状態、syntax=開いたファイルの構文情報の再構築先。 返り値: 成功時0、引数不正・判定失敗時-1。完成パスが無い場合はtrue。
+int now_input_path_open(struct editor_state *state,syntax *syntax){
+    if(state == NULL || syntax == NULL)return -1;
     struct dir_table dir_info = {0};
     now_open_path_name(&dir_info,get);
 
@@ -955,7 +955,7 @@ int now_input_path_open(struct editor_state *state,struct editor_input_context *
         restore_edit_screen(state);
         set_file_browse_path_input_mode(&state->file_browse,false);
         if(state->settings_data->built_in_syntax){
-            set_syntax_data(&ctx->syntax_data,ctx);
+            set_syntax_data(syntax,state);
         }
     }
     return 0;

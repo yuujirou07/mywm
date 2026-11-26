@@ -6,14 +6,14 @@
 #include "editor_types.h"
 
 
-// ctxの設定値で補完状態を初期化し、候補ポインタ配列と各文字列領域をstateへ確保する。
+// stateの設定値で補完状態を初期化し、候補ポインタ配列と各文字列領域をstateへ確保する。
 // 返り値: 成功0、確保失敗-1。途中失敗でも確保済み領域は残り、成功後の領域はstate側で解放する。
-int init_edit_complete_data(struct editor_input_context *ctx){
+int init_edit_complete_data(struct editor_state *state){
     edit_input_complete_data *tmp_comp_data =
-        &ctx->state->edit_input_complete_data;
+        &state->edit_input_complete_data;
 
     auto_complete_settings_data *tmp_settings_comp_data = 
-        &ctx->state->settings_data->auto_complete_settings_data;
+        &state->settings_data->auto_complete_settings_data;
 
     tmp_comp_data->show_data.size = tmp_settings_comp_data->auto_complete_window_size;
     tmp_comp_data->show_data.pos_mode = tmp_settings_comp_data->auto_complete_position_mode;
@@ -49,10 +49,10 @@ int init_edit_complete_data(struct editor_input_context *ctx){
 }
 
 // 補完対象言語を更新し、入力途中の候補文字列を空にする。
-// 引数: ctx=stateが設定済みの入力context、lang=新しい補完対象言語。 返り値: 候補文字列の初期化結果。現実装では0。
-int change_edit_complete_lang(struct editor_input_context *ctx,language lang){
-    ctx->state->edit_input_complete_data.lang = lang;
-    return init_edit_comt_candidacy_part_data(ctx->state);
+// 引数: state=補完状態を持つエディタ状態、lang=新しい補完対象言語。 返り値: 候補文字列の初期化結果。現実装では0。
+int change_edit_complete_lang(struct editor_state *state,language lang){
+    state->edit_input_complete_data.lang = lang;
+    return init_edit_comt_candidacy_part_data(state);
 }
 
 // stateの補完入力文字列へワイド文字chを追加し、文字数とNUL終端を更新する。
@@ -131,8 +131,7 @@ int set_complete_str(struct editor_state *state,wchar_t *wchr,int line_num){
 }
 
 
-int apply_completion_to_editor(struct editor_input_context *ctx){
-    struct editor_state *state = ctx->state;
+int apply_completion_to_editor(syntax *syntax,struct editor_state *state){
     bool is_new_line = true;
     if(state->edit_input_complete_data.
         comp_world_candidacy_part_data.
@@ -149,7 +148,7 @@ int apply_completion_to_editor(struct editor_input_context *ctx){
     init_edit_comt_candidacy_part_data(state);
            
     if(is_new_line){
-        handle_newline(ctx);
+        handle_newline(syntax, state);
     }
     return 0;
 }

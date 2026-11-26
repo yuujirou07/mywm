@@ -58,8 +58,8 @@ int load_settings_screen_items(settings_screen_data *settings_screen_data);
 void move_settings_select_line(settings_screen_data *settings_screen_data,int delta);
 struct editor_input_context;
 void set_settings_screen_box(struct editor_state *state);
-void draw_settings_screen(struct editor_input_context *ctx);
-int draw_settings_search_box(struct editor_input_context *ctx);
+void draw_settings_screen(struct editor_state *state);
+int draw_settings_search_box(struct editor_state *state);
 void draw_settings_explanation_box(struct editor_input_context *ctx);
 
 #endif

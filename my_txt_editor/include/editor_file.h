@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <wchar.h>
 #include "editor_types.h"
+#include "editor_syntax.h"
 
 struct editor_state;
 struct editor_input_context;
@@ -32,7 +33,7 @@ void file_select_line_update(struct file_select_line *file_select_line,int line)
 void input_mode_tmp_path(char *path,enum flags flags);
 const wchar_t *now_open_path_name(struct dir_table *path,enum flags flags);
 int check_dir_mem(struct dir_table *dir_table,int size);
-int now_input_path_open(struct editor_state *state,struct editor_input_context *ctx);
+int now_input_path_open(struct editor_state *state,syntax *syntax);
 int file_browser_show_mem_start_num(int start_num,enum flags flags);
 
 #endif

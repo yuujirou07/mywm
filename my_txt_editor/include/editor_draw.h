@@ -4,6 +4,7 @@
 #include <ncurses.h>
 #include <stdint.h>
 #include "editor_types.h"
+#include "editor_syntax.h"
 
 struct editor_state;
 struct editor_input_context;
@@ -28,7 +29,7 @@ void draw_box_inside_dir(struct editor_state *state,struct dir_entry *table);
 void draw_select_dir_scene_color(struct editor_state *state,int dir_num,int num);
 void show_file_browse(struct editor_state *state);
 void set_file_select_line(struct editor_state *state,int dir_num,int line);
-void editor_screen_move_line(struct editor_input_context *ctx,int num);
+void editor_screen_move_line(syntax *syntax,struct editor_state *state,int num);
 void editor_error_screen(struct editor_state *state,char *error_comment);
 void draw_file_data(struct editor_state *state);
 void draw_status_bar_line(struct editor_state *state,struct box status_bar);
@@ -44,7 +45,7 @@ int set_clear_box(struct clear_box_data *clear_box_data,struct box box);
 int clear_status_bar_outline(struct editor_state *state);
 int clear_box_area(struct box b);
 struct box complete_box_screen(struct editor_state *state);
-int draw_editor_complete_word_box(struct editor_input_context *ctx);
+int draw_editor_complete_word_box(syntax *syntax,struct editor_state *state);
 int draw_edit_complete_world(struct editor_state *state);
 int redraw_write_area_line_str(struct editor_state *state,uint16_t line,uint16_t size);
 

@@ -3,9 +3,8 @@
 #include "editor_types.h"
 
 // 未保存ファイル作成確認と新規ファイル名入力を処理する。
-// 引数: ctx=確認ダイアログと編集画面復帰に必要なcontext、input_result=get_wch()の結果、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
-bool handle_ask_make_file_mode_input(struct editor_input_context *ctx, int input_result, wint_t ch){
-    struct editor_state *state = ctx->state;
+// 引数: state=確認ダイアログと編集画面復帰に必要なエディタ状態、input_result=get_wch()の結果、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
+bool handle_ask_make_file_mode_input(struct editor_state *state, int input_result, wint_t ch){
     //入力画面時処理
     if(state->make_file_mode_status.is_input_scene){
         int input_limit = state->write_file_name_area.w - 2;

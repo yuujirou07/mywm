@@ -39,7 +39,7 @@ void show_filetree(struct editor_input_context *ctx,struct box ft_box){
             //変更前の枠を消す
             clear_status_bar_outline(state);
 
-            set_status_bar_size(ctx,tmp_status_bar_box);
+            set_status_bar_size(state,tmp_status_bar_box);
             state->render_flags |= RENDER_STATUS_BAR_LINE;
         }
     }
@@ -82,9 +82,8 @@ void hide_filetree(struct editor_input_context *ctx){
 
 
 // 選択行の項目を開き、通常ファイルなら編集画面へ移る。
-// 引数: ctx=ファイルツリーを持つ入力context。 返り値: なし。
-static void ft_open_select_item(struct editor_input_context *ctx){
-    struct editor_state *state = ctx->state;
+// 引数: syntax=開いたファイルの構文情報、state=ファイルツリーを持つエディタ状態。 返り値: なし。
+static void ft_open_select_item(syntax *syntax,struct editor_state *state){
     int item_view_num = state->file_tree_data.item_view_count_num;
     //選択行(項目領域内の0始まりの行)を画面のy座標へ変換する。
     //項目領域の先頭1行は項目を置かない(項目はview_h=1から並ぶ)ため+1する。
@@ -101,14 +100,14 @@ static void ft_open_select_item(struct editor_input_context *ctx){
     }
     
     if(tmp_item != NULL){
-        enum path_type state = ft_item_open_event(ctx,tmp_item);
+        enum path_type open_type = ft_item_open_event(syntax, state,tmp_item);
         //通常ファイルなら編集画面に移動する
-        if(state == PATH_TYPE_FILE){
-            editor_set_screen_state(ctx->state,edit_screen_mode);
+        if(open_type == PATH_TYPE_FILE){
+            editor_set_screen_state(state,edit_screen_mode);
             set_cell_color_pair(PAIR_TEXT,item_box.pos.x,tmp_item->screen_y,item_box.w - 1);
-            my_cur_set(ctx->state,true);
-            ctx->state->render_flags |= RENDER_EDIT_SCREEN_BASE;
-            ctx->state->render_flags |= RENDER_FILETREE;
+            my_cur_set(state,true);
+            state->render_flags |= RENDER_EDIT_SCREEN_BASE;
+            state->render_flags |= RENDER_FILETREE;
         }
     }
 }
@@ -127,7 +126,7 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
     }
 
     if(tmp_file_tree->ft_search_data.is_search_mode){
-        ft_handle_search_mode(ctx,ch);
+        ft_handle_search_mode(state,ch);
     }
     else{
         ft_handle_normal_mode(ctx,ch);
@@ -152,11 +151,10 @@ int change_file_tree_width(struct editor_input_context *ctx,int width){
 }
 
 // item_dataの項目を開く。ディレクトリなら開閉を切り替え、ファイルなら読み込んで編集画面の表示を更新する。
-// 引数: ctx=編集状態・構文情報を持つcontext、item_data=開く項目(table_ptrは有効であること)。 返り値: なし。必要な再描画フラグを立てる。
-enum path_type ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data){
+// 引数: syntax=構文情報、state=編集状態、item_data=開く項目(table_ptrは有効であること)。 返り値: なし。必要な再描画フラグを立てる。
+enum path_type ft_item_open_event(syntax *syntax,struct editor_state *state,ft_item_view_data *item_data){
 
     ft_item_view_data *item = item_data;
-    struct editor_state *state = ctx->state;
 
     enum path_type path_state =
         get_path_type(item->table_ptr->absolute_path);
@@ -178,7 +176,7 @@ enum path_type ft_item_open_event(struct editor_input_context *ctx,ft_item_view_
             state->render_flags |= RENDER_EDIT_SCREEN_BASE;
             state->render_flags |= RENDER_FILETREE;
             if(state->settings_data->built_in_syntax){
-                set_syntax_data(&ctx->syntax_data,ctx);
+                set_syntax_data(syntax,state);
             }
         }
     }
@@ -245,7 +243,7 @@ int ft_handle_normal_mode(struct editor_input_context *ctx,wchar_t wchr){
 
     if((wchr == KEY_ENTER || wchr == L'\n') && 
         !tmp_file_tree->ft_search_data.is_search_mode){
-        ft_open_select_item(ctx);
+        ft_open_select_item(&ctx->syntax_data, state);
     }
 
     if(wchr == (wchar_t)L'i'){
@@ -277,9 +275,8 @@ int ft_handle_normal_mode(struct editor_input_context *ctx,wchar_t wchr){
 
 // ファイルツリーの検索モードでの1文字入力を処理し、検索文字列へ反映する。
 // 返り値: 常に0。
-int ft_handle_search_mode(struct editor_input_context *ctx,wchar_t wchr){
+int ft_handle_search_mode(struct editor_state *state,wchar_t wchr){
 
-    struct editor_state *state = ctx->state;
     file_tree_data *tmp_file_tree = &state->file_tree_data;
 
 

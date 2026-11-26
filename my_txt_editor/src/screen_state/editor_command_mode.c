@@ -48,13 +48,12 @@ int destory_command_mode(struct editor_state *state){
 }
 
 // コマンドモード中の1文字入力を処理する。'q'で終了し、それ以外は入力文字列へ反映する。
-// 返り値: コマンドモードを続けるならtrue、'q'押下などで終了するならfalse(入力エラー時・ctxがNULLはtrue)。
-bool handle_command_mode(struct editor_input_context *ctx,wchar_t chr,int input_result){
-    if(ctx == NULL){
+// 返り値: コマンドモードを続けるならtrue、'q'押下などで終了するならfalse(入力エラー時・stateがNULLはtrue)。
+bool handle_command_mode(struct editor_state *state,wchar_t chr,int input_result){
+    if(state == NULL){
         return true;
     }
 
-    struct editor_state *state = ctx->state;
     if(input_result == ERR){
         return true;
     }
@@ -80,7 +79,7 @@ bool handle_command_mode(struct editor_input_context *ctx,wchar_t chr,int input_
                 return true;
             }
             
-            backspace_command_str(ctx);
+            backspace_command_str(state);
         }
         else if(chr == KEY_ENTER){
             
@@ -97,8 +96,7 @@ bool handle_command_mode(struct editor_input_context *ctx,wchar_t chr,int input_
 
 // 入力中のコマンド文字列の末尾1文字をカーソル位置へ描画する。
 // 返り値: 成功時0、入力文字列が空なら-1。
-int draw_command_str(struct editor_input_context *ctx){
-    struct editor_state *state = ctx->state;
+int draw_command_str(struct editor_state *state){
     if(state->command_mode_data.command_str_data.command_str_len < 1){
         return -1;
     }
@@ -126,8 +124,7 @@ int draw_command_str(struct editor_input_context *ctx){
 
 // コマンド文字列の末尾1文字を削除し、画面上の表示とカーソル位置も1文字分戻す。
 // 返り値: 常に0。文字列が空なら何もしない。
-int backspace_command_str(struct editor_input_context *ctx){
-    struct editor_state *state = ctx->state;
+int backspace_command_str(struct editor_state *state){
 
     command_str_data *command_str_data = 
         &state->command_mode_data.command_str_data;
@@ -156,8 +153,7 @@ int backspace_command_str(struct editor_input_context *ctx){
 
 // コマンド文字列を全消去し、画面上の表示を消してカーソルを開始位置へ戻す。
 // 返り値: 常に0。
-int clear_command_str(struct editor_input_context *ctx){
-    struct editor_state *state = ctx->state;
+int clear_command_str(struct editor_state *state){
     command_str_data *command_str_data = &state->command_mode_data.command_str_data;
 
     size_t command_str_len = 

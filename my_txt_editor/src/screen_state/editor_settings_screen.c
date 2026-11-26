@@ -11,10 +11,9 @@
 static void draw_explanation_str(const char *str,struct box box);
 settings_items_data *get_now_select_settings_item(settings_screen_data *screen_data);
 
-// ctxの設定画面でchとget_wch結果input_resultを処理し、選択移動・値入力・Tabでの復帰を行う。
+// stateの設定画面でchとget_wch結果input_resultを処理し、選択移動・値入力・Tabでの復帰を行う。
 // 返り値: 入力モード外のqはfalse、それ以外true。入力値の確定は入力モードを閉じるだけで、設定本体へは反映しない。
-bool handle_settings_screen_input(struct editor_input_context *ctx,wint_t ch,int input_result){
-    struct editor_state *state = ctx->state;
+bool handle_settings_screen_input(struct editor_state *state,wint_t ch,int input_result){
     settings_screen_data *screen_data = &state->settings_screen_data;
 
     if(screen_data->value_input_mode){
@@ -52,7 +51,7 @@ bool handle_settings_screen_input(struct editor_input_context *ctx,wint_t ch,int
     }
 
     if(ch == 'q')return false;
-    if(input_result == ERR)editor_error_screen(ctx->state,"key input error");
+    if(input_result == ERR)editor_error_screen(state,"key input error");
     if(ch == '\t'){
         enum screen_state old_state = editor_get_screen_state_log(state,1);
         if(old_state == screen_state_log_error_mode)editor_error_screen(state,"editor screen error");
@@ -197,10 +196,9 @@ void set_settings_screen_box(struct editor_state *state){
     st_scr_data->box.h = box_h;
 }
 
-// ctxの設定項目を枠内に複数列で描き、項目名とキーを左右へ揃えて選択項目を強調する。
-// 返り値: なし。ctxには設定画面の枠・項目配列・描画先が必要で、枠とタイトルも描画する。
-void draw_settings_screen(struct editor_input_context *ctx){
-    struct editor_state *state = ctx->state;
+// stateの設定項目を枠内に複数列で描き、項目名とキーを左右へ揃えて選択項目を強調する。
+// 返り値: なし。stateには設定画面の枠・項目配列・描画先が必要で、枠とタイトルも描画する。
+void draw_settings_screen(struct editor_state *state){
     settings_screen_data st_scr_data = state->settings_screen_data;
 
     draw_box(st_scr_data.box);
@@ -278,10 +276,9 @@ void draw_settings_screen(struct editor_input_context *ctx){
 }
 
 // 選択項目の型名と入力中の値を設定画面上部へ描画する。
-// 引数: ctx=設定画面状態と描画先を持つ入力context。 返り値: 成功時0、入力枠を配置できない場合は-1。
-int draw_settings_search_box(struct editor_input_context *ctx){
+// 引数: state=設定画面状態と描画先を持つエディタ状態。 返り値: 成功時0、入力枠を配置できない場合は-1。
+int draw_settings_search_box(struct editor_state *state){
 
-    struct editor_state *state = ctx->state;
     settings_screen_data st_scr_data = state->settings_screen_data;
 
     if(st_scr_data.box.pos.y <= 0)return -1;

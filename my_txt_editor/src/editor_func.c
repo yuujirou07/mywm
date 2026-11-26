@@ -124,10 +124,10 @@ void handle_resize(WINDOW *win, struct editor_input_context *ctx){
     update_screen_ratio(ctx);
 }
 
-// ctxのカーソル左の1文字をセル幅ごと削除する。行頭では前行へ結合して結合位置へ移動する。
+// stateのカーソル左の1文字をセル幅ごと削除する。行頭では前行へ結合して結合位置へ移動する。
+// 引数: syntax=スクロール時にずらす構文情報、state=エディタ状態。
 // 返り値: なし。不正な行・セルや結合失敗では処理を打ち切り、変更時は本文の再描画を要求する。
-void handle_backspace(struct editor_input_context *ctx) {
-    struct editor_state *state = ctx->state;
+void handle_backspace(syntax *syntax,struct editor_state *state) {
     int line = state->cursor.file_pos.y;
     if(line < 0 || line >= editor_line_limit(state)){
         return;
@@ -187,7 +187,7 @@ void handle_backspace(struct editor_input_context *ctx) {
         }
         else{
             //関数内でcursor.file_pos.yの値も変更される
-            editor_screen_move_line(ctx,-1);
+            editor_screen_move_line(syntax, state,-1);
         }
         //どちらの経路も桁は触らないため、ここで結合位置へ寄せる
         state->cursor.file_pos.x = editor_clamp_col(state, state->cursor.file_pos.y, join_col);
@@ -199,9 +199,8 @@ void handle_backspace(struct editor_input_context *ctx) {
 }
 
 // カーソル位置で現在行を分割し、右側の文字列を下の新しい行へ移す。その後、カーソルを次の行の行頭(col=0)へ進める。
-// 引数: ctx=ウィンドウ、カーソル行、書き込み領域を持つ入力context。 返り値: なし。
-void handle_newline(struct editor_input_context *ctx) {
-    struct editor_state *state = ctx->state;
+// 引数: syntax=スクロール時にずらす構文情報、state=カーソル行と書き込み領域を持つエディタ状態。 返り値: なし。
+void handle_newline(syntax *syntax,struct editor_state *state) {
     int line = state->cursor.file_pos.y;
     if(line < 0 || line >= editor_line_limit(state)){
         return;
@@ -220,7 +219,7 @@ void handle_newline(struct editor_input_context *ctx) {
     }
     else{
         // editor_screen_move_line()がcursor.file_pos.yの+1も行うため、ここでは動かさない
-        editor_screen_move_line(ctx,1);
+        editor_screen_move_line(syntax, state,1);
     }
     state->cursor.file_pos.x = 0;
 
@@ -365,9 +364,8 @@ void handle_char_input(WINDOW *win, wchar_t ch, struct editor_state *state){
 }
 
 // 矢印キー入力を処理し、行長を超えない位置へカーソルを移動する。画面端ではスクロールしながら表示内容を補う。
-// 引数: ctx=カーソルと表示位置を持つ入力context、ch=KEY_UP/DOWN/LEFT/RIGHT。 返り値: なし。
-void handle_input_allow(struct editor_input_context *ctx,wchar_t ch){
-    struct editor_state *state = ctx->state;
+// 引数: syntax=スクロール時にずらす構文情報、state=カーソルと表示位置を持つエディタ状態、ch=KEY_UP/DOWN/LEFT/RIGHT。 返り値: なし。
+void handle_input_allow(syntax *syntax,struct editor_state *state,wchar_t ch){
     int line_limit = state->settings_data->default_load_line_size;
     if(line_limit <= 0)return;
     
@@ -386,14 +384,14 @@ void handle_input_allow(struct editor_input_context *ctx,wchar_t ch){
                 editor_move_cursor_line(state, -1);
             }
             else if(state->scr.scr_start_num > 0){
-              editor_screen_move_line(ctx,-1);
+              editor_screen_move_line(syntax, state,-1);
             }
             break;
         }
         case KEY_DOWN:{
             if(line + 1 >= line_limit)break;
             if (can_move_down_in_view)editor_move_cursor_line(state, 1);
-            else editor_screen_move_line(ctx,1);
+            else editor_screen_move_line(syntax, state,1);
             break;
         }
         case KEY_LEFT:{
@@ -611,15 +609,15 @@ int set_cur_pos(struct editor_state *state){
 
 
 // 言語を保存し、有効な構文着色と補完データを初期化する。
-// 引数: ctx=stateとsettings_dataが設定済みの入力context、lang=新しい言語。 返り値: 常に0。現実装では補完データの初期化失敗を返さない。
-int editor_set_env_lang(struct editor_input_context *ctx,language lang){
-    if(ctx->state->settings_data->built_in_syntax){
-        init_syntax(&ctx->syntax_data);
-        set_syntax_language(lang,&ctx->syntax_data);
+// 引数: syntax=初期化する構文情報、state=settings_dataが設定済みのエディタ状態、lang=新しい言語。 返り値: 常に0。現実装では補完データの初期化失敗を返さない。
+int editor_set_env_lang(syntax *syntax,struct editor_state *state,language lang){
+    if(state->settings_data->built_in_syntax){
+        init_syntax(syntax);
+        set_syntax_language(lang,syntax);
     }
     env_language_ctl(&lang,set);
-    if(ctx->state->settings_data->auto_complete_settings_data.auto_complete_enabled){
-        init_edit_complete_data(ctx);
+    if(state->settings_data->auto_complete_settings_data.auto_complete_enabled){
+        init_edit_complete_data(state);
     }
 
     return 0;
@@ -641,12 +639,12 @@ int init_input_context(struct editor_input_context *ctx,struct editor_state *sta
     return 0;
 }
 
-// ctx->state->settings_dataへ既定値を設定してから、設定JSONの有効な項目で上書きする。
-// 返り値: 常に0。ctx・state・settings_dataは呼び出し前に接続しておく。
-int init_settings_data(struct editor_input_context *ctx){
+// state->settings_dataへ既定値を設定してから、設定JSONの有効な項目で上書きする。
+// 返り値: 常に0。state・settings_dataは呼び出し前に接続しておく。
+int init_settings_data(struct editor_state *state){
     //最初にデフォルト設定を読み込みユーザーが設定している項目だけ更新する
-    load_default_editor_settings(ctx->state->settings_data);
-    load_custom_editor_settings(ctx->state->settings_data);
+    load_default_editor_settings(state->settings_data);
+    load_custom_editor_settings(state->settings_data);
     return 0;
 }
 

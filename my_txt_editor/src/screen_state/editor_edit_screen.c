@@ -7,7 +7,7 @@
 
 static void send_lsp_did_change(struct editor_input_context *ctx);
 
-static void editor_mouse_click_event(struct editor_input_context *ctx,MEVENT *mev);
+static void editor_mouse_click_event(struct editor_state *state,MEVENT *mev);
 
 // 通常編集画面のキー入力を処理する。
 // 引数: ctx=編集画面の描画・状態更新に必要なcontext、input_result=get_wch()の結果、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue、qで終了するならfalse。
@@ -21,12 +21,12 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
     }
     if (input_result == KEY_CODE_YES && ch == KEY_BACKSPACE && state->cursor.is_cur_show) {
         reduce_edit_comp_candidacy_part_data(state);
-        handle_backspace(ctx);
+        handle_backspace(&ctx->syntax_data, state);
         if(state->settings_data->lsp.lsp_use){
             send_lsp_did_change(ctx);
         }
         if(state->settings_data->built_in_syntax){
-            set_syntax_data(&ctx->syntax_data,ctx);
+            set_syntax_data(&ctx->syntax_data,state);
         }
         return true;
     }
@@ -79,33 +79,13 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
     if (state->cursor.is_cur_show) {
 
         if (ch == KEY_ENTER || ch == '\n' || ch == '\r') {
-            bool is_new_line = true;
-            //入力補完設定
-            if(state->settings_data->auto_complete_settings_data.auto_complete_enabled){
-                if(state->edit_input_complete_data.
-                    comp_world_candidacy_part_data.
-                    comp_w_cand_part_d_count > 0 &&
-                    state->edit_input_complete_data.show){
-                    is_new_line = false;
-                    editor_input_str(
-                            state,
-                            state->edit_input_complete_data.
-                                word_data.world[state->edit_input_complete_data.
-                                    now_select_complete_world_num]
-                    );
-                }
-                init_edit_comt_candidacy_part_data(state);
-            }
-
-            if(is_new_line){
-                handle_newline(ctx);
-            }
-            
+            syntax *tmp_syntax = &ctx->syntax_data;
+            apply_completion_to_editor(tmp_syntax,);
         } else if (ch == '\t') {
             init_edit_comt_candidacy_part_data(state);
             handle_tab(win, state);
         } else if (ch == KEY_LEFT || ch == KEY_RIGHT || ch == KEY_UP || ch == KEY_DOWN){
-            handle_input_allow(ctx,ch);
+            handle_input_allow(&ctx->syntax_data, state,ch);
         //通常可視文字入力
         } else if (input_result == OK && iswprint((wint_t)ch)) {
             //デバッグ用
@@ -120,7 +100,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
         }
         //struct pos write_area_pos = editor_cursor_write_area_pos(state);
         if(state->settings_data->built_in_syntax){
-            set_syntax_data(&ctx->syntax_data,ctx);
+            set_syntax_data(&ctx->syntax_data,state);
         }
         state->render_flags |= RENDER_LINE_STATUS;
         
@@ -138,7 +118,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
                 send_lsp_did_change(ctx);
             }
             if(state->settings_data->built_in_syntax){
-                set_syntax_data(&ctx->syntax_data,ctx);
+                set_syntax_data(&ctx->syntax_data,state);
             }
             state->render_flags |= RENDER_LINE_STATUS;
         }
@@ -149,7 +129,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
             move_view_to_line(state, n - 1, 0);
 
             if(state->settings_data->built_in_syntax){
-                set_syntax_data(&ctx->syntax_data,ctx);
+                set_syntax_data(&ctx->syntax_data,state);
             }
             
             if(state->settings_data->auto_complete_settings_data.auto_complete_enabled){
@@ -204,10 +184,10 @@ static void send_lsp_did_change(struct editor_input_context *ctx){
 }
 
 
-// ctx->state->status_barへ画面上の矩形boxを値コピーする。
+// state->status_barへ画面上の矩形boxを値コピーする。
 // 返り値: 常に0。各ポインタは有効であること。範囲検査や再描画要求は行わない。
-int set_status_bar_size(struct editor_input_context *ctx,struct box box){
-    *ctx->state->status_bar = box;
+int set_status_bar_size(struct editor_state *state,struct box box){
+    *state->status_bar = box;
     return 0;
 }
 
@@ -249,29 +229,27 @@ void draw_file_data(struct editor_state *state){
 }
 
 // 表示開始行がmoved行(正で下方向)動いた分だけ構文情報をずらし、新しく見える行を解析し直す。
-// 引数: ctx=構文情報と画面状態、moved=実際に動いた行数(0なら何もしない)。 返り値: なし。組み込み構文が無効なら何もしない。
-static void sync_syntax_after_scroll(struct editor_input_context *ctx,int moved){
-    struct editor_state *state = ctx->state;
+// 引数: syntax=ずらす構文情報、state=画面状態、moved=実際に動いた行数(0なら何もしない)。 返り値: なし。組み込み構文が無効なら何もしない。
+static void sync_syntax_after_scroll(syntax *syntax,struct editor_state *state,int moved){
     if(!state->settings_data->built_in_syntax || moved == 0)return;
 
     const int h = state->write_area.h;
     int amount = moved > 0 ? moved : -moved;
     // 構文情報は画面相対行で持つ。下へ動くと既存分は上(負)へ、上へ動くと下(正)へずれる。
-    scroll_syntax_pos_data(&ctx->syntax_data,-moved,h);
+    scroll_syntax_pos_data(syntax,-moved,h);
 
     // 下へ動けば最下行側、上へ動けば最上行側のamount行が新しく見える。
     if(amount > h)amount = h;
     int first_line = moved > 0 ? h - amount : 0;
     for(int line = first_line;line < first_line + amount;line++){
-        update_line_syntax_data(ctx,line);
+        update_line_syntax_data(syntax, state,line);
     }
 }
 
 // マウスホイール1回分と、溜まっている同方向のホイール入力をまとめてスクロールする。
-// 引数: ctx=編集画面の状態、scroll_up=trueで上、falseで下。 返り値: なし。
+// 引数: syntax=ずらす構文情報、state=編集画面の状態、scroll_up=trueで上、falseで下。 返り値: なし。
 // 別種の入力が来たら押し戻してループを抜け、nodelayは必ず元(ブロッキング)へ戻す。
-static void scroll_editor_by_wheel(struct editor_input_context *ctx,bool scroll_up){
-    struct editor_state *state = ctx->state;
+static void scroll_editor_by_wheel(syntax *syntax,struct editor_state *state,bool scroll_up){
     const mmask_t same_dir_ev = scroll_up
         ? (BUTTON4_PRESSED | BUTTON4_CLICKED)
         : (BUTTON5_PRESSED | BUTTON5_CLICKED);
@@ -284,7 +262,7 @@ static void scroll_editor_by_wheel(struct editor_input_context *ctx,bool scroll_
     do{
         const int before_scr_start_num = state->scr.scr_start_num;
         editor_scroll_logical_line(state,scroll_up ? -sensitivity : sensitivity);
-        sync_syntax_after_scroll(ctx,state->scr.scr_start_num - before_scr_start_num);
+        sync_syntax_after_scroll(syntax, state,state->scr.scr_start_num - before_scr_start_num);
 
         if(get_wch(&chr) == ERR){
             break;
@@ -306,20 +284,19 @@ static void scroll_editor_by_wheel(struct editor_input_context *ctx,bool scroll_
 
 // 編集画面でのマウスクリックを処理する。クリック位置に応じてカーソル移動などを行う。
 // 返り値: なし。
-static void editor_mouse_click_event(struct editor_input_context *ctx,MEVENT *mev){
+static void editor_mouse_click_event(struct editor_state *state,MEVENT *mev){
     
-    struct editor_state *state = ctx->state;
 
     const int x = mev->x;
     const int y = mev->y;
     
     const struct box tmp_write_area_box = 
         {(struct pos){
-            ctx->state->write_area.x_start,
-            ctx->state->write_area.y_start
+            state->write_area.x_start,
+            state->write_area.y_start
         },
-            ctx->state->write_area.w,
-            ctx->state->write_area.h
+            state->write_area.w,
+            state->write_area.h
         };
     if(box_contains_point(tmp_write_area_box,(struct pos){x,y})){
         struct pos write_area_pos;
@@ -360,7 +337,7 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
 
     //ホイールスクロール処理(上下共通)。上下同時に立っている場合は上を優先する。
     if(event->bstate & (button5_ev | button4_ev)){
-        scroll_editor_by_wheel(ctx,(event->bstate & button4_ev) != 0);
+        scroll_editor_by_wheel(&ctx->syntax_data, state,(event->bstate & button4_ev) != 0);
     }
 
     //マウスクリック処理
@@ -368,7 +345,7 @@ void editor_screen_mouse_event(struct editor_input_context *ctx){
        (BUTTON1_PRESSED |
         BUTTON1_CLICKED  | 
         BUTTON1_DOUBLE_CLICKED)){
-        editor_mouse_click_event(ctx,event);
+        editor_mouse_click_event(state,event);
     }
     else{
         return;

@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     }
 
    //カスタム設定のバグになる値を検出する関数の設置
-    init_settings_data(&input_context);
+    init_settings_data(&state);
     
     setlocale(LC_ALL, "");
     // 危険: initscr()以降の失敗returnでendwin()を呼ばない経路が複数ある。
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     my_cur_set(&state,false);
 
     //cursesカーラー初期化
-    init_curses_color(&input_context);
+    init_curses_color(&state);
 
 
     // 固定の色ペアはinit_curses_colorが登録済み。構文色はPAIR_SYNTAX_BASE以降へ登録する。
@@ -305,7 +305,7 @@ int main(int argc, char *argv[])
         }
     }
     
-    editor_set_env_lang(&input_context,C);
+    editor_set_env_lang(&input_context.syntax_data, input_context.state,C);
     input_context.edit_screen.line_start_pos.x = state.write_area.x_start - 1;
     input_context.edit_screen.line_start_pos.y = state.write_area.y_start;
     input_context.edit_screen.line_end_pos.x = state.write_area.x_start - 1;
@@ -420,7 +420,7 @@ int main(int argc, char *argv[])
         
         if(editor_get_screen_state(&state) == edit_screen_mode){ 
             if(state.settings_data->built_in_syntax){
-                apply_syntax_color(&input_context,input_context.syntax_data);
+                apply_syntax_color(&state,input_context.syntax_data);
             }
             editor_sync_cursor(&state);
             set_cur_pos(&state);
@@ -457,7 +457,7 @@ int main(int argc, char *argv[])
         if (input_result == KEY_CODE_YES && ch == KEY_RESIZE) {
             handle_resize(win, &input_context);
             // 画面寸法が変わると表示範囲が変わるため、構文情報を全再計算する。
-            set_syntax_data(&input_context.syntax_data,&input_context);
+            set_syntax_data(&input_context.syntax_data,&state);
             continue;
         }
 

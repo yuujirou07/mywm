@@ -79,9 +79,9 @@ typedef struct{
 }edit_input_complete_data;
 
 
-int init_edit_complete_data(struct editor_input_context *ctx);
+int init_edit_complete_data(struct editor_state *state);
 
-int change_edit_complete_lang(struct editor_input_context *ctx,language lang);
+int change_edit_complete_lang(struct editor_state *state,language lang);
 
 int set_edit_comp_candidacy_part_data(struct editor_state *state,wint_t ch);
 

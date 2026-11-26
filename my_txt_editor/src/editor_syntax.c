@@ -224,23 +224,23 @@ int set_syntax_language(language lang,syntax *syntax){
 
 
 
-// ctxの表示範囲を解析し、初期化済みsyntaxの着色情報を再構築する。複数行コメントの状態は追跡しない。
+// stateの表示範囲を解析し、初期化済みsyntaxの着色情報を再構築する。複数行コメントの状態は追跡しない。
 // 返り値: 登録件数、不正な状態・追加失敗は-1。途中失敗では部分結果が残り、再確保で要素ポインタが無効になり得る。
-int set_syntax_data(syntax *syntax,struct editor_input_context *ctx){
-    if(syntax == NULL || ctx == NULL || ctx->state == NULL)return -1;
+int set_syntax_data(syntax *syntax,struct editor_state *state){
+    if(syntax == NULL || state == NULL)return -1;
 
     syntax->syntax_list_data.syntax_list_num = 0;
     if(syntax->syntax_list_data.syntax_data == NULL)return -1;
 
     // 色は画面に見えている行だけ計算する(hは画面相対、ファイル行はscr_start_numからのオフセット)。
     // 同じ始点は後のscanが上書きするため、literal・コメント等の優先したい種別を後ろに置く。
-    for(int h = 0;h < ctx->state->write_area.h;h++){
-        int now_file_line_num = ctx->state->scr.scr_start_num + h;
-        if(now_file_line_num < 0 || now_file_line_num >= editor_line_limit(ctx->state))break;
-        int line_str_len    = editor_line_len(ctx->state,now_file_line_num);
-        wint_t *line_st_ptr = editor_line_cells(ctx->state,now_file_line_num);
+    for(int h = 0;h < state->write_area.h;h++){
+        int now_file_line_num = state->scr.scr_start_num + h;
+        if(now_file_line_num < 0 || now_file_line_num >= editor_line_limit(state))break;
+        int line_str_len    = editor_line_len(state,now_file_line_num);
+        wint_t *line_st_ptr = editor_line_cells(state,now_file_line_num);
         if(line_st_ptr == NULL)continue;
-        int view_cols = editor_view_cols(ctx->state);
+        int view_cols = editor_view_cols(state);
 
         if(scan_syntax_words(syntax,line_st_ptr,line_str_len,view_cols,h,
             reserved_words,
@@ -265,18 +265,16 @@ int set_syntax_data(syntax *syntax,struct editor_input_context *ctx){
     return syntax->syntax_list_data.syntax_list_num;
 }
 
-// ctxの確保済み構文情報から画面相対行lineの旧情報を削除し、その行だけ再解析する。
+// syntaxの確保済み構文情報から画面相対行lineの旧情報を削除し、その行だけ再解析する。
 // 返り値: 全登録件数、状態・対象行不正や追加失敗は-1。他行の情報は保持し、途中失敗は巻き戻さない。
-int update_line_syntax_data(struct editor_input_context *ctx,int line){
-    if(ctx == NULL || ctx->state == NULL)return -1;
-    syntax *syntax = &ctx->syntax_data;
-    if(syntax == NULL)return -1;
+int update_line_syntax_data(syntax *syntax,struct editor_state *state,int line){
+    if(syntax == NULL || state == NULL)return -1;
     if(syntax->syntax_list_data.syntax_data == NULL)return -1;
 
     // 1行編集のたびに全画面を再解析しないよう、対象行の旧データだけを詰め直して再計算する。
     int h = line;
-    int now_file_line_num = ctx->state->scr.scr_start_num + h;
-    if(now_file_line_num < 0 || now_file_line_num >= editor_line_limit(ctx->state))return -1;
+    int now_file_line_num = state->scr.scr_start_num + h;
+    if(now_file_line_num < 0 || now_file_line_num >= editor_line_limit(state))return -1;
     syntax_list_data *list = &syntax->syntax_list_data;
     int write_index = 0;
     for(int read_index = 0;read_index < list->syntax_list_num;read_index++){
@@ -287,10 +285,10 @@ int update_line_syntax_data(struct editor_input_context *ctx,int line){
     }
     list->syntax_list_num = write_index;
 
-    int line_str_len = editor_line_len(ctx->state,now_file_line_num);
-    wint_t *line_st_ptr = editor_line_cells(ctx->state,now_file_line_num);
+    int line_str_len = editor_line_len(state,now_file_line_num);
+    wint_t *line_st_ptr = editor_line_cells(state,now_file_line_num);
     if(line_st_ptr == NULL)return list->syntax_list_num;
-    int view_cols = editor_view_cols(ctx->state);
+    int view_cols = editor_view_cols(state);
     if(scan_syntax_words(syntax,line_st_ptr,line_str_len,view_cols,h,
         reserved_words,sizeof(reserved_words) / sizeof(reserved_words[0]),reserved_word) < 0)return -1;
     if(scan_syntax_words(syntax,line_st_ptr,line_str_len,view_cols,h,
@@ -309,13 +307,11 @@ int update_line_syntax_data(struct editor_input_context *ctx,int line){
 
 // 行lineからsize行分の範囲に入る構文色の領域を、画面上の表示範囲に収めて描画する。
 // 表示領域外や幅0以下の領域は読み飛ばす。
-void set_syntax_color_line(struct editor_input_context *ctx,uint16_t line,uint16_t size){
-    syntax *tmp_syntax = &ctx->syntax_data;    
-    struct editor_state *state = ctx->state;
+void set_syntax_color_line(syntax *syntax,struct editor_state *state,uint16_t line,uint16_t size){
 
-    for(int i = 0;i < tmp_syntax->syntax_list_data.syntax_list_num;i++){
+    for(int i = 0;i < syntax->syntax_list_data.syntax_list_num;i++){
 
-        syntax_data tmp_syntax_data = tmp_syntax->syntax_list_data.syntax_data[i];
+        syntax_data tmp_syntax_data = syntax->syntax_list_data.syntax_data[i];
         struct box syntax_box = tmp_syntax_data.area;
 
         if(syntax_box.pos.y >= line && syntax_box.pos.y + syntax_box.h <= line + size){
@@ -382,11 +378,10 @@ static void color_text_cells(struct editor_state *state,int y,int x,int width,sh
     }
 }
 
-// ctxの本文領域を通常色に戻し、借用したsyntaxの可視範囲へ構文色を適用する。
-// 返り値: ctxがNULLなら-1、それ以外0。stateは必須で、配列の所有権は移動せず描画失敗は通知しない。
-int apply_syntax_color(struct editor_input_context *ctx,syntax syntax){
-    if(ctx == NULL)return -1;
-    struct editor_state *state = ctx->state; 
+// stateの本文領域を通常色に戻し、借用したsyntaxの可視範囲へ構文色を適用する。
+// 返り値: stateがNULLなら-1、それ以外0。stateは必須で、配列の所有権は移動せず描画失敗は通知しない。
+int apply_syntax_color(struct editor_state *state,syntax syntax){
+    if(state == NULL)return -1;
 
     int syntax_num = syntax.syntax_list_data.syntax_list_num;
     

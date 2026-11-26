@@ -5,10 +5,10 @@
 #include"editor_color.h"
 
 // 固定の色ペア(PAIR_xxx)をncursesへ登録し、初期属性を本文色(白on黒)にする。
-// 引数: ctx=NULL検査のみに使う。 返り値: ctxがNULLなら-1、それ以外は0(カラー非対応・ペア数不足なら登録せず0)。
-int init_curses_color(struct editor_input_context *ctx){
+// 引数: state=NULL検査のみに使う。 返り値: stateがNULLなら-1、それ以外は0(カラー非対応・ペア数不足なら登録せず0)。
+int init_curses_color(struct editor_state *state){
 
-    if(ctx == NULL){
+    if(state == NULL){
         return -1;
     }
     start_color();

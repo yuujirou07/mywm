@@ -6,6 +6,7 @@
 #include <time.h>
 #include <wchar.h>
 #include"editor_types.h"
+#include "editor_syntax.h"
 
 #define FILETREE_DEFAULT_SIZE_W 10 // ファイルツリーの既定幅（端末セル数）。
 #define FILETREE_MIN_W 5
@@ -80,7 +81,7 @@ ft_item_view_data *get_filetree_item_data(file_tree_data *file_tree,
 
 int set_filetree_box(file_tree_data *filetree_data,struct box filetree_box);
 
-int draw_filetree(struct editor_input_context *ctx,file_tree_data *filetree_data);
+int draw_filetree(struct editor_state *state,file_tree_data *filetree_data);
 int change_file_tree_width(struct editor_input_context *ctx,int width);
 void show_filetree(struct editor_input_context *ctx,struct box ft_box);
 void hide_filetree(struct editor_input_context *ctx);
@@ -91,7 +92,7 @@ int ft_get_same_layer_item_view_data(file_tree_data *file_tree_data,int layer,
 int ft_get_sorted_screen_y_item_view_data(ft_item_view_data *item_view_data,int item_view_num,
                                     ft_item_view_data ***sorted_data);
 
-int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_tree_data);
+int ft_draw_filetree_data(struct editor_state *state,file_tree_data *file_tree_data);
 
 
 
@@ -99,7 +100,7 @@ int ft_get_max_layer_item_view_data(ft_item_view_data *item_view_data,int item_v
 
 int ft_set_file_tree_item_select_line(file_tree_data *file_tree_data,int line_num);
 
-enum path_type ft_item_open_event(struct editor_input_context *ctx,ft_item_view_data *item_data);
+enum path_type ft_item_open_event(syntax *syntax,struct editor_state *state,ft_item_view_data *item_data);
 
 
 int ft_resize_by_key(struct editor_input_context *ctx,wchar_t wchr);
@@ -110,5 +111,5 @@ int ft_handle_normal_mode(struct editor_input_context *ctx,wchar_t wchr);
 
 int ft_move_select_line(file_tree_data *file_tree,int diff);
 
-int ft_handle_search_mode(struct editor_input_context *ctx,wchar_t wchr);
+int ft_handle_search_mode(struct editor_state *state,wchar_t wchr);
 #endif

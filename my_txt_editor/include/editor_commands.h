@@ -48,17 +48,17 @@ typedef struct{
 
 int init_command_mode(struct editor_state *editor_state);
 
-bool handle_command_mode(struct editor_input_context *ctx,wchar_t chr,int input_result);
+bool handle_command_mode(struct editor_state *state,wchar_t chr,int input_result);
 
 int cursor_set_command_mode_position(struct editor_state *state);
 
 
-int draw_command_str(struct editor_input_context *ctx);
+int draw_command_str(struct editor_state *state);
 
-int clear_command_str(struct editor_input_context *ctx);
+int clear_command_str(struct editor_state *state);
 
 
-int backspace_command_str(struct editor_input_context *ctx);
+int backspace_command_str(struct editor_state *state);
 
 int destory_command_mode(struct editor_state *state);
 

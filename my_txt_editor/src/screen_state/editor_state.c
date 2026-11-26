@@ -11,17 +11,17 @@ bool editor_handle_screen_input(struct editor_input_context *ctx, int input_resu
         case file_browse_screen_mode:
             return handle_file_browse_screen_input(ctx, input_result, ch);
         case line_jump_mode:
-            return handle_line_jump_mode_input(ctx, ch);
+            return handle_line_jump_mode_input(&ctx->syntax_data, ctx->state, ch);
         case error_screen_mode:
-            return handle_error_screen_input(ctx, ch);
+            return handle_error_screen_input(ctx->state, ch);
         case ask_make_file_mode:
-            return handle_ask_make_file_mode_input(ctx, input_result, ch);
+            return handle_ask_make_file_mode_input(ctx->state, input_result, ch);
         case setting_screen_mode:
-            return handle_settings_screen_input(ctx,ch,input_result);
+            return handle_settings_screen_input(ctx->state,ch,input_result);
         case filetree_screen_mode:
             return handle_filetree_screen_input(ctx,ch,input_result);
         case editor_command_mode:
-            return handle_command_mode(ctx,ch,input_result);
+            return handle_command_mode(ctx->state,ch,input_result);
         case screen_state_log_error_mode:
             return true;
     }

@@ -3,15 +3,16 @@
 
 #include "editor_types.h"
 #include "editor.h"
+#include "editor_syntax.h"
 
 
 bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result, wint_t ch);
 bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input_result, wint_t ch);
-bool handle_line_jump_mode_input(struct editor_input_context *ctx, wint_t ch);
-bool handle_error_screen_input(struct editor_input_context *ctx, wint_t ch);
-bool handle_ask_make_file_mode_input(struct editor_input_context *ctx, int input_result, wint_t ch);
+bool handle_line_jump_mode_input(syntax *syntax,struct editor_state *state, wint_t ch);
+bool handle_error_screen_input(struct editor_state *state, wint_t ch);
+bool handle_ask_make_file_mode_input(struct editor_state *state, int input_result, wint_t ch);
 bool handle_start_menu_input(struct editor_input_context *ctx, wint_t ch);
-bool handle_settings_screen_input(struct editor_input_context *ctx,wint_t ch,int input_result);
+bool handle_settings_screen_input(struct editor_state *state,wint_t ch,int input_result);
 bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int input_result);
 
 void reset_jump_mode(struct editor_state *state);
@@ -21,7 +22,7 @@ bool editor_handle_screen_input(struct editor_input_context *ctx, int input_resu
 void move_view_to_line(struct editor_state *state, long target_line, int col);
 int update_screen_ratio(struct editor_input_context *ctx);
 void restore_edit_screen(struct editor_state *state);
-int set_status_bar_size(struct editor_input_context *ctx,struct box box);
+int set_status_bar_size(struct editor_state *state,struct box box);
 
 int file_save_motion(struct editor_input_context *ctx);
 

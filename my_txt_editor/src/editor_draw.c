@@ -238,10 +238,10 @@ void request_draw_box(struct editor_state *state,struct box box){
 
 
 
-// ctxの表示開始行と論理カーソル行をnum行だけ同時に動かし、再描画を要求する。
+// stateの表示開始行と論理カーソル行をnum行だけ同時に動かし、syntaxの着色位置も合わせてずらし、再描画を要求する。
+// 引数: syntax=ずらす構文情報、state=エディタ状態、num=動かす行数(正で下方向)。
 // 返り値: なし。移動先が有効な場合だけ更新し、桁は移動先行へ丸める。呼び出し側で行を二重加算しない。
-void editor_screen_move_line(struct editor_input_context *ctx,int num){
-    struct editor_state *state = ctx->state;
+void editor_screen_move_line(syntax *syntax,struct editor_state *state,int num){
     int line_limit = state->settings_data->default_load_line_size;
     int next_cursor_line = state->cursor.file_pos.y + num;
     int next_scr_start = state->scr.scr_start_num + num;
@@ -256,9 +256,9 @@ void editor_screen_move_line(struct editor_input_context *ctx,int num){
 
     // 表示がnum行ずれるので構文情報は逆向きにずらし、新しく見える端の1行だけ解析し直す。
     if(state->settings_data->built_in_syntax){
-        scroll_syntax_pos_data(&ctx->syntax_data,-num,state->write_area.h);
+        scroll_syntax_pos_data(syntax,-num,state->write_area.h);
         int update_line = num > 0 ? state->write_area.h - 1 : 0;
-        update_line_syntax_data(ctx,update_line);
+        update_line_syntax_data(syntax, state,update_line);
     }
 
     state->render_flags |= RENDER_EDIT_SCREEN_BASE;
@@ -388,9 +388,9 @@ void update_screen(struct editor_input_context *ctx){
         if(flags & RENDER_SETTINGS){
             bool is_cur_move = false;
             struct pos mouse_pos;
-            draw_settings_screen(ctx);   
+            draw_settings_screen(state);   
             if(state->settings_screen_data.value_input_mode){
-                draw_settings_search_box(ctx);
+                draw_settings_search_box(state);
                 getyx(ctx->win,mouse_pos.y,mouse_pos.x);
                 is_cur_move = true;
             }
@@ -417,7 +417,7 @@ void update_screen(struct editor_input_context *ctx){
         // RENDER_EDIT_SCREEN_BASEを要求するときはRENDER_FILETREEも同時に要求し、必ずこの後で描き直す。
         if(flags & RENDER_FILETREE){
             if(state->file_tree_data.is_show){
-                draw_filetree(ctx,&state->file_tree_data);
+                draw_filetree(state,&state->file_tree_data);
             }
         }
         if(flags & RENDER_FILE_BROWSE){
@@ -434,14 +434,14 @@ void update_screen(struct editor_input_context *ctx){
             draw_make_file_dialog(ctx);
         }
         if(flags & RENDER_EDIT_COMPLETE_WINDOW){
-            draw_editor_complete_word_box(ctx);
+            draw_editor_complete_word_box(&ctx->syntax_data, state);
             draw_edit_complete_world(state);
 
         }
         if(flags & RENDER_COMMAND_MODE){
             //入力されている文字が0以上なら文字を描画する
             if(state->command_mode_data.command_str_data.command_str_len > 0){
-               draw_command_str(ctx);
+               draw_command_str(state);
                
             } 
         }
@@ -522,8 +522,7 @@ struct box complete_box_screen(struct editor_state *state){
 // stateの補完表示設定とカーソル位置から候補枠を配置・保存し、内部消去と枠描画を行う。
 // 枠の位置は編集領域内座標で保存する(描画時に画面座標へ変換する)。
 // 返り値: 常に0。縦の配置余地が足りない場合はエラー画面へ遷移する。
-int draw_editor_complete_word_box(struct editor_input_context *ctx){
-    struct editor_state *state = ctx->state;
+int draw_editor_complete_word_box(syntax *syntax,struct editor_state *state){
 
     struct pos tmp_mouse_pos;
     state->edit_input_complete_data.show = true;
@@ -600,7 +599,7 @@ int draw_editor_complete_word_box(struct editor_input_context *ctx){
     if(old_box.w > 0 && old_box.h > 0){
         redraw_write_area_line_str(state,old_box.pos.y,old_box.h);
         if(state->settings_data->built_in_syntax){
-            set_syntax_color_line(ctx,old_box.pos.y,old_box.h);
+            set_syntax_color_line(syntax, state,old_box.pos.y,old_box.h);
         }
     }
     clear_box_area(complete_box_screen(state));
@@ -664,10 +663,10 @@ int set_editor_background_color(short color){
     return 0;
 }
 
-// 画面全体の背景描画用の関数。現状は未実装で、ctxの検証のみ行う。
-// 引数: ctx=エディタ入力コンテキスト。 返り値: ctxがNULLなら-1、それ以外は0(描画は行わない)。
-int draw_screen_back_ground(struct editor_input_context *ctx){
-    if(ctx == NULL){
+// 画面全体の背景描画用の関数。現状は未実装で、stateの検証のみ行う。
+// 引数: state=エディタ状態。 返り値: stateがNULLなら-1、それ以外は0(描画は行わない)。
+int draw_screen_back_ground(struct editor_state *state){
+    if(state == NULL){
         return - 1;
     }
 

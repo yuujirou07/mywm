@@ -3,9 +3,8 @@
 #include "editor_color.h"
 
 // エラー画面でEnterが押されたら遷移元に応じて画面へ戻す。
-// 引数: ctx=編集画面復帰に必要なcontext、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
-bool handle_error_screen_input(struct editor_input_context *ctx, wint_t ch){
-    struct editor_state *state = ctx->state;
+// 引数: state=編集画面復帰に必要なエディタ状態、ch=入力文字またはKEY_*。 返り値: 入力ループを続けるならtrue。
+bool handle_error_screen_input(struct editor_state *state, wint_t ch){
 
     if(ch == KEY_ENTER || ch == '\n' || ch == '\r'){
         clear();

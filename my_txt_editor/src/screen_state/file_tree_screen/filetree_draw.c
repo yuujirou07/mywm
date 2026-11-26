@@ -27,7 +27,7 @@ int set_tree_item(struct box filetree_box,int layer,int pos_y,struct table *tree
 
 // filetree_dataのtable_num件のtableに表示座標と階層を再帰的に割り当てる(描画はしない)。layerは深さ、*file_hは次の相対行。
 // 返り値: なし。*file_h・各項目の画面座標・drawing_item_numを更新し、枠の下端・項目情報の確保失敗で打ち切る。
-static void ft_update_filetree_data(struct editor_input_context *ctx,
+static void ft_update_filetree_data(struct editor_state *state,
                                 file_tree_data *filetree_data,
                                 struct table *table,int table_num,
                                 int layer,int *file_h){
@@ -58,7 +58,7 @@ static void ft_update_filetree_data(struct editor_input_context *ctx,
         //i番目のテーブルにそのディレクトリ内の要素のデータをつける
         if(table[i].s_data.d_type == DT_DIR && item_data->is_open){
             if(load_child_dir(&table[i]) == 0){
-                ft_update_filetree_data(ctx,filetree_data,table[i].c_table,
+                ft_update_filetree_data(state,filetree_data,table[i].c_table,
                                     table[i].c_table_num,layer + 1,file_h);
             }
         }
@@ -68,7 +68,7 @@ static void ft_update_filetree_data(struct editor_input_context *ctx,
 
 // filetree_dataの枠内を消して境界線を描き、項目の画面座標を振り直してからft_draw_filetree_dataで項目を描く。
 // 返り値: 常に0。枠が小さい、またはルート未設定なら描画しない。
-int draw_filetree(struct editor_input_context *ctx,file_tree_data *filetree_data){
+int draw_filetree(struct editor_state *state,file_tree_data *filetree_data){
     struct box box = filetree_data->ft_box;
 
     if(box.w <= 2 || box.h <= 2 || filetree_data->root_node == NULL){
@@ -101,14 +101,14 @@ int draw_filetree(struct editor_input_context *ctx,file_tree_data *filetree_data
 
     int file_h = 1;
     ft_update_filetree_data(
-        ctx,filetree_data,
+        state,filetree_data,
         filetree_data->root_node->c_table,
         filetree_data->root_node->c_table_num,
         0,
         &file_h
     );
     
-    ft_draw_filetree_data(ctx,filetree_data);
+    ft_draw_filetree_data(state,filetree_data);
     
     if(filetree_data->ft_search_data.is_search_mode){
         
@@ -131,8 +131,8 @@ static struct pos ft_get_item_name_pos(struct box ft_box,int file_h,int layer){
 
 
 // 項目1件を、記録済みのscreen_y/screen_xへアイコン(ディレクトリは開閉、ファイルは拡張子別)と名前の順に描く。
-// 引数: ctx=アイコン設定を持つcontext、ft_box=名前を切り詰める基準の枠、view_data=描画する項目(screen_y/xは設定済み)。 返り値: なし。名前の描画幅が残っていなければ名前は描かない。
-static void ft_draw_item_data(struct editor_input_context *ctx,struct box ft_box,
+// 引数: state=アイコン設定を持つエディタ状態、ft_box=名前を切り詰める基準の枠、view_data=描画する項目(screen_y/xは設定済み)。 返り値: なし。名前の描画幅が残っていなければ名前は描かない。
+static void ft_draw_item_data(struct editor_state *state,struct box ft_box,
                          ft_item_view_data *view_data){
 
     const char *item_name = view_data->table_ptr->s_data.d_name;
@@ -143,7 +143,7 @@ static void ft_draw_item_data(struct editor_input_context *ctx,struct box ft_box
         icon = view_data->is_open ? FILE_TREE_ICON_OPEN : FILE_TREE_ICON_CLOSE;
     }
     else{
-        icon = get_file_ext_code(item_name,&ctx->state->settings_data->icon_data);
+        icon = get_file_ext_code(item_name,&state->settings_data->icon_data);
     }
 
     //アイコンの使用セル数
@@ -161,7 +161,7 @@ static void ft_draw_item_data(struct editor_input_context *ctx,struct box ft_box
 
 // file_tree_dataの先頭から枠の高さ-1件までの項目を、記録済みscreen_y/screen_xへアイコン付きで描く。
 // 返り値: 常に0。座標は事前にft_update_filetree_dataで設定しておく。
-int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_tree_data){
+int ft_draw_filetree_data(struct editor_state *state,file_tree_data *file_tree_data){
        
     struct box ft_box = file_tree_data->ft_box;
     ft_item_view_data **sorted_item_view_data;
@@ -192,13 +192,13 @@ int ft_draw_filetree_data(struct editor_input_context *ctx,file_tree_data *file_
             i++;
             continue;
         }
-        ft_draw_item_data(ctx,ft_box,tmp_view_data);
+        ft_draw_item_data(state,ft_box,tmp_view_data);
         //選択中の項目は、その行のツリー幅いっぱい(枠線は除く)を薄い白背景にして目立たせる
         // 選択行は項目領域内の0始まりの行なので、項目のscreen_yを同じ基準に直して比べる。
         const int item_row = tmp_view_data->screen_y - (file_tree_data->ft_item_box.pos.y + 1);
         //ファイルツリーにフォーカスしているときだけ色を変える
         if(item_row == file_tree_data->ft_item_select_line && 
-            editor_get_screen_state(ctx->state) == filetree_screen_mode){
+            editor_get_screen_state(state) == filetree_screen_mode){
             set_cell_color_pair(
                 PAIR_FILETREE_SELECT,
                 ft_box.pos.x,

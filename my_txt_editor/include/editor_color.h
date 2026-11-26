@@ -19,8 +19,8 @@
 
 
 // 固定の色ペアを登録し、初期属性を本文色にする。
-// 引数: ctx=NULL検査のみに使う。 返り値: ctxがNULLなら-1、それ以外は0(カラー非対応・ペア数不足なら登録せず0)。
-int init_curses_color(struct editor_input_context *ctx);
+// 引数: state=NULL検査のみに使う。 返り値: stateがNULLなら-1、それ以外は0(カラー非対応・ペア数不足なら登録せず0)。
+int init_curses_color(struct editor_state *state);
 
 // (x,y)から右へnセルを色ペアpairへ変える。各セルの文字・文字属性は保つ。
 // 引数: pair=PAIR_xxxの色ペア番号、x/y=開始セルの画面座標、n=変更するセル数。 返り値: 成功0、nが0以下または読み取り失敗なら-1。

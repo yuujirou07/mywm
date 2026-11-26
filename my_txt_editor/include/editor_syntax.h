@@ -8,6 +8,7 @@
 #include<stdint.h>
 #include "editor_types.h"
 
+struct editor_state;
 struct editor_input_context;
 
 // 着色の分類。現在は予約語、リテラル、ヘッダー名、コメント、メソッド、型、変数を解析で生成する。
@@ -61,9 +62,9 @@ int find_syntax_word(const wint_t *line,int line_len,int pos,
                      const wchar_t *const words[],size_t word_count);
 
 // 現在表示している本文を再解析し、syntaxの着色情報を再構築する。
-// 引数: syntaxはinit_syntax()成功済み、ctxは有効なstateを持つ入力コンテキスト。どちらも借用する。
+// 引数: syntaxはinit_syntax()成功済み、stateは有効なエディタ状態。どちらも借用する。
 // 戻り値: 登録件数。無効な引数・未確保・追加失敗なら-1。失敗時は途中までの結果が残る。
-int set_syntax_data(syntax *syntax,struct editor_input_context *ctx);
+int set_syntax_data(syntax *syntax,struct editor_state *state);
 
 
 // 画面寸法分の着色情報配列を確保し、有効件数を0にする。langは変更しない。
@@ -82,9 +83,9 @@ void init_syntax_colors(void);
 short syntax_color_pair(syntax_type word_type);
 
 // 本文領域を通常色に戻し、登録済みの構文色を画面へ適用する。
-// 引数: ctxは有効なstateを持つコンテキスト、syntaxは着色配列を借用する浅いコピー。
-// 戻り値: 成功時0、ctxがNULLなら-1。ncursesの失敗は返り値に反映しない。
-int apply_syntax_color(struct editor_input_context *ctx,syntax syntax);
+// 引数: stateは有効なエディタ状態、syntaxは着色配列を借用する浅いコピー。
+// 戻り値: 成功時0、stateがNULLなら-1。ncursesの失敗は返り値に反映しない。
+int apply_syntax_color(struct editor_state *state,syntax syntax);
 
 
 // 識別子の後ろに空白と'('が続く箇所をメソッドとして登録する。
@@ -128,11 +129,11 @@ int move_syntax_pos_data(syntax *syntax,int y);
 int scroll_syntax_pos_data(syntax *syntax,int y,int view_rows);
 
 // 指定した表示行の旧着色情報を削除し、その1行だけを再解析する。
-// 引数: ctxは有効なstateとsyntax_dataを持つコンテキスト、lineは表示領域先頭を0とする行。配列確保が必要。
+// 引数: syntaxは確保済みの構文情報、stateは有効なエディタ状態、lineは表示領域先頭を0とする行。配列確保が必要。
 // 戻り値: 更新後の登録件数。無効な引数・未確保・追加失敗なら-1。
-int update_line_syntax_data(struct editor_input_context *ctx,int line);
+int update_line_syntax_data(syntax *syntax,struct editor_state *state,int line);
 
 
-void set_syntax_color_line(struct editor_input_context *ctx,uint16_t line,uint16_t size);
+void set_syntax_color_line(syntax *syntax,struct editor_state *state,uint16_t line,uint16_t size);
 
 #endif
