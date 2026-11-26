@@ -6,11 +6,11 @@
 
 // スタートメニューの1項目。表示名、ショートカットキー、画面上の位置(x,y)と幅wを持つ。
 struct option_data{
-        char *option_name;
-        char short_cut_key;
-        int x;
-        int y;
-        int w;
+    char *option_name;
+    char short_cut_key;
+    int x;
+    int y;
+    int w;
 };   
 
 void option_fn(char *key,int *return_numk);
@@ -24,211 +24,211 @@ static void write_startup_time_log(const struct timespec *start_time, const char
 // 返り値: 選択した処理番号またはresize_request。startup_start_time/log_pathは初回描画の所要時間記録用（NULL可）。
 // normal_color_pairは選択肢の強調に使う本文色の色ペア番号。
 int draw_start_menu(int screen_max_w,int screen_max_h,struct ascii_data *ascii_data_ptr,
-        const struct timespec *startup_start_time,
-                const char *startup_log_path,
-                short normal_color_pair){
+    const struct timespec *startup_start_time,
+        const char *startup_log_path,
+        short normal_color_pair){
 
-        static bool is_first_start_menu = 1;
-        struct pos screen_max_pos   = (struct pos){screen_max_w,screen_max_h};
-        struct pos screen_mid_pos   = (struct pos){screen_max_w/2,screen_max_h/2};
-        struct pos option_start_pos = {0};
-        struct ascii_data ascii_data = {0};
-        struct option_data option_data[option_list_max];
+    static bool is_first_start_menu = 1;
+    struct pos screen_max_pos   = (struct pos){screen_max_w,screen_max_h};
+    struct pos screen_mid_pos   = (struct pos){screen_max_w/2,screen_max_h/2};
+    struct pos option_start_pos = {0};
+    struct ascii_data ascii_data = {0};
+    struct option_data option_data[option_list_max];
 
-        draw_ascii_logo(screen_mid_pos,&ascii_data);
-        int option_count = 
-            draw_option(
-                    screen_max_pos,
-                    &option_start_pos,
-                    ascii_data,
-                    option_data,
-                    option_list_max
-            );
+    draw_ascii_logo(screen_mid_pos,&ascii_data);
+    int option_count = 
+        draw_option(
+            screen_max_pos,
+            &option_start_pos,
+            ascii_data,
+            option_data,
+            option_list_max
+        );
 
-        draw_version(screen_mid_pos,ascii_data);
+    draw_version(screen_mid_pos,ascii_data);
 
-        for(int i = 0;i < option_count;i++){
-                mvchgat(option_data[i].y,option_data[i].x,
-                        option_data[i].w,A_BOLD,normal_color_pair,NULL);
-        }
+    for(int i = 0;i < option_count;i++){
+        mvchgat(option_data[i].y,option_data[i].x,
+            option_data[i].w,A_BOLD,normal_color_pair,NULL);
+    }
 
-        refresh();
-        if(is_first_start_menu){
-                write_startup_time_log(startup_start_time,startup_log_path);
-                is_first_start_menu = 0;
-        }
+    refresh();
+    if(is_first_start_menu){
+        write_startup_time_log(startup_start_time,startup_log_path);
+        is_first_start_menu = 0;
+    }
         
-        while(1){
-                wint_t ch = 0;
-                int input_result;
-                input_result = get_wch(&ch);
-                if(input_result == ERR)continue;
+    while(1){
+        wint_t ch = 0;
+        int input_result;
+        input_result = get_wch(&ch);
+        if(input_result == ERR)continue;
                 
-                if(input_result == KEY_CODE_YES && ch == KEY_RESIZE){
-                        return resize_request;
-                }
-
-                int return_num = 0;
-                // 危険: 初期化済みなのはoption_count件だけで、残りのoption_dataは未初期化。
-                // option_list_maxまで読むと未初期化値をキーとして比較する未定義動作になる。
-                for(int i = 0;i < option_count;i++){
-                        if(ch != (wint_t)option_data[i].short_cut_key)continue;
-                        option_fn(&option_data[i].short_cut_key,&return_num);
-                        if(return_num == none)continue;
-                        if(ascii_data_ptr != NULL)*ascii_data_ptr = ascii_data;
-                        return return_num;
-                }
-                refresh();
+        if(input_result == KEY_CODE_YES && ch == KEY_RESIZE){
+            return resize_request;
         }
-        return 0;
+
+        int return_num = 0;
+        // 危険: 初期化済みなのはoption_count件だけで、残りのoption_dataは未初期化。
+        // option_list_maxまで読むと未初期化値をキーとして比較する未定義動作になる。
+        for(int i = 0;i < option_count;i++){
+            if(ch != (wint_t)option_data[i].short_cut_key)continue;
+            option_fn(&option_data[i].short_cut_key,&return_num);
+            if(return_num == none)continue;
+            if(ascii_data_ptr != NULL)*ascii_data_ptr = ascii_data;
+            return return_num;
+        }
+        refresh();
+    }
+    return 0;
 }
 
 // 開始時刻から現在までの経過ミリ秒をログへ上書き保存する。
 // 引数: start_time=CLOCK_MONOTONICの開始時刻、log_path=保存先パス。 返り値: なし。引数不正またはファイルを開けない場合は保存しない。
 static void write_startup_time_log(const struct timespec *start_time, const char *log_path){
-        if(start_time == NULL || log_path == NULL)return;
+    if(start_time == NULL || log_path == NULL)return;
         
-        struct timespec end_time;
-        clock_gettime(CLOCK_MONOTONIC, &end_time);
-        double msec = (end_time.tv_sec - start_time->tv_sec) * 1000.0 +
-                      (end_time.tv_nsec - start_time->tv_nsec) / 1000000.0;
+    struct timespec end_time;
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    double msec = (end_time.tv_sec - start_time->tv_sec) * 1000.0 +
+            (end_time.tv_nsec - start_time->tv_nsec) / 1000000.0;
 
-        FILE *startup_timer_log_file = fopen(log_path, "w");
-        if(startup_timer_log_file == NULL){
-                error_log_write("can not count start up time :(");
-                return;
-        }
+    FILE *startup_timer_log_file = fopen(log_path, "w");
+    if(startup_timer_log_file == NULL){
+        error_log_write("can not count start up time :(");
+        return;
+    }
 
-        fprintf(startup_timer_log_file,"%f\n",msec);
-        fclose(startup_timer_log_file);
+    fprintf(startup_timer_log_file,"%f\n",msec);
+    fclose(startup_timer_log_file);
 }
 
 // 設定ファイルからASCIIロゴを読み込み、画面上部の中央へ描画する。
 // 引数: screen_mid_pos=画面中央座標、ascii_data=読み込んだロゴ情報の保存先。 返り値: なし。ファイルを開けない場合はログを残して描画しない。
 void draw_ascii_logo(struct pos screen_mid_pos,struct ascii_data *ascii_data){
 
-        FILE *ascii_file = NULL;
-        char ascii_path[PATH_MAX];
-        if(editor_path_from_exe_dir(ascii_path, sizeof(ascii_path), ASCII_ART_PATH) != NULL){
-                ascii_file = fopen(ascii_path,"r");
-        }
-        if(ascii_file == NULL){
-                error_log_write("can not open ascii art file\n");
-                return;
-        }
-        get_ascii_data(ascii_data,ascii_file,screen_mid_pos.x*2);//スクリーン幅に戻す
+    FILE *ascii_file = NULL;
+    char ascii_path[PATH_MAX];
+    if(editor_path_from_exe_dir(ascii_path, sizeof(ascii_path), ASCII_ART_PATH) != NULL){
+        ascii_file = fopen(ascii_path,"r");
+    }
+    if(ascii_file == NULL){
+        error_log_write("can not open ascii art file\n");
+        return;
+    }
+    get_ascii_data(ascii_data,ascii_file,screen_mid_pos.x*2);//スクリーン幅に戻す
         
-        int h_counter = 0;
-        int str_size = strlen(ascii_data->ascii_data[h_counter]);
-        while(h_counter < ascii_data->h){
-                move(h_counter,screen_mid_pos.x-(str_size/2));
-                addstr(ascii_data->ascii_data[h_counter++]);
-        }
+    int h_counter = 0;
+    int str_size = strlen(ascii_data->ascii_data[h_counter]);
+    while(h_counter < ascii_data->h){
+        move(h_counter,screen_mid_pos.x-(str_size/2));
+        addstr(ascii_data->ascii_data[h_counter++]);
+    }
 
-        fclose(ascii_file);
+    fclose(ascii_file);
 }
 
 
 // スタートメニュー項目とショートカットキーを配置して描画する。
 // 引数: screen_max_pos=画面サイズ、option_start_pos=先頭項目位置の返却先、 ascii_data=ロゴ寸法、option_data=項目情報の書き込み先、size=配列要素数。 返り値: 描画した項目数。画面に収まらない場合は0。
 int draw_option(struct pos screen_max_pos,struct pos *option_start_pos,
-        struct ascii_data ascii_data,struct option_data *option_data,int size){
+    struct ascii_data ascii_data,struct option_data *option_data,int size){
 
-        int ascii_art_option_space = 5;
-        int option_list_counter = 0;
-        int option_short_cut_key = screen_max_pos.x/3;
+    int ascii_art_option_space = 5;
+    int option_list_counter = 0;
+    int option_short_cut_key = screen_max_pos.x/3;
      
-        if(option_list_counter < size){
-                option_data[option_list_counter].option_name    = "new file";
-                option_data[option_list_counter].short_cut_key  = 'n';
-                option_list_counter++;
+    if(option_list_counter < size){
+        option_data[option_list_counter].option_name    = "new file";
+        option_data[option_list_counter].short_cut_key  = 'n';
+        option_list_counter++;
+    }
+
+    if(option_list_counter < size){
+        option_data[option_list_counter].option_name    = "select folder";
+        option_data[option_list_counter].short_cut_key  = 'f';
+        option_list_counter++;
+    }
+
+    if(option_list_counter < size){
+        option_data[option_list_counter].option_name    = "quit my txt editor";
+        option_data[option_list_counter].short_cut_key  = 'q';
+        option_list_counter++;
+    }
+    if(option_list_counter < size){
+        option_data[option_list_counter].option_name = "settings";
+        option_data[option_list_counter].short_cut_key = 's';
+        option_list_counter++;
+    }
+
+    int option_pos_y = ascii_data.h + ascii_art_option_space;
+    int option_pos_x = screen_max_pos.x/3;
+
+    *option_start_pos = (struct pos){option_pos_x,option_pos_y};
+    char skt[4];
+    skt[0]= '[';
+    //skt[1] in loop
+    skt[2]= ']';
+    skt[3]= NUL;
+
+    for(int i = 0; i < option_list_counter;i++){
+        skt[1] = option_data[i].short_cut_key;
+        int short_cut_key_len = strlen(skt);
+        int option_draw_len = option_short_cut_key + short_cut_key_len;
+        int option_y = option_pos_y + (i * 2);
+
+        if( option_y > screen_max_pos.y ){
+            //画面を大きくしろの警告を表示
+            return 0;
+        }
+        else if(option_pos_x + option_draw_len > screen_max_pos.x){
+            //画面を大きくしろの警告を表示
+            return 0;
         }
 
-        if(option_list_counter < size){
-                option_data[option_list_counter].option_name    = "select folder";
-                option_data[option_list_counter].short_cut_key  = 'f';
-                option_list_counter++;
-        }
+        option_data[i].x = option_pos_x;
+        option_data[i].y = option_y;
+        option_data[i].w = option_draw_len;
 
-        if(option_list_counter < size){
-                option_data[option_list_counter].option_name    = "quit my txt editor";
-                option_data[option_list_counter].short_cut_key  = 'q';
-                option_list_counter++;
-        }
-        if(option_list_counter < size){
-                option_data[option_list_counter].option_name = "settings";
-                option_data[option_list_counter].short_cut_key = 's';
-                option_list_counter++;
-        }
-
-        int option_pos_y = ascii_data.h + ascii_art_option_space;
-        int option_pos_x = screen_max_pos.x/3;
-
-        *option_start_pos = (struct pos){option_pos_x,option_pos_y};
-        char skt[4];
-        skt[0]= '[';
-        //skt[1] in loop
-        skt[2]= ']';
-        skt[3]= NUL;
-
-        for(int i = 0; i < option_list_counter;i++){
-                skt[1] = option_data[i].short_cut_key;
-                int short_cut_key_len = strlen(skt);
-                int option_draw_len = option_short_cut_key + short_cut_key_len;
-                int option_y = option_pos_y + (i * 2);
-
-                if( option_y > screen_max_pos.y ){
-                        //画面を大きくしろの警告を表示
-                        return 0;
-                }
-                else if(option_pos_x + option_draw_len > screen_max_pos.x){
-                        //画面を大きくしろの警告を表示
-                        return 0;
-                }
-
-                option_data[i].x = option_pos_x;
-                option_data[i].y = option_y;
-                option_data[i].w = option_draw_len;
-
-                mvaddstr(option_y,option_pos_x,option_data[i].option_name);
-                mvaddstr(option_y,option_pos_x + option_short_cut_key,skt);
-        }
-        return option_list_counter;
+        mvaddstr(option_y,option_pos_x,option_data[i].option_name);
+        mvaddstr(option_y,option_pos_x + option_short_cut_key,skt);
+    }
+    return option_list_counter;
 }
 
 // ロゴ最終行の中央へエディタのバージョンを描画する。
 // 引数: screen_mid_pos=画面中央座標、ascii_data=ロゴの高さ。 返り値: なし。
 void draw_version(struct pos screen_mid_pos,struct ascii_data ascii_data){
-        char var[16];
-        snprintf(var,16,"Var%.1f",my_txt_editor_var);
-        int len = strlen(var);
-        mvaddstr(ascii_data.h-1,screen_mid_pos.x - (len/2),var);
+    char var[16];
+    snprintf(var,16,"Var%.1f",my_txt_editor_var);
+    int len = strlen(var);
+    mvaddstr(ascii_data.h-1,screen_mid_pos.x - (len/2),var);
 }
 
 // ショートカットキーをスタートメニューの処理番号へ変換する。
 // 引数: key=判定する1文字、return_num=処理番号の書き込み先。 返り値: なし。未対応キーではreturn_numへnoneを書き込む。
 void option_fn(char *key,int *return_num){
-        switch(*key){
-                case 'q':{
-                        *return_num = quit;
-                        break;
-                }
-                case 'n':{
-                        *return_num = new_file;
-                        break;
-                }
-                case 'f':{
-                        *return_num = select_folder;
-                        break;
-                }
-                case 's':{
-                        *return_num = settings;
-                        break;
-                }
-                default:{
-                        *return_num = none;
-                        break;
-                }
+    switch(*key){
+        case 'q':{
+            *return_num = quit;
+            break;
         }
-        return;
+        case 'n':{
+            *return_num = new_file;
+            break;
+        }
+        case 'f':{
+            *return_num = select_folder;
+            break;
+        }
+        case 's':{
+            *return_num = settings;
+            break;
+        }
+        default:{
+            *return_num = none;
+            break;
+        }
+    }
+    return;
 }
