@@ -1,6 +1,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include "editor.h"
 #include "editor_log.h"
 #include "editor_screen.h"
 #include"editor_color.h"
@@ -605,7 +606,6 @@ int set_cur_pos(struct editor_state *state){
     state->cursor.screen_pos = state->cursor.show_cur_pos_queue;
     return 0;
 }
-
 
 
 // 言語を保存し、有効な構文着色と補完データを初期化する。

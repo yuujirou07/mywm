@@ -120,11 +120,6 @@ bool handle_filetree_screen_input(struct editor_input_context *ctx,wint_t ch,int
     struct editor_state *state = ctx->state;
     file_tree_data *tmp_file_tree = &state->file_tree_data;
 
-    if(state->cursor.is_cur_show && 
-        !tmp_file_tree->ft_search_data.is_search_mode){
-        my_cur_set(state,false);
-    }
-
     if(tmp_file_tree->ft_search_data.is_search_mode){
         ft_handle_search_mode(state,ch);
     }
@@ -278,20 +273,24 @@ int ft_handle_normal_mode(struct editor_input_context *ctx,wchar_t wchr){
 int ft_handle_search_mode(struct editor_state *state,wchar_t wchr){
 
     file_tree_data *tmp_file_tree = &state->file_tree_data;
+    ft_search_data *tmp_search_data = &tmp_file_tree->ft_search_data;
 
-
-    if(wchr == iswalnum(wchr)){
-        const size_t serch_str_len = wcslen(tmp_file_tree->ft_search_data.serch_str);
+    if(iswprint(wchr) != 0){
+        const size_t serch_str_len = wcslen(tmp_search_data->serch_str);
         //文字数がオーバーフローしていないかの判定
         if(serch_str_len >= 
-            (sizeof(tmp_file_tree->ft_search_data.serch_str) /
-                sizeof(tmp_file_tree->ft_search_data.serch_str[0]))){
+            (sizeof(tmp_search_data->serch_str) /
+            sizeof(tmp_search_data->serch_str[0]))){
             return 0;
         }
 
-
         tmp_file_tree->ft_search_data.serch_str[serch_str_len] = wchr;
         tmp_file_tree->ft_search_data.serch_str[serch_str_len + 1] = WNUL_;
+        state->render_flags|=RENDER_FILETREE;
+    }
+
+    if(wchr == L'q'){
+        tmp_search_data->is_search_mode = false;
     }
 
     return 0;

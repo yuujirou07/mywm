@@ -1,10 +1,13 @@
 #include <ncurses.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <math.h>
+#include <wchar.h>
 #include <wctype.h>
 
 #include "editor.h"
 #include "editor_log.h"
+#include "editor_types.h"
 #include "filetree.h"
 #include "ftj.h"
 #include "editor_screen.h"
@@ -109,11 +112,9 @@ int draw_filetree(struct editor_state *state,file_tree_data *filetree_data){
     );
     
     ft_draw_filetree_data(state,filetree_data);
-    
+    //ファイル検索で入力された文字の描画処理
     if(filetree_data->ft_search_data.is_search_mode){
-        
-
-
+        ft_draw_serch_input(state);
     }
 
     return 0;
@@ -217,4 +218,39 @@ int ft_draw_filetree_data(struct editor_state *state,file_tree_data *file_tree_d
     free(sorted_item_view_data);
     
     return 0;
+}
+
+
+int ft_draw_serch_input(struct editor_state *state){
+    
+    const ft_search_data *tmp_search_data = &state->file_tree_data.ft_search_data;
+    const int str_draw_width_max = tmp_search_data->ft_search_box.w - 1;
+    
+    const wchar_t *tmp_wchr = tmp_search_data->serch_str;
+    size_t wchr_draw_start_offset = 0;
+
+    int wchr_width = 0;
+    //入力文字の描画する部分を求める処理
+    do{
+        const wchar_t *wchr_offset = &tmp_wchr[wchr_draw_start_offset++];
+        if(*wchr_offset == WNUL_){
+            break;
+        }
+
+        const size_t wchr_len = wcslen(wchr_offset);
+        wchr_width = wcswidth(wchr_offset,wchr_len);
+        
+    }while(wchr_width <= str_draw_width_max);
+    
+    //未入力時のL'\0'しか配列にない状態の場合、何も描画せずreturnする
+    if(wchr_draw_start_offset-1 <= 0){
+        return 0;
+    }
+
+    struct pos cur_pos = get_screen_cursor_pos(state);
+    
+    const wchar_t *tmp_wchr_start_draw_offset = &tmp_wchr[wchr_draw_start_offset - 1];
+    
+    mvaddwstr(cur_pos.y,cur_pos.x,L"abc");
+   return 0;
 }

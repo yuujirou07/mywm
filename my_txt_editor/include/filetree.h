@@ -112,4 +112,8 @@ int ft_handle_normal_mode(struct editor_input_context *ctx,wchar_t wchr);
 int ft_move_select_line(file_tree_data *file_tree,int diff);
 
 int ft_handle_search_mode(struct editor_state *state,wchar_t wchr);
+
+
+int ft_draw_serch_input(struct editor_state *state);
+
 #endif
