@@ -1,7 +1,7 @@
 
 
-#ifndef C_SETTINGS_SETTING_H
-#define C_SETTINGS_SETTING_H
+#ifndef C_SETTINGS_SETTING_H_
+#define C_SETTINGS_SETTING_H_
 
 
 
@@ -9,7 +9,7 @@
 #include <wchar.h>
 
 
-#define KEY_MAPPING_MAX_NUM 512
+#define KEY_MAPPING_MAX_NUM_ 512
 
 
 

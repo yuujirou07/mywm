@@ -33,29 +33,29 @@ int main(int argc, char *argv[])
 
     //エラーログ履歴ファイルのパス設定(my_txt_editor/直下からの相対パス)
     //エラーログが作れない場合終了する
-    if(set_error_log_file(EDITOR_LOG_DIR EDITOR_ERROR_LOG_FILE_NAME) < 0){
-        wrp_stderr_puts("can not set error log file");
+    if(set_error_log_file(EDITOR_LOG_DIR_ EDITOR_ERROR_LOG_FILE_NAME_) < 0){
+        wrp_stderr_puts_("can not set error log file");
         return EXIT_SUCCESS;
     }
-    if(set_log_file(EDITOR_LOG_DATA) != 0){
+    if(set_log_file(EDITOR_LOG_DATA_) != 0){
         return EXIT_SUCCESS;
     }
     
     bool mylsp = false;
     //引数解析
-    if(argc > startuptime_log_file_argument_num){
-        int result = strcmp(argv[startuptime_log_file_argument_num],"sttime");
+    if(argc > startuptime_log_file_argument_num_){
+        int result = strcmp(argv[startuptime_log_file_argument_num_],"sttime");
 
         if(result == 0){
             if(editor_path_from_exe_dir(startuptime_log_file_path_name,sizeof(startuptime_log_file_path_name),
-                        EDITOR_LOG_DIR "startuptime_log.log") != NULL){
+                        EDITOR_LOG_DIR_ "startuptime_log.log") != NULL){
                 startup_timer = 1;
             }
             else{
                 error_log_write("path to long");
             }
         }
-        else if(strcmp(argv[startuptime_log_file_argument_num],"mylsp") == 0){
+        else if(strcmp(argv[startuptime_log_file_argument_num_],"mylsp") == 0){
             mylsp = true;
         }
 
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     // ファイルを開くまでは各行へ画面幅分の容量を割り当てておく。
     // 足りなくなった行はeditor_ensure_line_cap()が伸ばす。
     int default_line_cols = (state.scr.scr_size.x > 0)
-        ? state.scr.scr_size.x : EDITOR_LINE_COL_SLACK;
+        ? state.scr.scr_size.x : EDITOR_LINE_COL_SLACK_;
     if(line_cap < 1 || default_line_cols > LONG_MAX / line_cap){
         printf("line buffer size is too large");
         return 1;
@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
     input_context.ask_make_file_mode.screen_center_pos.x = state.scr.scr_size.x / 2;
     input_context.ask_make_file_mode.screen_center_pos.y = input_context.ask_make_file_mode.screen_center_y;
     
-    bkgd(COLOR_PAIR(PAIR_TEXT));
+    bkgd(COLOR_PAIR(PAIR_TEXT_));
     editor_sync_cursor(&state);
     set_cur_pos(&state);
     refresh();
@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
     // スタートメニューは共有ライブラリ(プラグイン)として実行時に読み込む。
     if(state.settings_data->show_start_menu){
         char plugin_path[PATH_MAX];
-        if(editor_path_from_exe_dir(plugin_path, sizeof(plugin_path), START_MENU_SO_PATH) != NULL){
+        if(editor_path_from_exe_dir(plugin_path, sizeof(plugin_path), START_MENU_SO_PATH_) != NULL){
             handle = dlopen(plugin_path, RTLD_NOW);
         }
         //スタートメニューsoファイルが見つからないならエラーを出す
@@ -332,12 +332,12 @@ int main(int argc, char *argv[])
     input_context.state->key_board_data.key_log_data.key_log  = NULL;
 
     if(init_command_mode(&state) != 0){
-        error_log("command mode init error");
-        wrp_stderr_puts("command mode init error");
+        error_log_("command mode init error");
+        wrp_stderr_puts_("command mode init error");
         return 0;
     }
 
-    KL_open_key_log_file(KEY_EVENT_LOG_PATH);
+    KL_open_key_log_file(KEY_EVENT_LOG_PATH_);
     
 
     //設定プログラムファイルロード　
@@ -351,12 +351,12 @@ int main(int argc, char *argv[])
     
     int load_icon_rt = 
         load_icon_data(
-            ICON_SETTINGS_PATH,
+            ICON_SETTINGS_PATH_,
             &settings_data.icon_data
         );
 
     if(load_icon_rt != 0){
-        error_log("can not load icon data");
+        error_log_("can not load icon data");
     }
 
 

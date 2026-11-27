@@ -84,7 +84,7 @@ void handle_resize(WINDOW *win, struct editor_input_context *ctx){
         int msg_y = state->scr.scr_size.y / 2;
 
         clear();
-        attr_t error_attr = COLOR_PAIR(PAIR_ERROR);
+        attr_t error_attr = COLOR_PAIR(PAIR_ERROR_);
         attron(error_attr);
         mvaddnstr(msg_y, msg_x, resize_msg, draw_len);
         attroff(error_attr);
@@ -553,10 +553,10 @@ int make_new_line_space(struct editor_state *state,long make_space_line_num){
     // 容量0の行は編集経路の列容量チェックに引っかかって操作を受け付けなくなるため、
     // 最低限の余白を持たせておく(伸長は後続行のoffsetまで面倒を見てくれる)。
     if(state->str.line_cap[target] <= 0){
-        editor_ensure_line_cap(state, target, EDITOR_LINE_COL_SLACK);
+        editor_ensure_line_cap(state, target, EDITOR_LINE_COL_SLACK_);
     }
     if(state->str.line_cap[line] <= 0){
-        editor_ensure_line_cap(state, line, EDITOR_LINE_COL_SLACK);
+        editor_ensure_line_cap(state, line, EDITOR_LINE_COL_SLACK_);
     }
 
     state->file_data.description_line_end = used_rows + 1;

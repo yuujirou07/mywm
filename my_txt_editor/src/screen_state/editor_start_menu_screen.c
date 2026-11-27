@@ -21,18 +21,18 @@ bool handle_start_menu_input(struct editor_input_context *ctx, wint_t ch){
         ctx->start_menu_screen.ascii_data,
         ctx->start_menu_screen.startup_start_time,
         ctx->start_menu_screen.startup_log_path,
-        PAIR_TEXT);
+        PAIR_TEXT_);
     flushinp();
     *ctx->start_menu_screen.open = false;
 
-    if(start_menu_result == resize_request){
+    if(start_menu_result == resize_request_){
         handle_resize(win, ctx);
         return true;
     }
-    else if(start_menu_result == quit){
+    else if(start_menu_result == quit_){
         return false;
     }
-    else if(start_menu_result == select_folder){
+    else if(start_menu_result == select_folder_){
         editor_set_screen_state(state, file_browse_screen_mode);
         my_cur_set(state,false);
 
@@ -48,20 +48,20 @@ bool handle_start_menu_input(struct editor_input_context *ctx, wint_t ch){
         refresh();
         return true;
     }
-    else if(start_menu_result == new_file){
+    else if(start_menu_result == new_file_){
         editor_set_screen_state(state, edit_screen_mode);
         my_cur_set(state,true);
         clear();
         state->scr.scr_start_num = 0;
 
-        state->file_data.now_open_path_name[0] = NUL;
+        state->file_data.now_open_path_name[0] = NUL_;
         editor_set_cursor(state, 0, 0);
         editor_sync_cursor(state);
         state->render_flags |= RENDER_EDIT_SCREEN_BASE;
         state->render_flags |= RENDER_FILETREE;
         return true;
     }
-    else if(start_menu_result == settings){
+    else if(start_menu_result == settings_){
         editor_set_screen_state(state,setting_screen_mode);
         my_cur_set(state,false);
 

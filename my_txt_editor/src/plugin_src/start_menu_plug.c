@@ -33,7 +33,7 @@ int draw_start_menu(int screen_max_w,int screen_max_h,struct ascii_data *ascii_d
     struct pos screen_mid_pos   = (struct pos){screen_max_w/2,screen_max_h/2};
     struct pos option_start_pos = {0};
     struct ascii_data ascii_data = {0};
-    struct option_data option_data[option_list_max];
+    struct option_data option_data[option_list_max_];
 
     draw_ascii_logo(screen_mid_pos,&ascii_data);
     int option_count = 
@@ -42,7 +42,7 @@ int draw_start_menu(int screen_max_w,int screen_max_h,struct ascii_data *ascii_d
             &option_start_pos,
             ascii_data,
             option_data,
-            option_list_max
+            option_list_max_
         );
 
     draw_version(screen_mid_pos,ascii_data);
@@ -65,7 +65,7 @@ int draw_start_menu(int screen_max_w,int screen_max_h,struct ascii_data *ascii_d
         if(input_result == ERR)continue;
                 
         if(input_result == KEY_CODE_YES && ch == KEY_RESIZE){
-            return resize_request;
+            return resize_request_;
         }
 
         int return_num = 0;
@@ -74,7 +74,7 @@ int draw_start_menu(int screen_max_w,int screen_max_h,struct ascii_data *ascii_d
         for(int i = 0;i < option_count;i++){
             if(ch != (wint_t)option_data[i].short_cut_key)continue;
             option_fn(&option_data[i].short_cut_key,&return_num);
-            if(return_num == none)continue;
+            if(return_num == none_)continue;
             if(ascii_data_ptr != NULL)*ascii_data_ptr = ascii_data;
             return return_num;
         }
@@ -109,7 +109,7 @@ void draw_ascii_logo(struct pos screen_mid_pos,struct ascii_data *ascii_data){
 
     FILE *ascii_file = NULL;
     char ascii_path[PATH_MAX];
-    if(editor_path_from_exe_dir(ascii_path, sizeof(ascii_path), ASCII_ART_PATH) != NULL){
+    if(editor_path_from_exe_dir(ascii_path, sizeof(ascii_path), ASCII_ART_PATH_) != NULL){
         ascii_file = fopen(ascii_path,"r");
     }
     if(ascii_file == NULL){
@@ -169,7 +169,7 @@ int draw_option(struct pos screen_max_pos,struct pos *option_start_pos,
     skt[0]= '[';
     //skt[1] in loop
     skt[2]= ']';
-    skt[3]= NUL;
+    skt[3]= NUL_;
 
     for(int i = 0; i < option_list_counter;i++){
         skt[1] = option_data[i].short_cut_key;
@@ -200,7 +200,7 @@ int draw_option(struct pos screen_max_pos,struct pos *option_start_pos,
 // 引数: screen_mid_pos=画面中央座標、ascii_data=ロゴの高さ。 返り値: なし。
 void draw_version(struct pos screen_mid_pos,struct ascii_data ascii_data){
     char var[16];
-    snprintf(var,16,"Var%.1f",my_txt_editor_var);
+    snprintf(var,16,"Var%.1f",my_txt_editor_var_);
     int len = strlen(var);
     mvaddstr(ascii_data.h-1,screen_mid_pos.x - (len/2),var);
 }
@@ -210,23 +210,23 @@ void draw_version(struct pos screen_mid_pos,struct ascii_data ascii_data){
 void option_fn(char *key,int *return_num){
     switch(*key){
         case 'q':{
-            *return_num = quit;
+            *return_num = quit_;
             break;
         }
         case 'n':{
-            *return_num = new_file;
+            *return_num = new_file_;
             break;
         }
         case 'f':{
-            *return_num = select_folder;
+            *return_num = select_folder_;
             break;
         }
         case 's':{
-            *return_num = settings;
+            *return_num = settings_;
             break;
         }
         default:{
-            *return_num = none;
+            *return_num = none_;
             break;
         }
     }

@@ -11,9 +11,9 @@
 #include "editor_log.h"
 #include "editor_types.h"
 
-#define LSP_INVALID_FD (-1) // 言語サーバーとのパイプが未接続であることを表す値。
-#define LSP_HEADER_MAX 8192 // 受信するLSPヘッダーの最大バイト数。
-#define LSP_CONTENT_MAX ((size_t)32 * 1024 * 1024) // fdへdataのlenバイトを全て書く。短い書込みは続行し、EINTRは再試行する。
+#define LSP_INVALID_FD_ (-1) // 言語サーバーとのパイプが未接続であることを表す値。
+#define LSP_HEADER_MAX_ 8192 // 受信するLSPヘッダーの最大バイト数。
+#define LSP_CONTENT_MAX_ ((size_t)32 * 1024 * 1024) // fdへdataのlenバイトを全て書く。短い書込みは続行し、EINTRは再試行する。
 // 返り値: 完了0、書込失敗・0バイト書込みは-1。blocking fdでは完了まで待機する。
 static int lsp_write_all(int fd, const char *data, size_t len)
 {
@@ -55,7 +55,7 @@ static int lsp_read_all(int fd, char *data, size_t len)
         }
         read_size += (size_t)result;
     }
-    data[len] = NUL;
+    data[len] = NUL_;
     return 0;
 }
 
@@ -65,7 +65,7 @@ static size_t lsp_parse_content_length(const char *header)
 {
     const char *line = header;
 
-    while(*line != NUL){
+    while(*line != NUL_){
         const char *line_end = strstr(line, "\r\n");
         size_t line_len = line_end != NULL ? (size_t)(line_end - line) : strlen(line);
 
@@ -80,7 +80,7 @@ static size_t lsp_parse_content_length(const char *header)
             errno = 0;
             length = strtoull(value, &end, 10);
             if(errno != 0 || end == value || *value == '-' ||
-               length > (unsigned long long)LSP_CONTENT_MAX){
+               length > (unsigned long long)LSP_CONTENT_MAX_){
                 return SIZE_MAX;
             }
             return (size_t)length;
@@ -111,23 +111,23 @@ void lsp_process_init(struct lsp_process *lsp)
     }
 
     lsp->pid = -1;
-    lsp->to_server_fd = LSP_INVALID_FD;
-    lsp->from_server_fd = LSP_INVALID_FD;
+    lsp->to_server_fd = LSP_INVALID_FD_;
+    lsp->from_server_fd = LSP_INVALID_FD_;
     lsp->initialized = false;
     lsp->epfd = -1;
     lsp->lsp_root_uri = NULL;
     memset(&lsp->ev, 0, sizeof(lsp->ev));
     lsp->update_data.file_update_counter = 0;
-    lsp->update_data.path_name[0] = NUL;
-    lsp->lsp_language_id[0] = NUL;
+    lsp->update_data.path_name[0] = NUL_;
+    lsp->lsp_language_id[0] = NUL_;
 }
 
 // commandをargv（NULLならcommandだけ）でfork/execし、pidと標準入出力のパイプを未接続のlspへ保存する。
 // 返り値: 親側の接続成功0、引数・pipe・fork失敗-1。0でも子のexec成功は保証せず、終了時はlsp_close_serverを呼ぶ。
 int lsp_start_server(struct lsp_process *lsp, const char *command, char *const argv[])
 {
-    int to_server[2] = {LSP_INVALID_FD, LSP_INVALID_FD};
-    int from_server[2] = {LSP_INVALID_FD, LSP_INVALID_FD};
+    int to_server[2] = {LSP_INVALID_FD_, LSP_INVALID_FD_};
+    int from_server[2] = {LSP_INVALID_FD_, LSP_INVALID_FD_};
     char *default_argv[2];
     pid_t pid;
 
@@ -206,13 +206,13 @@ void lsp_close_server(struct lsp_process *lsp)
         close(lsp->epfd);
         lsp->epfd = -1;
     }
-    if(lsp->to_server_fd != LSP_INVALID_FD){
+    if(lsp->to_server_fd != LSP_INVALID_FD_){
         close(lsp->to_server_fd);
-        lsp->to_server_fd = LSP_INVALID_FD;
+        lsp->to_server_fd = LSP_INVALID_FD_;
     }
-    if(lsp->from_server_fd != LSP_INVALID_FD){
+    if(lsp->from_server_fd != LSP_INVALID_FD_){
         close(lsp->from_server_fd);
-        lsp->from_server_fd = LSP_INVALID_FD;
+        lsp->from_server_fd = LSP_INVALID_FD_;
     }
     if(lsp->pid > 0){
         // 危険: WNOHANGで未終了だった場合も直後にpidを捨てる。
@@ -234,27 +234,27 @@ int lsp_path_to_file_uri(char *uri, size_t uri_size, const char *path)
         return -1;
     }
 
-    for(size_t i = 0; prefix[i] != NUL; i++){
+    for(size_t i = 0; prefix[i] != NUL_; i++){
         if(pos + 1 >= uri_size){
-            uri[0] = NUL;
+            uri[0] = NUL_;
             return -1;
         }
         uri[pos++] = prefix[i];
     }
 
-    for(size_t i = 0; path[i] != NUL; i++){
+    for(size_t i = 0; path[i] != NUL_; i++){
         unsigned char ch = (unsigned char)path[i];
 
         if(lsp_is_uri_safe(ch)){
             if(pos + 1 >= uri_size){
-                uri[0] = NUL;
+                uri[0] = NUL_;
                 return -1;
             }
             uri[pos++] = (char)ch;
         }
         else{
             if(pos + 3 >= uri_size){
-                uri[0] = NUL;
+                uri[0] = NUL_;
                 return -1;
             }
             uri[pos++] = '%';
@@ -263,7 +263,7 @@ int lsp_path_to_file_uri(char *uri, size_t uri_size, const char *path)
         }
     }
 
-    uri[pos] = NUL;
+    uri[pos] = NUL_;
     return 0;
 }
 
@@ -333,14 +333,14 @@ int lsp_send_initialize(int fd, int id, pid_t process_id, const char *root_uri)
 // 返り値: 呼び出し側がfreeする本文、受信・解析・確保失敗はNULL。blocking fdでは全本文を受け取るまで待つ。
 char *lsp_read_message(int fd){
 
-    char header[LSP_HEADER_MAX + 1];
+    char header[LSP_HEADER_MAX_ + 1];
     size_t header_len = 0;
     size_t content_length;
     char *json;
 
     // 危険: epollが保証するのは「1バイト以上読める」ことだけで、完全なメッセージではない。
     // blocking fdでヘッダや本文の残りを待つため、分割受信するとUI全体が停止する。
-    while(header_len < LSP_HEADER_MAX){
+    while(header_len < LSP_HEADER_MAX_){
         if(lsp_read_all(fd, &header[header_len], 1) == -1){
             return NULL;
         }
@@ -351,7 +351,7 @@ char *lsp_read_message(int fd){
         }
     }
 
-    if(header_len >= LSP_HEADER_MAX){
+    if(header_len >= LSP_HEADER_MAX_){
         return NULL;
     }
 
@@ -412,7 +412,7 @@ void lsp_handle_message(struct lsp_process *lsp, char *msg){
             error_log_write("\n");
         }
     }
-    else if(cJSON_IsNumber(id) && id->valueint == initialize_id_num && !lsp->initialized){
+    else if(cJSON_IsNumber(id) && id->valueint == initialize_id_num_ && !lsp->initialized){
         if(error != NULL){
             error_log_write(msg);
             error_log_write("\n");

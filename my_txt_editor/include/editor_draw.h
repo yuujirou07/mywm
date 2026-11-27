@@ -1,5 +1,5 @@
-#ifndef TXT_EDITOR_DRAW_H
-#define TXT_EDITOR_DRAW_H
+#ifndef TXT_EDITOR_DRAW_H_
+#define TXT_EDITOR_DRAW_H_
 
 #include <ncurses.h>
 #include <stdint.h>

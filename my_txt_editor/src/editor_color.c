@@ -14,20 +14,20 @@ int init_curses_color(struct editor_state *state){
     start_color();
 
     //カラー非対応か、固定ペア+構文色を置けるだけのペア数がなければカラーをつけない
-    if (!has_colors() || COLOR_PAIRS <= PAIR_SYNTAX_BASE) {
+    if (!has_colors() || COLOR_PAIRS <= PAIR_SYNTAX_BASE_) {
         return 0;
     }
 
     // 薄い白は256色端末だけ。それ以外は基本色の白で代用する。
-    const short light_gray = (COLORS >= 256) ? COLOR_LIGHT_GRAY : COLOR_WHITE;
+    const short light_gray = (COLORS >= 256) ? COLOR_LIGHT_GRAY_ : COLOR_WHITE;
 
-    init_pair(PAIR_TEXT,COLOR_WHITE,COLOR_BLACK);
-    init_pair(PAIR_ERROR,COLOR_BLACK,COLOR_RED);
-    init_pair(PAIR_SELECT,COLOR_BLACK,COLOR_WHITE);
-    init_pair(PAIR_ACCENT,COLOR_CYAN,COLOR_BLACK);
-    init_pair(PAIR_FILETREE_SELECT,COLOR_BLACK,light_gray);
+    init_pair(PAIR_TEXT_,COLOR_WHITE,COLOR_BLACK);
+    init_pair(PAIR_ERROR_,COLOR_BLACK,COLOR_RED);
+    init_pair(PAIR_SELECT_,COLOR_BLACK,COLOR_WHITE);
+    init_pair(PAIR_ACCENT_,COLOR_CYAN,COLOR_BLACK);
+    init_pair(PAIR_FILETREE_SELECT_,COLOR_BLACK,light_gray);
 
-    attrset(COLOR_PAIR(PAIR_TEXT));
+    attrset(COLOR_PAIR(PAIR_TEXT_));
     return 0;
 }
 

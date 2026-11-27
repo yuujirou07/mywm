@@ -1,7 +1,7 @@
 
 
-#ifndef EDIT_INPUT_COMPLETE_H
-#define EDIT_INPUT_COMPLETE_H
+#ifndef EDIT_INPUT_COMPLETE_H_
+#define EDIT_INPUT_COMPLETE_H_
 
 #include<editor_types.h>
 #include<stdbool.h>
@@ -9,8 +9,8 @@
 #include <wctype.h>
 #include "editor_syntax.h"
 
-#define COMPLETE_WORLD_CANDIDACY_PART_DATA_MAX_LEN 256 // 入力中の候補文字列の配列要素数。終端文字を含む。
-#define COMPLETE_WORLD_MAX_COUNT 256
+#define COMPLETE_WORLD_CANDIDACY_PART_DATA_MAX_LEN_ 256 // 入力中の候補文字列の配列要素数。終端文字を含む。
+#define COMPLETE_WORLD_MAX_COUNT_ 256
 struct editor_input_context;
 struct editor_state;
 
@@ -63,7 +63,7 @@ typedef struct{
 }complete_show_data;
 // 入力途中の補完対象文字列。countは終端文字を含まない文字数。
 typedef struct{
-    wchar_t complete_world_candidacy_part_str[COMPLETE_WORLD_CANDIDACY_PART_DATA_MAX_LEN]; // NUL終端の入力文字列。
+    wchar_t complete_world_candidacy_part_str[COMPLETE_WORLD_CANDIDACY_PART_DATA_MAX_LEN_]; // NUL終端の入力文字列。
     int comp_w_cand_part_d_count; // 次に文字を書き込む位置。
 }complete_world_candidacy_part_data;
 

@@ -227,7 +227,7 @@ static void flush_box_queue(struct box_queue *queue){
 void request_draw_box(struct editor_state *state,struct box box){
     struct box_queue *queue = &state->draw_box_queue;
 
-    if(queue->count >= DRAW_BOX_REQUEST_MAX)return;
+    if(queue->count >= DRAW_BOX_REQUEST_MAX_)return;
     queue->box[queue->count++] = box;
     state->render_flags |= RENDER_BOX;
 }
@@ -289,7 +289,7 @@ void draw_status_bar_path(struct editor_state *state){
         ? state->status_bar->pos.y - 1 : state->status_bar->pos.y;
     
     char *draw_path = NULL; 
-    if(state->file_data.now_open_path_name[0] == NUL){ 
+    if(state->file_data.now_open_path_name[0] == NUL_){ 
         draw_path = "Unknown file";
     }
     else{
@@ -407,7 +407,7 @@ void update_screen(struct editor_input_context *ctx){
                       ctx->edit_screen.line_end_pos, all_draw_mode);
         }
         if(flags & RENDER_SELECT_DIR_SCENE_COLOR){
-            draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,PAIR_SELECT);
+            draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,PAIR_SELECT_);
         }
         if(flags & RENDER_EDIT_SCREEN_BASE){
             draw_edit_screen_base(state, win, ctx->edit_screen.line_start_pos,
@@ -453,7 +453,7 @@ void update_screen(struct editor_input_context *ctx){
 // 次回更新で消す矩形を消去要求配列へ追加する。
 // 引数: state=消去要求の保存先、box=消去対象領域。 返り値: なし。要求配列が満杯ならエラー画面へ遷移する。
 void request_clear_box(struct editor_state *state, struct box box){
-    if(state->clear_box_data.clear_box_counter >= box_retention_max){
+    if(state->clear_box_data.clear_box_counter >= box_retention_max_){
         editor_error_screen(state,"clear box over flow ");
         return;
     }
@@ -488,7 +488,7 @@ int clear_status_bar_outline(struct editor_state *state){
     struct box tmp_status_bar_box = *state->status_bar;
     char outline_str[tmp_status_bar_box.w + 1];
     memset(outline_str,' ',tmp_status_bar_box.w);
-    outline_str[tmp_status_bar_box.w] = NUL;
+    outline_str[tmp_status_bar_box.w] = NUL_;
     for(int i = 0;i < tmp_status_bar_box.h;i++){
         if(i == 0 || i == tmp_status_bar_box.h){
             mvaddnstr(tmp_status_bar_box.pos.y + i,
@@ -497,7 +497,7 @@ int clear_status_bar_outline(struct editor_state *state){
                 tmp_status_bar_box.w);
         }
         else{
-            char wall_outline[2] = {' ',NUL};
+            char wall_outline[2] = {' ',NUL_};
             mvaddnstr(tmp_status_bar_box.pos.y + i,
                 tmp_status_bar_box.pos.x,
                 wall_outline,sizeof(wall_outline));
@@ -613,7 +613,7 @@ int draw_editor_complete_word_box(syntax *syntax,struct editor_state *state){
 // 返り値: 幅・高さが2以下なら-1、それ以外0。ncursesの描画失敗は通知しない。
 int clear_box_area(struct box b){
     if(b.h <= 2 || b.w <= 2)return -1;
-    attr_t clear_attr = COLOR_PAIR(PAIR_TEXT);
+    attr_t clear_attr = COLOR_PAIR(PAIR_TEXT_);
     for(int i = 0;i < b.h;i++){
         mvhline(b.pos.y + i,b.pos.x,L' '|clear_attr,b.w );
     }
@@ -630,7 +630,7 @@ int draw_edit_complete_world(struct editor_state *state){
     if(state->edit_input_complete_data.word_data.world_num <= 0)return 0;
     
     for(int i = 0;i < state->edit_input_complete_data.box.h - 2;i++){
-        if(cmp_data->world[i][0] == WNUL)continue;
+        if(cmp_data->world[i][0] == WNUL_)continue;
         mvaddnwstr(tmp_cmp_box.pos.y + i,tmp_cmp_box.pos.x + 1,cmp_data->world[i],tmp_cmp_box.w - 2);
     }
     return 0;

@@ -85,8 +85,8 @@ int ft_mouse_event(struct editor_input_context *ctx){
         int new_ft_width = ev->x;
 
         //ファイルツリー横幅制限
-        if(ev->x < FILETREE_DEFAULT_SIZE_W){
-            new_ft_width = FILETREE_DEFAULT_SIZE_W;
+        if(ev->x < FILETREE_DEFAULT_SIZE_W_){
+            new_ft_width = FILETREE_DEFAULT_SIZE_W_;
         }
         else if(screen_width < ev->x){
             new_ft_width = screen_width;
@@ -203,7 +203,7 @@ int ft_mouse_event(struct editor_input_context *ctx){
 // 返り値: 間隔未満ならtrue。
 static bool is_within_double_click(struct timespec st){
     //st_timeから関数実行時までの時間差取得
-    return (trunc(get_time_elapsed_MS(st)) < MOUSE_DOUBLE_CLICK_INTERVAL);
+    return (trunc(get_time_elapsed_MS(st)) < MOUSE_DOUBLE_CLICK_INTERVAL_);
 }
 
 // 編集領域内のクリックなら、その位置へ論理カーソルを移して編集画面に切り替える。
@@ -236,7 +236,7 @@ static bool file_tree_is_on_outline(struct editor_state *state,MEVENT *ev){
 // ダブルクリックリサイズが無効なら即リサイズ開始、有効なら2回目判定用に時刻を記録する。常に0を返す。
 static int file_tree_outline_first_click_process(struct editor_state *state){
     //ダブルクリックリサイズが無効だった場合シングルクリックでリサイズを開始する
-    if(FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE == false){
+    if(FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE_ == false){
         state->file_tree_data.is_grabed = true;
     }
     else{

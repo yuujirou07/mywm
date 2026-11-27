@@ -1,5 +1,5 @@
-#ifndef KBD_INPUT_LOG_H
-#define KBD_INPUT_LOG_H
+#ifndef KBD_INPUT_LOG_H_
+#define KBD_INPUT_LOG_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -7,7 +7,7 @@
 #include "editor_types.h"
 
 
-#define KEY_LOG_ALLOCATE_NUM 32
+#define KEY_LOG_ALLOCATE_NUM_ 32
 
 struct editor_state;
 

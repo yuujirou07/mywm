@@ -34,7 +34,7 @@ static void color_text_cells(struct editor_state *state,int y,int x,int width,sh
 void init_syntax_colors(void){
     if(!has_colors())return;
     for(size_t i = 0;i < sizeof(syntax_colors) / sizeof(syntax_colors[0]);i++){
-        short pair = (short)(PAIR_SYNTAX_BASE + i);
+        short pair = (short)(PAIR_SYNTAX_BASE_ + i);
         if(pair >= COLOR_PAIRS)break; // 端末のペア上限を超える分は登録しない(syntax_color_pairが本文色へ退避)。
         short fg = (COLORS >= 256) ? syntax_colors[i].color_256 : syntax_colors[i].color_8;
         init_pair(pair,fg,COLOR_BLACK);
@@ -47,11 +47,11 @@ short syntax_color_pair(syntax_type word_type){
     if(!has_colors())return 0;
     //suntax_typeが要素数より上の値かの条件分岐
     if((unsigned int)word_type >= sizeof(syntax_colors) / sizeof(syntax_colors[0])){
-        return PAIR_TEXT;
+        return PAIR_TEXT_;
     }
-    short pair = (short)(PAIR_SYNTAX_BASE + word_type);
+    short pair = (short)(PAIR_SYNTAX_BASE_ + word_type);
     if(pair < COLOR_PAIRS)return pair;
-    return PAIR_TEXT;
+    return PAIR_TEXT_;
 }
 
 static const wchar_t *const reserved_words[] = {
@@ -386,7 +386,7 @@ int apply_syntax_color(struct editor_state *state,syntax syntax){
     int syntax_num = syntax.syntax_list_data.syntax_list_num;
     
     // 本文描画の後に色だけを重ねる方式なので、まず通常色に戻して前回の着色を消す。
-    short normal_color = PAIR_TEXT;
+    short normal_color = PAIR_TEXT_;
     for(int h = 0;h < state->write_area.h;h++){
         if(state->write_area.w > 0){
             color_text_cells(state,state->write_area.y_start + h,state->write_area.x_start,

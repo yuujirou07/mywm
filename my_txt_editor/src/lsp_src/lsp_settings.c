@@ -58,7 +58,7 @@ struct lsp_process *lsp_run(const char *root_path,const char *language){
     set_lsp_use_language(tmp_lsp_process,(char *)language);
 
     /* epollインスタンスを作成 */
-    tmp_lsp_process->epfd = epoll_create(FDS_N);
+    tmp_lsp_process->epfd = epoll_create(FDS_N_);
     if(tmp_lsp_process->epfd < 0){
         error_log_write("cant create lsp epoll\n");
         tmp_lsp_process->epfd = -1;
@@ -164,9 +164,9 @@ bool is_lsp_running(struct editor_input_context *ctx){
 // lsp->epfdでtimeout_msミリ秒待機し、受信メッセージを処理・解放する。
 // epoll_wait失敗時はfdを閉じてlsp->epfdを-1にする。
 static void lsp_poll_events(struct lsp_process *lsp,int timeout_ms){
-    struct epoll_event events[FDS_N];
+    struct epoll_event events[FDS_N_];
 
-    int n_events = epoll_wait(lsp->epfd, events, FDS_N, timeout_ms);
+    int n_events = epoll_wait(lsp->epfd, events, FDS_N_, timeout_ms);
     if(n_events < 0){
         error_log_write("lsp epoll_wait error\n");
         close(lsp->epfd);

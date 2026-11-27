@@ -1,5 +1,5 @@
-#ifndef C_SETTINGS_H
-#define C_SETTINGS_H
+#ifndef C_SETTINGS_H_
+#define C_SETTINGS_H_
 
 #include "editor.h"
 #include "public_data/c_settings/c_settings_setting.h"

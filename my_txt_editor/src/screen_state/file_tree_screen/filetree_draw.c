@@ -140,7 +140,7 @@ static void ft_draw_item_data(struct editor_state *state,struct box ft_box,
 
     //ディレクトリは開閉状態、それ以外は拡張子に応じたアイコンを使う
     if(view_data->table_ptr->s_data.d_type == DT_DIR){
-        icon = view_data->is_open ? FILE_TREE_ICON_OPEN : FILE_TREE_ICON_CLOSE;
+        icon = view_data->is_open ? FILE_TREE_ICON_OPEN_ : FILE_TREE_ICON_CLOSE_;
     }
     else{
         icon = get_file_ext_code(item_name,&state->settings_data->icon_data);
@@ -200,7 +200,7 @@ int ft_draw_filetree_data(struct editor_state *state,file_tree_data *file_tree_d
         if(item_row == file_tree_data->ft_item_select_line && 
             editor_get_screen_state(state) == filetree_screen_mode){
             set_cell_color_pair(
-                PAIR_FILETREE_SELECT,
+                PAIR_FILETREE_SELECT_,
                 ft_box.pos.x,
                 tmp_view_data->screen_y,
                 ft_box.w

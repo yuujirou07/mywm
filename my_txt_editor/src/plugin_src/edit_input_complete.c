@@ -20,7 +20,7 @@ int init_edit_complete_data(struct editor_state *state){
     tmp_comp_data->now_select_complete_world_num = 0;
     tmp_comp_data->word_data.world_num = 0;
     tmp_comp_data->comp_world_candidacy_part_data.comp_w_cand_part_d_count = 0;
-    tmp_comp_data->comp_world_candidacy_part_data.complete_world_candidacy_part_str[0] = WNUL;
+    tmp_comp_data->comp_world_candidacy_part_data.complete_world_candidacy_part_str[0] = WNUL_;
 
     //念の為二倍に確保しておく
     tmp_comp_data->word_data.world_allocate_num = 
@@ -31,17 +31,17 @@ int init_edit_complete_data(struct editor_state *state){
 
     tmp_comp_data->word_data.world = malloc(sizeof(wchar_t *) * tmp_comp_data->word_data.world_allocate_num);
     if(tmp_comp_data->word_data.world == NULL){
-        error_log("malloc");
+        error_log_("malloc");
         return -1;
     }
 
     for(int i = 0;i < tmp_comp_data->word_data.world_allocate_num;i++){
-        tmp_comp_data->word_data.world[i] = malloc(sizeof(wchar_t) * COMPLETE_WORLD_MAX_COUNT);
+        tmp_comp_data->word_data.world[i] = malloc(sizeof(wchar_t) * COMPLETE_WORLD_MAX_COUNT_);
         if(tmp_comp_data->word_data.world[i] == NULL){
-            error_log("malloc");
+            error_log_("malloc");
             return -1;
         }
-        tmp_comp_data->word_data.world[i][0] = WNUL;
+        tmp_comp_data->word_data.world[i][0] = WNUL_;
     }
 
     tmp_comp_data->lang = get_env_language();
@@ -58,7 +58,7 @@ int change_edit_complete_lang(struct editor_state *state,language lang){
 // stateの補完入力文字列へワイド文字chを追加し、文字数とNUL終端を更新する。
 // 返り値: 追加0、既存文字列長が上限以上なら-1。文字数と実長を一致させ、文字と終端の2要素分の空きが必要。
 int set_edit_comp_candidacy_part_data(struct editor_state *state,wint_t ch){
-    if(COMPLETE_WORLD_CANDIDACY_PART_DATA_MAX_LEN <=
+    if(COMPLETE_WORLD_CANDIDACY_PART_DATA_MAX_LEN_ <=
         (int)wcslen(state->edit_input_complete_data.
             comp_world_candidacy_part_data.
                 complete_world_candidacy_part_str)){
@@ -74,7 +74,7 @@ int set_edit_comp_candidacy_part_data(struct editor_state *state,wint_t ch){
                             comp_w_cand_part_d_count];
     
     tmp_str[0] = ch;
-    tmp_str[1] = WNUL;
+    tmp_str[1] = WNUL_;
 
     state->edit_input_complete_data.
         comp_world_candidacy_part_data.
@@ -93,7 +93,7 @@ int reduce_edit_comp_candidacy_part_data(struct editor_state *state){
             complete_world_candidacy_part_str
                 [state->edit_input_complete_data.
                     comp_world_candidacy_part_data.
-                    comp_w_cand_part_d_count - 1] = WNUL;
+                    comp_w_cand_part_d_count - 1] = WNUL_;
 
     state->edit_input_complete_data.
         comp_world_candidacy_part_data.
@@ -106,7 +106,7 @@ int reduce_edit_comp_candidacy_part_data(struct editor_state *state){
 int init_edit_comt_candidacy_part_data(struct editor_state *state){
     state->edit_input_complete_data.
         comp_world_candidacy_part_data.
-            complete_world_candidacy_part_str[0] = NUL;
+            complete_world_candidacy_part_str[0] = NUL_;
 
     state->edit_input_complete_data.
         comp_world_candidacy_part_data.
@@ -124,7 +124,7 @@ int set_complete_str(struct editor_state *state,wchar_t *wchr,int line_num){
     if(state->edit_input_complete_data.word_data.world_allocate_num <= line_num || line_num < 0)return 0;
     wchar_t *tmp_comp_world = state->edit_input_complete_data.word_data.world[line_num];    
     int str_len = wcslen(wchr);
-    if(str_len <= 0 || str_len >= COMPLETE_WORLD_MAX_COUNT)return 0;
+    if(str_len <= 0 || str_len >= COMPLETE_WORLD_MAX_COUNT_)return 0;
     wmemcpy(tmp_comp_world,wchr,str_len + 1);
     state->edit_input_complete_data.word_data.world_num++;
     return 0;

@@ -35,7 +35,7 @@ int ft_init_file_tree(file_tree_data *file_tree){
 int get_root_file_tree_data(file_tree_data *file_tree,char *path){
     file_tree->root_node = create_tree(path);
     if(file_tree->root_node == NULL){
-        error_log("can not create file tree");
+        error_log_("can not create file tree");
         return -1;
     }
     int mem_num = file_tree->root_node->c_table_num;
@@ -180,7 +180,7 @@ int ft_get_same_layer_item_view_data(file_tree_data *file_tree_data,int layer,
     if(layer_item_view_data == NULL){
         *item_view_num = 0;
         *item_view_data = NULL;
-        error_log("malloc error");
+        error_log_("malloc error");
         return -1;
     }
 
@@ -222,7 +222,7 @@ int ft_get_sorted_screen_y_item_view_data(
         malloc(sizeof(ft_item_view_data *) * item_view_num);
         
     if(tmp_sorted_data == NULL){
-        error_log("malloc error");
+        error_log_("malloc error");
         return -1;
     }
     for(int i = 0;i < item_view_num;i++){

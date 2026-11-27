@@ -1,5 +1,5 @@
-#ifndef LSP_SETTINGS_H
-#define LSP_SETTINGS_H
+#ifndef LSP_SETTINGS_H_
+#define LSP_SETTINGS_H_
 
 #include <stdbool.h>
 #include <stddef.h>

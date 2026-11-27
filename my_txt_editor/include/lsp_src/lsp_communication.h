@@ -1,5 +1,5 @@
-#ifndef LANGUAGE_SERVER_COMMUNICATION_H
-#define LANGUAGE_SERVER_COMMUNICATION_H
+#ifndef LANGUAGE_SERVER_COMMUNICATION_H_
+#define LANGUAGE_SERVER_COMMUNICATION_H_
 
 #include <linux/limits.h>
 #include <stdbool.h>
@@ -7,10 +7,10 @@
 #include <sys/epoll.h>
 #include <sys/types.h>
 
-#define MSG_BUFF_SIZE_MAX 2048 // LSP送受信ログ用の固定バッファ長。
-#define MAX_ID_STRAGE_SIZE 512 // 事前生成して保持するJSON-RPC IDの個数。
-#define initialize_id_num 1 // initialize要求へ割り当てるJSON-RPC ID。
-#define NONE -1 // 有効なIDやメソッドが無い状態を表す値。
+#define MSG_BUFF_SIZE_MAX_ 2048 // LSP送受信ログ用の固定バッファ長。
+#define MAX_ID_STRAGE_SIZE_ 512 // 事前生成して保持するJSON-RPC IDの個数。
+#define initialize_id_num_ 1 // initialize要求へ割り当てるJSON-RPC ID。
+#define NONE_ -1 // 有効なIDやメソッドが無い状態を表す値。
 
 struct editor_state;
 
@@ -36,7 +36,7 @@ typedef struct{
 
 // 送信に使用するJSON-RPC ID列と、次に使う位置。
 struct lsp_send_receve_id_data{
-    int used_id_history[MAX_ID_STRAGE_SIZE]; // initialize_id()が連番で初期化するID配列。
+    int used_id_history[MAX_ID_STRAGE_SIZE_]; // initialize_id()が連番で初期化するID配列。
     int id_storage_counter; // 次に送信へ使用する配列添字。
 };
 
@@ -65,8 +65,8 @@ struct lsp_process {
     struct epoll_event ev; // from_server_fdをepollへ登録する際のイベント情報。
     struct txt_update_data update_data; // didChange用の文書状態。
     struct lsp_send_receve_id_data id_data; // 送信要求へ割り当てるID列。
-    char from_server_msg_buff[MSG_BUFF_SIZE_MAX]; // 受信内容のログ・確認用NUL終端バッファ。
-    char to_server_msg_buff[MSG_BUFF_SIZE_MAX]; // 送信内容のログ・確認用NUL終端バッファ。
+    char from_server_msg_buff[MSG_BUFF_SIZE_MAX_]; // 受信内容のログ・確認用NUL終端バッファ。
+    char to_server_msg_buff[MSG_BUFF_SIZE_MAX_]; // 送信内容のログ・確認用NUL終端バッファ。
     char lsp_language_id[32]; // didOpenで送る言語IDのNUL終端文字列。
     char *lsp_root_uri; // initializeへ渡したルートURI(ヒープ所有)。未設定はNULL。
 };

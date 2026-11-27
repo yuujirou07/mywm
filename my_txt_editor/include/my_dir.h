@@ -1,5 +1,5 @@
-#ifndef MY_DIR_H
-#define MY_DIR_H
+#ifndef MY_DIR_H_
+#define MY_DIR_H_
 #include <sys/syscall.h> 
 #include <dirent.h>  
 

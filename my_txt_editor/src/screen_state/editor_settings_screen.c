@@ -6,7 +6,7 @@
 
 
 
-#define SETTINGS_EXPLATAION_BOX_MIN_W 12 // 設定説明欄へ確保する最小幅（端末セル数）。
+#define SETTINGS_EXPLATAION_BOX_MIN_W_ 12 // 設定説明欄へ確保する最小幅（端末セル数）。
 
 static void draw_explanation_str(const char *str,struct box box);
 settings_items_data *get_now_select_settings_item(settings_screen_data *screen_data);
@@ -24,14 +24,14 @@ bool handle_settings_screen_input(struct editor_state *state,wint_t ch,int input
         }
         else if(ch == KEY_BACKSPACE){
             if(screen_data->input_value_len > 0){
-                screen_data->input_value[--screen_data->input_value_len] = WNUL;
+                screen_data->input_value[--screen_data->input_value_len] = WNUL_;
             }
         }
         else if(input_result == OK && iswprint(ch) &&
-            screen_data->input_value_len < SETTINGS_INPUT_MAX - 1){
+            screen_data->input_value_len < SETTINGS_INPUT_MAX_ - 1){
 
             screen_data->input_value[screen_data->input_value_len++] = ch;
-            screen_data->input_value[screen_data->input_value_len] = WNUL;
+            screen_data->input_value[screen_data->input_value_len] = WNUL_;
         }
         state->render_flags |= RENDER_SETTINGS;
         return true;
@@ -41,7 +41,7 @@ bool handle_settings_screen_input(struct editor_state *state,wint_t ch,int input
             if(screen_data->item_data[i].key_code == ch){
                 screen_data->value_input_mode = true;
                 screen_data->input_value_len = 0;
-                screen_data->input_value[0] = WNUL;
+                screen_data->input_value[0] = WNUL_;
                 my_cur_set(state,true);
                 state->render_flags |= RENDER_SETTINGS;
                 int select_item_delta = i - screen_data->select_line;
@@ -68,7 +68,7 @@ bool handle_settings_screen_input(struct editor_state *state,wint_t ch,int input
     if(ch == KEY_ENTER || ch == '\n' || ch == '\r'){
         screen_data->value_input_mode = true;
         screen_data->input_value_len = 0;
-        screen_data->input_value[0] = WNUL;
+        screen_data->input_value[0] = WNUL_;
         my_cur_set(state,true);
         state->render_flags |= RENDER_SETTINGS;
     }
@@ -98,7 +98,7 @@ int add_settings_screen_item(settings_screen_data *settings_screen_data,settings
         settings_screen_data->item_data = malloc(sizeof(settings_items_data) *
             settings_screen_data->settings_item_data_allocate_num);
         if(settings_screen_data->item_data == NULL){
-            error_log("item data arry allocate error");
+            error_log_("item data arry allocate error");
             return -1;
         }
     }
@@ -106,7 +106,7 @@ int add_settings_screen_item(settings_screen_data *settings_screen_data,settings
         settings_items_data *tmp_item_data = realloc(settings_screen_data->item_data
             ,sizeof(settings_items_data) * (settings_screen_data->settings_item_data_num * 2));
         if(tmp_item_data == NULL){
-            error_log("settings_item_data realloc error");
+            error_log_("settings_item_data realloc error");
             return -1;
         }
         settings_screen_data->item_data = tmp_item_data;
@@ -131,7 +131,7 @@ static int settings_item_name_width(const char *name){
     wchar_t wide_name[256];
     size_t converted = mbstowcs(wide_name,name,sizeof(wide_name)/sizeof(wide_name[0]) - 1);
     if(converted == (size_t)-1)return -1;
-    wide_name[converted] = WNUL;
+    wide_name[converted] = WNUL_;
 
     int width = wcswidth(wide_name,converted);
     return (width < 0) ? -1 : width;
@@ -145,7 +145,7 @@ static void draw_settings_title(struct box box){
     if(box.w < title_len + 2)return;
 
     int title_x = box.pos.x + (box.w - title_len) / 2;
-    attr_t accent_attr = COLOR_PAIR(PAIR_ACCENT) | A_BOLD;
+    attr_t accent_attr = COLOR_PAIR(PAIR_ACCENT_) | A_BOLD;
     attron(accent_attr);
     mvaddstr(box.pos.y,title_x,title);
     attroff(accent_attr);
@@ -158,8 +158,8 @@ void set_settings_screen_box(struct editor_state *state){
     settings_screen_data *st_scr_data = &state->settings_screen_data;
 
     //枠の上限。画面の端まで届かせず、上下左右に余白を残す。
-    int limit_w = state->scr.scr_size.x - state->scr.scr_size.x / SETTINGS_SCREEN_MARGIN_DIV;
-    int limit_h = state->scr.scr_size.y - state->scr.scr_size.y / SETTINGS_SCREEN_MARGIN_DIV;
+    int limit_w = state->scr.scr_size.x - state->scr.scr_size.x / SETTINGS_SCREEN_MARGIN_DIV_;
+    int limit_h = state->scr.scr_size.y - state->scr.scr_size.y / SETTINGS_SCREEN_MARGIN_DIV_;
 
     //一番長い項目名にキーと余白を足して、1列分の幅を決める。
     int name_width_max = 0;
@@ -167,9 +167,9 @@ void set_settings_screen_box(struct editor_state *state){
         int name_width = settings_item_name_width(st_scr_data->item_data[i].name);
         if(name_width > name_width_max)name_width_max = name_width;
     }
-    int col_w = name_width_max + SETTINGS_ITEM_KEY_WIDTH + 5;
-    if(col_w < SETTINGS_ITEM_COLUMN_MIN_WIDTH)col_w = SETTINGS_ITEM_COLUMN_MIN_WIDTH;
-    if(col_w > SETTINGS_ITEM_COLUMN_MAX_WIDTH)col_w = SETTINGS_ITEM_COLUMN_MAX_WIDTH;
+    int col_w = name_width_max + SETTINGS_ITEM_KEY_WIDTH_ + 5;
+    if(col_w < SETTINGS_ITEM_COLUMN_MIN_WIDTH_)col_w = SETTINGS_ITEM_COLUMN_MIN_WIDTH_;
+    if(col_w > SETTINGS_ITEM_COLUMN_MAX_WIDTH_)col_w = SETTINGS_ITEM_COLUMN_MAX_WIDTH_;
 
     //枠の内側に並べられる行数。上下の枠線の分を引く。
     int rows = limit_h - 2;
@@ -182,8 +182,8 @@ void set_settings_screen_box(struct editor_state *state){
     int box_w = col_w * col_count + 2;
     int box_h = st_scr_data->settings_item_data_num + 2;
     //項目が少なくても小さくなりすぎないよう、最小サイズまで広げる。
-    if(box_w < SETTINGS_SCREEN_MIN_W)box_w = SETTINGS_SCREEN_MIN_W;
-    if(box_h < SETTINGS_SCREEN_MIN_H)box_h = SETTINGS_SCREEN_MIN_H;
+    if(box_w < SETTINGS_SCREEN_MIN_W_)box_w = SETTINGS_SCREEN_MIN_W_;
+    if(box_h < SETTINGS_SCREEN_MIN_H_)box_h = SETTINGS_SCREEN_MIN_H_;
     if(box_w > limit_w)box_w = limit_w;
     if(box_h > limit_h)box_h = limit_h;
 
@@ -213,14 +213,14 @@ void draw_settings_screen(struct editor_state *state){
     //1列に入りきらない分を次の列へ回す。端数は最終列に入る。
     int col_count = (item_num + inner_h - 1) / inner_h;
     //狭い枠で列を増やしすぎると1列が潰れるため、最小幅で頭打ちにする。
-    int col_count_max = inner_w / SETTINGS_ITEM_COLUMN_MIN_WIDTH;
+    int col_count_max = inner_w / SETTINGS_ITEM_COLUMN_MIN_WIDTH_;
     if(col_count > col_count_max)col_count = col_count_max;
     if(col_count < 1)col_count = 1;
 
     //余りは切り捨てる。はみ出した分は使わないだけで、枠線へは被らない。
     int col_w = inner_w / col_count;
     //枠が広いときはキーが右端まで離れてしまうため、列幅に上限を設ける。
-    if(col_w > SETTINGS_ITEM_COLUMN_MAX_WIDTH)col_w = SETTINGS_ITEM_COLUMN_MAX_WIDTH;
+    if(col_w > SETTINGS_ITEM_COLUMN_MAX_WIDTH_)col_w = SETTINGS_ITEM_COLUMN_MAX_WIDTH_;
     //使わなくなった幅は左右へ均等に割って、項目の並びを中央へ寄せる。
     int items_pos_x = st_scr_data.box.pos.x + 1 + (inner_w - col_w * col_count) / 2;
 
@@ -235,7 +235,7 @@ void draw_settings_screen(struct editor_state *state){
         const int mark_pos_x = col_pos_x;
         const int item_pos_x = col_pos_x + 2;
         //キーは列の右端から桁数と余白1つ分だけ内側へ寄せる。
-        int key_pos_x = col_pos_x + col_w - 1 - SETTINGS_ITEM_KEY_WIDTH - 1;
+        int key_pos_x = col_pos_x + col_w - 1 - SETTINGS_ITEM_KEY_WIDTH_ - 1;
 
         for(int i = 0; i < inner_h;i++){
             int item_index = c * inner_h + i;
@@ -260,16 +260,16 @@ void draw_settings_screen(struct editor_state *state){
                 mvaddch(scr_pos_y,blank,' ');
             }
 
-            wchar_t key_code[SETTINGS_ITEM_KEY_WIDTH + 1] =
-                {L'[',(wchar_t)item.key_code,L']',WNUL};
-            attr_t accent_attr = COLOR_PAIR(PAIR_ACCENT) | A_BOLD;
+            wchar_t key_code[SETTINGS_ITEM_KEY_WIDTH_ + 1] =
+                {L'[',(wchar_t)item.key_code,L']',WNUL_};
+            attr_t accent_attr = COLOR_PAIR(PAIR_ACCENT_) | A_BOLD;
             attron(accent_attr);
-            mvaddnwstr(scr_pos_y,key_pos_x,key_code,SETTINGS_ITEM_KEY_WIDTH);
+            mvaddnwstr(scr_pos_y,key_pos_x,key_code,SETTINGS_ITEM_KEY_WIDTH_);
             attroff(accent_attr);
 
             //反転は最後に重ねる。名前とキーの色より選択表示を優先する。
             if(is_select){
-                mvchgat(scr_pos_y,col_pos_x,col_w,A_NORMAL,PAIR_SELECT,NULL);
+                mvchgat(scr_pos_y,col_pos_x,col_w,A_NORMAL,PAIR_SELECT_,NULL);
             }
         }
     }
@@ -340,7 +340,7 @@ void draw_settings_explanation_box(struct editor_input_context *ctx){
 
     int explanation_box_pos_x = st_scr_data.box.pos.x + st_scr_data.box.w;
     int explanation_box_max_w = x - explanation_box_pos_x;
-    if(explanation_box_max_w < SETTINGS_EXPLATAION_BOX_MIN_W)return;
+    if(explanation_box_max_w < SETTINGS_EXPLATAION_BOX_MIN_W_)return;
     
 
     struct pos explanation_pos = {explanation_box_pos_x,st_scr_data.box.pos.y};
@@ -350,11 +350,11 @@ void draw_settings_explanation_box(struct editor_input_context *ctx){
     int explanation_box_max_h = (y - st_scr_data.box.pos.y);
     // 説明枠の最小幅で説明文を折り返した場合の必要行数。これを満たす最小の枠サイズを下で探す。
     //説明ウィンドウの横幅に説明文を入れきれるかの計算
-    int explanation_str_h = (explanation_str_len/(SETTINGS_EXPLATAION_BOX_MIN_W - 2)) + 1;
+    int explanation_str_h = (explanation_str_len/(SETTINGS_EXPLATAION_BOX_MIN_W_ - 2)) + 1;
     
     int area_w = 0;
     int area_h = 0;
-    for(int w = SETTINGS_EXPLATAION_BOX_MIN_W;w < explanation_box_max_w;w++){
+    for(int w = SETTINGS_EXPLATAION_BOX_MIN_W_;w < explanation_box_max_w;w++){
         for(int h = st_scr_data.box.h; h < explanation_box_max_h;h++){
             int explanation_box_area = w * h;
             if(explanation_box_area < explanation_str_h)continue;

@@ -1,5 +1,5 @@
-#ifndef DEFALT_SETTINGS_H
-#define DEFALT_SETTINGS_H
+#ifndef DEFALT_SETTINGS_H_
+#define DEFALT_SETTINGS_H_
 
 #include "editor_icon.h"
 #include "input_complete.h"
@@ -7,42 +7,42 @@
 #include<editor_types.h>
 #include <stddef.h>
 
-#define MAX_LINES    1000 // 初期設定で扱う最大行数。
-#define MAX_LINE_SIZE 1024 // ファイル読込み時の1行バッファ長。
-#define LINE_NUMBER_SPACE 4 // 行番号表示へ確保する端末セル数。
-#define INDENT_RANGE 8 // Tab入力1回で挿入する空白数。
-#define JMP_SET_CUR_POS 10 // 行ジャンプ後のカーソル位置として保持する既定値。
-#define DEFAULT_LOAD_LINE_SIZE 9999 // 読み込める論理行数の既定上限。
-#define LOAD_BUFFER_LINES 100 // 編集バッファへ最初に確保する行数。
-#define SHOW_STATUS_BAR true // ステータスバーを表示する既定値。
-#define DEFAULT_DRAW_SPLIT_LINE 1 // 行番号欄と本文の境界線を描く既定値。
-#define DEFAULT_STATUS_BAR_SIDE top // ステータスバーを置く既定の画面端。
-#define JUMP_LINE_NUM_DIGITS 4 // 行ジャンプ欄へ入力できる最大桁数。
-#define DEFAULT_ASK_MAKE_FILE 1 // 未作成ファイルを開く際に作成確認を出す既定値。
-#define DEFAULT_PATH_NAME_MAX_SIZE PATH_MAX // ファイルパス配列の要素数。
-#define DEFAULT_FILE_SELECT_SCENE_LIGHTING true // ファイル選択行を反転表示する既定値。
-#define DEFAULT_SHOW_START_MENU true // 起動時にスタートメニューを表示する既定値。
-#define DEFAULT_LSP_PROCESS_LAUNCH_STARTUP_EDITOR true // 起動時にLSPを開始する既定値。
-#define DEFAULT_EPOLL_TIME_OUT_MS 16 // LSPイベント待機の既定時間（ミリ秒）。
-#define DEFAULT_LSP_USE true // LSP連携を有効にする既定値。
-#define DEFAULT_USE_ICON false // ファイル種別アイコンを表示する既定値。
-#define DEFAULT_BUILT_IN_SYNTAX true // 組込み構文着色を有効にする既定値。
-#define DEFAULT_EDITOR_SCROLL_SENSITIVITY 1 // マウスホイール1回あたりのスクロール行数の既定値。
+#define MAX_LINES_    1000 // 初期設定で扱う最大行数。
+#define MAX_LINE_SIZE_ 1024 // ファイル読込み時の1行バッファ長。
+#define LINE_NUMBER_SPACE_ 4 // 行番号表示へ確保する端末セル数。
+#define INDENT_RANGE_ 8 // Tab入力1回で挿入する空白数。
+#define JMP_SET_CUR_POS_ 10 // 行ジャンプ後のカーソル位置として保持する既定値。
+#define DEFAULT_LOAD_LINE_SIZE_ 9999 // 読み込める論理行数の既定上限。
+#define LOAD_BUFFER_LINES_ 100 // 編集バッファへ最初に確保する行数。
+#define SHOW_STATUS_BAR_ true // ステータスバーを表示する既定値。
+#define DEFAULT_DRAW_SPLIT_LINE_ 1 // 行番号欄と本文の境界線を描く既定値。
+#define DEFAULT_STATUS_BAR_SIDE_ top // ステータスバーを置く既定の画面端。
+#define JUMP_LINE_NUM_DIGITS_ 4 // 行ジャンプ欄へ入力できる最大桁数。
+#define DEFAULT_ASK_MAKE_FILE_ 1 // 未作成ファイルを開く際に作成確認を出す既定値。
+#define DEFAULT_PATH_NAME_MAX_SIZE_ PATH_MAX // ファイルパス配列の要素数。
+#define DEFAULT_FILE_SELECT_SCENE_LIGHTING_ true // ファイル選択行を反転表示する既定値。
+#define DEFAULT_SHOW_START_MENU_ true // 起動時にスタートメニューを表示する既定値。
+#define DEFAULT_LSP_PROCESS_LAUNCH_STARTUP_EDITOR_ true // 起動時にLSPを開始する既定値。
+#define DEFAULT_EPOLL_TIME_OUT_MS_ 16 // LSPイベント待機の既定時間（ミリ秒）。
+#define DEFAULT_LSP_USE_ true // LSP連携を有効にする既定値。
+#define DEFAULT_USE_ICON_ false // ファイル種別アイコンを表示する既定値。
+#define DEFAULT_BUILT_IN_SYNTAX_ true // 組込み構文着色を有効にする既定値。
+#define DEFAULT_EDITOR_SCROLL_SENSITIVITY_ 1 // マウスホイール1回あたりのスクロール行数の既定値。
 
-#define DEFAULT_AUTO_COMPLETE true // 自動補完を有効にする既定値。
-#define DEFAULT_AUTO_COMPLETE_WINDOW true // 補完候補ウィンドウを表示する既定値。
-#define DEFAULT_AUTO_COMPLETE_WINDOW_WIDTH 12 // 候補ウィンドウの既定幅（端末セル数）。
-#define DEFAULT_AUTO_COMPLETE_WINDOW_HEIGHT 7 // 候補ウィンドウの既定高さ（端末行数）。
-#define DEFAULT_AUTO_COMPLETE_POSITION_MODE EDIT_COMP_TRACKING // 候補ウィンドウを入力位置に追従させる既定値。
+#define DEFAULT_AUTO_COMPLETE_ true // 自動補完を有効にする既定値。
+#define DEFAULT_AUTO_COMPLETE_WINDOW_ true // 補完候補ウィンドウを表示する既定値。
+#define DEFAULT_AUTO_COMPLETE_WINDOW_WIDTH_ 12 // 候補ウィンドウの既定幅（端末セル数）。
+#define DEFAULT_AUTO_COMPLETE_WINDOW_HEIGHT_ 7 // 候補ウィンドウの既定高さ（端末行数）。
+#define DEFAULT_AUTO_COMPLETE_POSITION_MODE_ EDIT_COMP_TRACKING // 候補ウィンドウを入力位置に追従させる既定値。
 
-#define DEFAULT_SETTINGS_LANGUAGE 2
+#define DEFAULT_SETTINGS_LANGUAGE_ 2
 
-#define DEFAULT_USE_KEY_LOG true
-#define DEFAULT_KEY_LOG_BUFFER_SIZE 2048
+#define DEFAULT_USE_KEY_LOG_ true
+#define DEFAULT_KEY_LOG_BUFFER_SIZE_ 2048
 
-#define DEFAULT_LSP_LANGUAGE "" // 起動対象の言語サーバー名の既定値。空なら未指定。
-#define DEFAULT_EDITOR_SETTINGS_PROGRAM_ENABLED true // 設定プログラムを使う既定値。
-#define DEFAULT_EDITOR_SETTINGS_PROGRAM_LANGUAGE editor_settings_program_lang_UNKNOWN // 設定プログラムの言語の既定値。
+#define DEFAULT_LSP_LANGUAGE_ "" // 起動対象の言語サーバー名の既定値。空なら未指定。
+#define DEFAULT_EDITOR_SETTINGS_PROGRAM_ENABLED_ true // 設定プログラムを使う既定値。
+#define DEFAULT_EDITOR_SETTINGS_PROGRAM_LANGUAGE_ editor_settings_program_lang_UNKNOWN // 設定プログラムの言語の既定値。
 
 
 

@@ -18,7 +18,7 @@ static bool json_int_in_range(const cJSON *item, int min, int max){
 // 返り値: なし。ファイル読込・JSON解析失敗は元の設定を保持し、個別に不正な値は読み飛ばす。
 void load_custom_editor_settings(struct editor_settings *settings_data){
     char path[PATH_MAX];
-    if(editor_path_from_exe_dir(path, sizeof(path), EDITOR_SETTINGS_PATH) == NULL){
+    if(editor_path_from_exe_dir(path, sizeof(path), EDITOR_SETTINGS_PATH_) == NULL){
         return;
     }
 
@@ -47,7 +47,7 @@ void load_custom_editor_settings(struct editor_settings *settings_data){
     }
 
     cJSON *max_line_size = cJSON_GetObjectItemCaseSensitive(buffer, SETTINGS_JSON_KEY_STR[JSON_OBJ_BUFFER][BUFFER_KEY_MAX_LINE_SIZE]);
-    if(json_int_in_range(max_line_size, 2, EDITOR_LINE_COL_MAX)){
+    if(json_int_in_range(max_line_size, 2, EDITOR_LINE_COL_MAX_)){
         settings_data->max_line_size = max_line_size->valueint;
     }
 
@@ -234,7 +234,7 @@ void load_custom_editor_settings(struct editor_settings *settings_data){
 // 一致していたらその列挙型の値、すべて一致していなかったらunknownを返す
 settings_lang comb_str_to_lang(char *str){
     if(str == NULL){
-        error_log("argument error");
+        error_log_("argument error");
         return settings_lang_UNKNOWN;
     }
 
@@ -249,7 +249,7 @@ settings_lang comb_str_to_lang(char *str){
 // comb_str_to_lang()のeditor_settings_program用。
 editor_settings_program_lang comb_str_to_program_lang(char *str){
     if(str == NULL){
-        error_log("argument error");
+        error_log_("argument error");
         return editor_settings_program_lang_UNKNOWN;
     }
 

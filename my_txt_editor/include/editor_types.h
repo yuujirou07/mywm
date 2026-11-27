@@ -1,12 +1,12 @@
-#ifndef EDITOR_TYPES_H
-#define EDITOR_TYPES_H
+#ifndef EDITOR_TYPES_H_
+#define EDITOR_TYPES_H_
 
-#ifndef NUL
-    #define NUL '\0'
+#ifndef NUL_
+    #define NUL_ '\0'
 #endif
 
-#ifndef WNUL
-    #define WNUL L'\0'
+#ifndef WNUL_
+    #define WNUL_ L'\0'
 #endif
 
 // 解析対象の言語。現在はコメント開始文字列の切り替えに使用する。

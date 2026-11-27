@@ -129,7 +129,7 @@ int SetCursorMode(struct editor_state *state,CURSOR_MODE CurMode){
 int SetCursorColor(struct editor_state *state,CURSOR_COLOR color){
 
     if((sizeof(CURSOR_COLOR_ESC)/sizeof(CURSOR_COLOR_ESC[0])) <= color){
-        error_log("cursor color error");
+        error_log_("cursor color error");
         return -1;
     }
 

@@ -84,7 +84,7 @@ static MY_TXT_EDITOR_RESULT api_key_mapping(void *userdata,wchar_t key1,wchar_t 
 }
 
 
-// apiへctxを接続し、editor_settings/so_file/settings.soからST_INITを呼んで設定を登録する。
+// apiへctxを接続し、editor_settings/so_file/settings_.soからST_INITを呼んで設定を登録する。
 // 返り値: なし。読込失敗は登録せず戻り、成功したハンドルはctxが保持して終了時にdlcloseする。
 void init_settings_src(MY_TXT_EDITOR_API *const api,struct editor_input_context *ctx){
     connect_api_mem_data(api,ctx);
@@ -154,7 +154,7 @@ void check_key_maps_entry(struct editor_input_context *ctx,wchar_t chr[2],MY_TXT
 
 static MY_TXT_EDITOR_RESULT add_key_input_event_handle(void *userdata,wchar_t chr,MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action){
     if(userdata== NULL || action == NULL){
-        error_log("argument error");
+        error_log_("argument error");
         return API_ERR_NULL;
     }
 
@@ -184,7 +184,7 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
     size_t idx = ctx->dl_data.dl_handle_data.dl_handles_list_num;
     if(ctx->dl_data.dl_load_path_data.loading_dl_lib == NULL ||
         idx >= ctx->dl_data.dl_load_path_data.now_loading_lib_num){
-        error_log("no settings library path to load");
+        error_log_("no settings library path to load");
         return NULL;
     }
 
@@ -192,13 +192,13 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
 
     struct stat st;
     if(stat(obj_path, &st) != 0 || !S_ISREG(st.st_mode)){
-        error_log("can not found settings obj file");
+        error_log_("can not found settings obj file");
         return NULL;
     }
 
     void *handle = dlopen(obj_path,RTLD_NOW | RTLD_GLOBAL);
     if(handle == NULL){
-        error_log("can not load settings library");
+        error_log_("can not load settings library");
     }
     return handle;
 }
@@ -209,7 +209,7 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
 // 返り値: 常に0。ctxは非NULLとする。
 int check_user_settings_event(struct editor_input_context *ctx){
     if(ctx == NULL){
-        wrp_stderr_puts("argument error");
+        wrp_stderr_puts_("argument error");
         return -1;
     }
 
@@ -258,7 +258,7 @@ int call_user_key_mapping_event(key_map_data *key_map_ptr){
 // 引数: ctx=読込状態を持つ入力context、dl_path=editor_settings/からの相対パス。 返り値: 成功0、引数不正・確保失敗・基準パス取得失敗は-1。
 int add_dl_path(struct editor_input_context *ctx,char *dl_path){
     if(ctx == NULL || dl_path == NULL){
-        wrp_stderr_puts("argument error");
+        wrp_stderr_puts_("argument error");
         return -1;
     }
 
@@ -269,14 +269,14 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
         ctx->dl_data.dl_load_path_data.now_loading_lib_num = 0;
         ctx->dl_data.dl_load_path_data.loading_dl_lib = malloc(sizeof(char *) * ctx->dl_data.dl_load_path_data.now_loading_lib_allocate_num);
         if(ctx->dl_data.dl_load_path_data.loading_dl_lib == NULL){
-            wrp_stderr_puts("malloc error");
+            wrp_stderr_puts_("malloc error");
             return -1;
         }
     }
     else if(ctx->dl_data.dl_load_path_data.now_loading_lib_allocate_num <= ctx->dl_data.dl_load_path_data.now_loading_lib_num){
         char **tmp_dl_path = realloc(ctx->dl_data.dl_load_path_data.loading_dl_lib,sizeof(char *) * ctx->dl_data.dl_load_path_data.now_loading_lib_num * 2);
         if(tmp_dl_path == NULL){
-            wrp_stderr_puts("realloc error");
+            wrp_stderr_puts_("realloc error");
             return -1;
         }
         ctx->dl_data.dl_load_path_data.loading_dl_lib = tmp_dl_path;
@@ -307,22 +307,22 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
 
         // 基準ディレクトリはPATH_MAXで必ず収まるので固定配列で取り、結合後の文字列だけ必要な長さで確保する
         char base_dir[PATH_MAX];
-        if(editor_path_from_exe_dir(base_dir,sizeof(base_dir),EDITOR_SETTINGS_DIR) == NULL){
-            wrp_stderr_puts("can not get settings dir");
+        if(editor_path_from_exe_dir(base_dir,sizeof(base_dir),EDITOR_SETTINGS_DIR_) == NULL){
+            wrp_stderr_puts_("can not get settings dir");
             return -1;
         }
         
         size_t full_path_size = strlen(base_dir) + strlen(dl_path) + 1;
         char *full_path = malloc(full_path_size);
         if(full_path == NULL){
-            wrp_stderr_puts("malloc error");
+            wrp_stderr_puts_("malloc error");
             return -1;
         }
         snprintf(full_path,full_path_size,"%s%s",base_dir,dl_path);
         editor_log(full_path,NULL,NULL,NULL,0);
         if(access(full_path,F_OK) != 0){
             free(full_path);
-            error_log("dl path cannot access");
+            error_log_("dl path cannot access");
             return -1;
         }
 
@@ -333,13 +333,13 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
         size_t jointed_msg_len = log_msg_len + full_path_len + 1;
 
         char editor_msg[jointed_msg_len];
-        editor_msg[0] = NUL;
+        editor_msg[0] = NUL_;
 
         memcpy(editor_msg,log_msg,log_msg_len);
         memcpy(editor_msg + log_msg_len,full_path,full_path_len);
 
-        editor_msg[log_msg_len + full_path_len] = NUL;
-        editor_log_msg(editor_msg);
+        editor_msg[log_msg_len + full_path_len] = NUL_;
+        editor_log_msg_(editor_msg);
 
         //dl path追加
         ctx->dl_data.dl_load_path_data.loading_dl_lib[ctx->dl_data.dl_load_path_data.now_loading_lib_num] = full_path;
@@ -352,7 +352,7 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
 // 返り値: 成功0、ctxがNULLなら-1。
 int destroy_dl_path(struct editor_input_context *ctx){
     if(ctx == NULL){
-        wrp_stderr_puts("argument error");
+        wrp_stderr_puts_("argument error");
         return -1;
     }
 
@@ -379,7 +379,7 @@ int destroy_dl_path(struct editor_input_context *ctx){
 // 返り値: 成功時0、ctxがNULLなら-1。
 static int check_input_handle(struct editor_input_context *ctx,wchar_t chr){
     if(ctx == NULL){
-        error_log("argument error");
+        error_log_("argument error");
         return -1;
     }
 
@@ -568,7 +568,7 @@ static MY_TXT_EDITOR_RESULT load_settings_src_file(const MY_TXT_EDITOR_API *api,
         dlopen(combed_path,RTLD_GLOBAL | RTLD_GLOBAL);    
     
     if(tmp_handle == NULL){
-        error_log("dlopen NULL error");
+        error_log_("dlopen NULL error");
         return API_ERR_INVALID_ARG;
     }
 

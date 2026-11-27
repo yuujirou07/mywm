@@ -28,43 +28,43 @@ int load_icon_data(const char *relative_path,icon_data *icon_data_ptr){
 
     char path[PATH_MAX];
     if(editor_path_from_exe_dir(path,sizeof(path),relative_path) == NULL){
-        error_log("can not resolve icon file path");
+        error_log_("can not resolve icon file path");
         return -1;
     }
 
     struct stat icon_stat;
     if(stat(path,&icon_stat) != 0){
-        error_log("can not read icon file");
+        error_log_("can not read icon file");
         return -1;
     }
     if(!S_ISREG(icon_stat.st_mode)){
-        error_log("can not read file");
+        error_log_("can not read file");
         return -1;
     }
 
     // 拡張子はパス末尾のドット以降だけを見る。
     // strstrで探すとディレクトリ名の途中の".json"を拾ってしまう。
     const char *ext_ptr = strrchr(path,'.');
-    if(ext_ptr == NULL || strcmp(ext_ptr,SETTINGS_FILE_EXT) != 0){
-        error_log("this file extension is not support");
+    if(ext_ptr == NULL || strcmp(ext_ptr,SETTINGS_FILE_EXT_) != 0){
+        error_log_("this file extension is not support");
         return -1;
     }
 
     char *json_buff = read_file_all(path);
     if(json_buff == NULL){
-        error_log("can not read file");
+        error_log_("can not read file");
         return -1;
     }
 
     cJSON *json_data = cJSON_Parse(json_buff);
     free(json_buff);
     if(json_data == NULL){
-        error_log("icon json parse error");
+        error_log_("icon json parse error");
         return -1;
     }
     if(!cJSON_IsArray(json_data)){
         cJSON_Delete(json_data);
-        error_log("icon json is not array");
+        error_log_("icon json is not array");
         return -1;
     }
 
@@ -77,7 +77,7 @@ int load_icon_data(const char *relative_path,icon_data *icon_data_ptr){
     if(icon_data_ptr->icon_lib == NULL){
         icon_data_ptr->icon_lib_allocate_num = 0;
         cJSON_Delete(json_data);
-        error_log("icon lib malloc error");
+        error_log_("icon lib malloc error");
         return -1;
     }
 
@@ -88,14 +88,14 @@ int load_icon_data(const char *relative_path,icon_data *icon_data_ptr){
         if(!cJSON_IsString(ext_item) || !cJSON_IsString(icon_item)){
             clear_icon_lib(icon_data_ptr);
             cJSON_Delete(json_data);
-            error_log("icon json item error");
+            error_log_("icon json item error");
             return -1;
         }
-        if(strlen(ext_item->valuestring) >= ICON_FILE_EXT_SIZE ||
-            strlen(icon_item->valuestring) >= ICON_CODE_MAX_SIZE){
+        if(strlen(ext_item->valuestring) >= ICON_FILE_EXT_SIZE_ ||
+            strlen(icon_item->valuestring) >= ICON_CODE_MAX_SIZE_){
             clear_icon_lib(icon_data_ptr);
             cJSON_Delete(json_data);
-            error_log("icon json item is so long");
+            error_log_("icon json item is so long");
             return -1;
         }
 
@@ -107,7 +107,7 @@ int load_icon_data(const char *relative_path,icon_data *icon_data_ptr){
             if(tmp_icon_lib == NULL){
                 clear_icon_lib(icon_data_ptr);
                 cJSON_Delete(json_data);
-                error_log("icon lib realloc error");
+                error_log_("icon lib realloc error");
                 return -1;
             }
             icon_data_ptr->icon_lib = tmp_icon_lib;

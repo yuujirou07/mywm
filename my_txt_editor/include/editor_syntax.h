@@ -1,6 +1,6 @@
 
-#ifndef TXT_EDITOR_SYNTAX_H
-#define TXT_EDITOR_SYNTAX_H
+#ifndef TXT_EDITOR_SYNTAX_H_
+#define TXT_EDITOR_SYNTAX_H_
 
 
 #include <stddef.h>

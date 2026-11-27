@@ -1,5 +1,5 @@
-#ifndef TXT_EDITOR_FILE_H
-#define TXT_EDITOR_FILE_H
+#ifndef TXT_EDITOR_FILE_H_
+#define TXT_EDITOR_FILE_H_
 
 #include <stdbool.h>
 #include <wchar.h>

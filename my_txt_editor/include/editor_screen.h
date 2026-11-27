@@ -1,5 +1,5 @@
-#ifndef TXT_EDITOR_SCREEN_H
-#define TXT_EDITOR_SCREEN_H
+#ifndef TXT_EDITOR_SCREEN_H_
+#define TXT_EDITOR_SCREEN_H_
 
 #include "editor_types.h"
 #include "editor.h"

@@ -1,5 +1,5 @@
-#ifndef TXT_EDITOR_H
-#define TXT_EDITOR_H
+#ifndef TXT_EDITOR_H_
+#define TXT_EDITOR_H_
 
 #include <ncurses.h>
 #include <stdbool.h>
@@ -27,22 +27,22 @@
 
 
 
-#define SETTINGS_FILE_EXT ".json" // 設定ファイルとして受け付ける拡張子。
+#define SETTINGS_FILE_EXT_ ".json" // 設定ファイルとして受け付ける拡張子。
 
-#define startuptime_log_file_argument_num 1 // 起動時間ログのパスを受け取るargv添字。
-#define FDS_N 4 // epoll_wait()で一度に受け取るイベント配列の要素数。
-#define DRAW_BOX_REQUEST_MAX 64 // 1回の更新まで保持できる枠描画要求数。
-#define box_retention_max 64    // 1回の更新まで保持できる矩形消去要求数。
-#define screen_state_log_storage 256 // 画面遷移履歴へ保持できる状態数。
+#define startuptime_log_file_argument_num_ 1 // 起動時間ログのパスを受け取るargv添字。
+#define FDS_N_ 4 // epoll_wait()で一度に受け取るイベント配列の要素数。
+#define DRAW_BOX_REQUEST_MAX_ 64 // 1回の更新まで保持できる枠描画要求数。
+#define box_retention_max_ 64    // 1回の更新まで保持できる矩形消去要求数。
+#define screen_state_log_storage_ 256 // 画面遷移履歴へ保持できる状態数。
 // ファイルブラウザ一覧に保持する名前の最大長。
 // 使用: ファイルブラウザ・ファイルツリーの項目構造体の名前配列(d_name・name)のサイズ。
-#define DIR_ENTRY_NAME_MAX 256
+#define DIR_ENTRY_NAME_MAX_ 256
 // 各行へ前もって足す余白列数。ここに収まる入力は再配置なしで処理できる。
 // 使用: 読込時の行容量計算、editor_ensure_line_capの伸長の初期値、空行の確保、画面幅が取れないときの代替値。
-#define EDITOR_LINE_COL_SLACK 16
+#define EDITOR_LINE_COL_SLACK_ 16
 // 1行が確保できる列数の絶対上限。これを超える伸長要求は拒否する。
 // 使用: editor_ensure_line_capの上限判定と容量の丸め、設定値max_line_sizeの許可範囲の上限。
-#define EDITOR_LINE_COL_MAX 65536
+#define EDITOR_LINE_COL_MAX_ 65536
 
 
 static const char *const MY_TXT_EDITOR_CURRENT_DIR_NAME = "my_txt_editor";
@@ -79,10 +79,10 @@ enum render_flags {
 
 // <sys/ttydefaults.h>(sys/epoll.h経由で入る)も同名・同値のCTRLを定義しているため、
 // 先に外してから定義し直す。値は同じなので、どちらが残っても動作は変わらない。
-#ifdef CTRL
-#undef CTRL
+#ifdef CTRL_
+#undef CTRL_
 #endif
-#define CTRL(x) ((x) & 0x1f) // ASCII文字から対応するCtrlキーコードを作る。
+#define CTRL_(x) ((x) & 0x1f) // ASCII文字から対応するCtrlキーコードを作る。
 
 // ステータスバーを画面上端か下端のどちらに出すか。
 enum status_bar_side{
@@ -92,7 +92,7 @@ enum status_bar_side{
 
 // 行ジャンプモード中に入力された行番号を保持する。
 struct jump_mode{
-    char jump_line_num[JUMP_LINE_NUM_DIGITS + 1]; // 入力中のジャンプ先行番号文字列。
+    char jump_line_num[JUMP_LINE_NUM_DIGITS_ + 1]; // 入力中のジャンプ先行番号文字列。
     int  jump_line_num_counter; // jump_line_numに入っている文字数。
 };
 
@@ -105,7 +105,7 @@ struct file_data{
     // 実際に開いて編集・保存・LSP通知するファイルパス。ブラウザから開く場合は絶対パス、
     // 新規作成時は入力された相対パスまたは絶対パスをそのまま保持する。
     // now_open_path_name()内のファイルブラウザ用パスとは別に保持する。
-    char    now_open_path_name[DEFAULT_PATH_NAME_MAX_SIZE];
+    char    now_open_path_name[DEFAULT_PATH_NAME_MAX_SIZE_];
     long*   file_line_start_num;  // 論理行番号(0始まり)で引く、その行がfile_str_dataで始まる添字。
     long    file_line_start_num_counter; // file_line_start_numに登録済みの行数。
     long    description_line_end; // 保存対象として扱う論理行数(論理行基準)。
@@ -120,7 +120,7 @@ struct file_data{
 // 新規ファイル作成ダイアログの入力状態。
 struct make_file_mode_status{
     bool is_input_scene; // trueならファイル名入力欄を編集中。
-    char new_file_name[DEFAULT_PATH_NAME_MAX_SIZE]; // 入力された保存先。相対パスまたは絶対パス。
+    char new_file_name[DEFAULT_PATH_NAME_MAX_SIZE_]; // 入力された保存先。相対パスまたは絶対パス。
     int new_file_name_counter; // new_file_nameに入っている文字数。
 };
 
@@ -133,13 +133,13 @@ struct file_browse_select_state{
 // パスとdirent互換の名前・種別をまとめた一時的な項目情報。
 struct dir_table{
     char *path_name; // 操作対象の借用パス。相対パスまたは絶対パス。
-    char d_name[DIR_ENTRY_NAME_MAX]; // 項目名のNUL終端文字列。
+    char d_name[DIR_ENTRY_NAME_MAX_]; // 項目名のNUL終端文字列。
     unsigned char d_type; // dirent.d_typeと同じDT_*値。
 };
 
 // ファイルブラウザ一覧へ保持する1行分の項目情報。
 struct dir_entry {
-    char name[DIR_ENTRY_NAME_MAX]; // 項目名のNUL終端文字列。
+    char name[DIR_ENTRY_NAME_MAX_]; // 項目名のNUL終端文字列。
     unsigned char d_type; // dirent.d_typeと同じDT_*値。
 };
 
@@ -231,20 +231,20 @@ struct str_data {
 
 // 後で消去する矩形領域を一時的に保持する。
 struct clear_box_data{
-    struct box clear_box[box_retention_max]; // 消去予定の矩形配列(画面座標)。
+    struct box clear_box[box_retention_max_]; // 消去予定の矩形配列(画面座標)。
     int clear_box_counter; // clear_boxに積まれている数。
 };
 
 // 次回更新で描く枠を積むキュー。配列と件数を分けて持つと
 // 「件数 <= 確保数」を呼び出し側が守る必要があるため、1つにまとめる。
 struct box_queue{
-    struct box box[DRAW_BOX_REQUEST_MAX]; // 積まれた枠(画面座標)。先頭からcount個が有効。
+    struct box box[DRAW_BOX_REQUEST_MAX_]; // 積まれた枠(画面座標)。先頭からcount個が有効。
     int count; // boxに入っている有効な数。
 };
 
 // 現在状態を末尾に保持する固定長の画面遷移履歴。
 struct screen_state_log{
-    enum screen_state screen_state_log[screen_state_log_storage]; // 画面遷移履歴。
+    enum screen_state screen_state_log[screen_state_log_storage_]; // 画面遷移履歴。
     int screen_state_log_counter; // 記録済みの遷移数。
 };
 
@@ -310,11 +310,11 @@ static inline void editor_set_screen_state(struct editor_state *state,
        log->screen_state_log[log->screen_state_log_counter - 1] == next_state){
         return;
     }
-    if(log->screen_state_log_counter >= screen_state_log_storage){
-        for(int i = 1; i < screen_state_log_storage; i++){
+    if(log->screen_state_log_counter >= screen_state_log_storage_){
+        for(int i = 1; i < screen_state_log_storage_; i++){
             log->screen_state_log[i - 1] = log->screen_state_log[i];
         }
-        log->screen_state_log_counter = screen_state_log_storage - 1;
+        log->screen_state_log_counter = screen_state_log_storage_ - 1;
     }
     log->screen_state_log[log->screen_state_log_counter++] = next_state;
 }

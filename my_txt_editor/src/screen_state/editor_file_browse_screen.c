@@ -19,7 +19,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
     //もしインプットモードなら英数字のキーには反応させない
     bool input_mode = get_file_browse_path_input_mode(file_browse);
 
-    if (ch == CTRL('f')) {
+    if (ch == CTRL_('f')) {
         restore_edit_screen(state);
         return true;
     }
@@ -37,7 +37,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
         size_t now_open_path_len = strlen(file_browse->path_name);
         char tmp_now_open_path[now_open_path_len + 2];
         strcpy(tmp_now_open_path,file_browse->path_name);
-        char joint_str[2] = {'/',NUL};
+        char joint_str[2] = {'/',NUL_};
         strcat(tmp_now_open_path,joint_str);
         struct dir_table now_path = {.path_name = tmp_now_open_path};
         now_open_path_name(&now_path,set);
@@ -90,10 +90,10 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                     return 1;
                 }
                 if(strchr(file_browse->path_name,'/') == child_dir){
-                    *(child_dir+1) = NUL;
+                    *(child_dir+1) = NUL_;
                 }
                 else{
-                    *(child_dir) = NUL;
+                    *(child_dir) = NUL_;
                 }
                 
 
@@ -115,7 +115,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                     file_browse->dir_name_table_num,
                     file_browse->path_name, &select_state);
             
-            if(select_state.select_name[0] != NUL && select_state.select_state == PATH_TYPE_DIR){
+            if(select_state.select_name[0] != NUL_ && select_state.select_state == PATH_TYPE_DIR){
                 struct dir_table now_path = {
                     .path_name = file_browse->path_name,
                 };
@@ -180,10 +180,10 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
             memcpy(tmp_path,path,sizeof(wchar_t) * (path_len+1));
             char mb_path[PATH_MAX];
             if(path_len > 0){
-                tmp_path[path_len-1] = WNUL;
+                tmp_path[path_len-1] = WNUL_;
                 size_t char_path_len = 0;
                 if((char_path_len = wcstombs(mb_path, tmp_path, sizeof(mb_path))) != (size_t)-1){
-                    mb_path[char_path_len] = NUL;
+                    mb_path[char_path_len] = NUL_;
                     struct dir_table now_path = {.path_name = mb_path};
                     now_open_path_name(&now_path,set);
                     state->render_flags |= RENDER_FILE_BROWSE;
@@ -194,7 +194,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
             wchar_t tmp_path[path_len + 2];
             memcpy(tmp_path,path,sizeof(wchar_t) * (path_len+1));
             tmp_path[path_len] = ch;
-            tmp_path[path_len + 1] = WNUL;
+            tmp_path[path_len + 1] = WNUL_;
             char mb_path[PATH_MAX];
             if(wcstombs(mb_path, tmp_path, sizeof(mb_path)) != (size_t)-1){
                 struct dir_table now_path = {.path_name = mb_path};
@@ -202,19 +202,19 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                 state->render_flags |= RENDER_FILE_BROWSE;
             }
         }
-        else if(ch == '\t' || ch == NUL || ch == '\r' || ch == '\n' || ch == KEY_ENTER){
+        else if(ch == '\t' || ch == NUL_ || ch == '\r' || ch == '\n' || ch == KEY_ENTER){
             
             const wchar_t *path = now_open_path_name(NULL,get);
             if(path == NULL)return true;
             char char_old_path[PATH_MAX];
             size_t converted = wcstombs(char_old_path,path,sizeof(char_old_path) - 1);
             if(converted == (size_t)-1){
-                error_log("wcstombs argument error");
+                error_log_("wcstombs argument error");
                 char *err = strerror(errno);
                 fputs(err,stderr);
                 return true;
             }
-            char_old_path[converted] = NUL;
+            char_old_path[converted] = NUL_;
 
             //現在入力されているパスが存在したら開く
             enum path_type path_state = get_path_type(char_old_path);
@@ -237,13 +237,13 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
             }
             struct dir_table *candidate = &candidates[selected_line];
             if(path == NULL){
-                error_log("can not get open path name");
+                error_log_("can not get open path name");
                 return true;
             }
         
             char *last_slash = strrchr(char_old_path,'/');
             if(last_slash != NULL){
-                *(last_slash+1) = NUL;
+                *(last_slash+1) = NUL_;
             }
 
             char char_path[PATH_MAX];
@@ -296,7 +296,7 @@ bool handle_file_browse_screen_input(struct editor_input_context *ctx, int input
                         file_browse->dir_name_table[i].d_type = table[i].d_type;
                     }
                     else{
-                        file_browse->dir_name_table[i].name[0] = NUL;
+                        file_browse->dir_name_table[i].name[0] = NUL_;
                         file_browse->dir_name_table[i].d_type = DT_UNKNOWN;
                     }
                 }
@@ -386,7 +386,7 @@ void draw_box_inside_dir(struct editor_state *state,struct dir_entry *table){
     if(table == NULL || state->file_browse.area.w <= 0 || state->file_browse.area.h <= 0){return;}
     char clear[state->file_browse.area.w + 1];
     memset(clear,' ',state->file_browse.area.w * sizeof(char));
-    clear[state->file_browse.area.w] = NUL;
+    clear[state->file_browse.area.w] = NUL_;
 
     // エントリ名は幅に関係なく丸ごと保持しているため、はみ出す分はここで詰める。
     // 描き始めがpos.x+1なので、使える幅は内側幅から1引いた分。
@@ -402,7 +402,7 @@ void draw_box_inside_dir(struct editor_state *state,struct dir_entry *table){
         if(last_slash != NULL){
             size_t dir_len = (last_slash == now_path.path_name) ? 1 : (size_t)(last_slash - now_path.path_name);
             memcpy(input_dir,now_path.path_name,dir_len);
-            input_dir[dir_len] = NUL;
+            input_dir[dir_len] = NUL_;
             base_path = input_dir;
         }
     }
@@ -413,7 +413,7 @@ void draw_box_inside_dir(struct editor_state *state,struct dir_entry *table){
         if(max_len <= 0) continue;
 
         struct dir_entry *entry = &table[state->file_browse.select_line.now_logical_line + i];
-        if(entry->name[0] == NUL) continue;
+        if(entry->name[0] == NUL_) continue;
 
         int draw_y = state->file_browse.area.pos.y + i;
         int draw_x = state->file_browse.area.pos.x + 3;
@@ -465,7 +465,7 @@ void draw_select_dir_scene_color(struct editor_state *state,int dir_num,int num)
     if(state->file_browse.select_line.previous_line != state->file_browse.select_line.now_line){
         int previous_line = state->file_browse.area.pos.y + state->file_browse.select_line.previous_line;
         // 選択が移った前の行を通常の本文色へ戻す。
-        mvchgat(previous_line,state->file_browse.area.pos.x,state->file_browse.area.w,A_NORMAL,PAIR_TEXT,NULL);
+        mvchgat(previous_line,state->file_browse.area.pos.x,state->file_browse.area.w,A_NORMAL,PAIR_TEXT_,NULL);
     }
     move(cur_y,cur_x);
 }
@@ -513,7 +513,7 @@ void draw_file_browse(struct editor_input_context *ctx){
     draw_now_path_name(state->file_browse.box,
                        state->file_browse.path_name);
     draw_box_inside_dir(state, state->file_browse.dir_name_table);
-    draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,PAIR_SELECT);
+    draw_select_dir_scene_color(state,state->file_browse.dir_name_table_num,PAIR_SELECT_);
 
     //サーチボックスの描画とサーチボックス内のパス描画
     if(get_file_browse_path_input_mode(&state->file_browse)){

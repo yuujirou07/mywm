@@ -17,10 +17,10 @@ int main(){
 
     set_log_file("/home/yuujirou07/vscode_proj/mywm_proj/my_txt_editor/tests");
 
-    error_log("hello tester");
+    error_log_("hello tester");
 
 
-    editor_log_msg("hello tester");
+    editor_log_msg_("hello tester");
 
 
     close_error_log_file();

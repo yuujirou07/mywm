@@ -104,7 +104,7 @@ static void ft_open_select_item(syntax *syntax,struct editor_state *state){
         //通常ファイルなら編集画面に移動する
         if(open_type == PATH_TYPE_FILE){
             editor_set_screen_state(state,edit_screen_mode);
-            set_cell_color_pair(PAIR_TEXT,item_box.pos.x,tmp_item->screen_y,item_box.w - 1);
+            set_cell_color_pair(PAIR_TEXT_,item_box.pos.x,tmp_item->screen_y,item_box.w - 1);
             my_cur_set(state,true);
             state->render_flags |= RENDER_EDIT_SCREEN_BASE;
             state->render_flags |= RENDER_FILETREE;
@@ -250,12 +250,12 @@ int ft_handle_normal_mode(struct editor_input_context *ctx,wchar_t wchr){
         ft_enter_search_mode(state);
     }
 
-    if(wchr == CTRL('n')){
+    if(wchr == CTRL_('n')){
         // ツリーを出したキーと同じキーで閉じる。
         hide_filetree(ctx);
         return true;
     }
-    else if(wchr == CTRL('h')){
+    else if(wchr == CTRL_('h')){
         editor_set_screen_state(state,line_jump_mode);
         reset_jump_mode(state);
         state->render_flags |= RENDER_LINE_JUMP;
@@ -291,7 +291,7 @@ int ft_handle_search_mode(struct editor_state *state,wchar_t wchr){
 
 
         tmp_file_tree->ft_search_data.serch_str[serch_str_len] = wchr;
-        tmp_file_tree->ft_search_data.serch_str[serch_str_len + 1] = WNUL;
+        tmp_file_tree->ft_search_data.serch_str[serch_str_len + 1] = WNUL_;
     }
 
     return 0;

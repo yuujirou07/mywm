@@ -1,5 +1,5 @@
-#ifndef TXT_EDITOR_FUNC_H
-#define TXT_EDITOR_FUNC_H
+#ifndef TXT_EDITOR_FUNC_H_
+#define TXT_EDITOR_FUNC_H_
 
 #include <ncurses.h>
 #include <stdbool.h>

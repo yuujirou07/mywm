@@ -15,7 +15,7 @@ bool handle_ask_make_file_mode_input(struct editor_state *state, int input_resul
 
             int index = state->make_file_mode_status.new_file_name_counter++;
             state->make_file_mode_status.new_file_name[index] = (char)ch;
-            state->make_file_mode_status.new_file_name[index + 1] = NUL;
+            state->make_file_mode_status.new_file_name[index + 1] = NUL_;
             state->render_flags |= RENDER_MAKE_FILE;
             
         }
@@ -23,7 +23,7 @@ bool handle_ask_make_file_mode_input(struct editor_state *state, int input_resul
             && state->make_file_mode_status.new_file_name_counter > 0){
             state->make_file_mode_status.new_file_name_counter--;
             state->make_file_mode_status.new_file_name[
-                state->make_file_mode_status.new_file_name_counter] = NUL;
+                state->make_file_mode_status.new_file_name_counter] = NUL_;
             state->render_flags |= RENDER_MAKE_FILE;
         }
         else if(ch == KEY_ENTER || ch == '\n' || ch == '\r' || ch == ' '){
@@ -32,7 +32,7 @@ bool handle_ask_make_file_mode_input(struct editor_state *state, int input_resul
                 return true;
             }
             state->make_file_mode_status.
-                new_file_name[state->make_file_mode_status.new_file_name_counter] = NUL;
+                new_file_name[state->make_file_mode_status.new_file_name_counter] = NUL_;
 
             editor_set_screen_state(state, edit_screen_mode);
             memcpy(state->file_data.now_open_path_name,

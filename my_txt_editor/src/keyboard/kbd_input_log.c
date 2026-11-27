@@ -17,14 +17,14 @@ int KL_add(struct editor_state *state,wchar_t ch,int result,screen_state screen_
     }
 
     if(state->key_board_data.key_log_data.key_log == NULL){
-        state->key_board_data.key_log_data.key_allocate_num = KEY_LOG_ALLOCATE_NUM;
+        state->key_board_data.key_log_data.key_allocate_num = KEY_LOG_ALLOCATE_NUM_;
         state->key_board_data.key_log_data.key_count = 0;
         state->key_board_data.key_log_data.key_log = 
             malloc(sizeof(key_data) * 
                 state->key_board_data.key_log_data.key_allocate_num);
 
         if(state->key_board_data.key_log_data.key_log == NULL){
-            error_log("malloc");
+            error_log_("malloc");
             return -1;
         }
     }
@@ -43,7 +43,7 @@ int KL_add(struct editor_state *state,wchar_t ch,int result,screen_state screen_
                 sizeof(key_data) * tmp_realloc_num
             );
         if(tmp_key_data == NULL){
-            error_log("malloc");
+            error_log_("malloc");
             return -1;
         }
         state->key_board_data.key_log_data.key_log = tmp_key_data;
@@ -79,12 +79,12 @@ int KL_open_key_log_file(const char *relative_path){
     if(key_log_file == NULL){
         char path[PATH_MAX];
         if(editor_path_from_exe_dir(path,sizeof(path),relative_path) == NULL){
-            error_log("can not resolve key log file path");
+            error_log_("can not resolve key log file path");
             return -1;
         }
         key_log_file = fopen(path,"a+");
         if(key_log_file == NULL){
-            error_log("can not open key log file");
+            error_log_("can not open key log file");
             return -1;
         }
     }

@@ -39,6 +39,6 @@ char *read_file_all(const char *path){
         return NULL;
     }
 
-    buf[size] = NUL;
+    buf[size] = NUL_;
     return buf;
 }

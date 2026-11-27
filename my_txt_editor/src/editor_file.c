@@ -80,9 +80,9 @@ int load_dir_table(struct editor_state *state,struct dir_entry **table,int *tabl
 // 返り値: なし。種類・名前をselect_stateへ返し、成功時のFILEは旧FILEを閉じてstateが所有する。失敗はerror。
 void load_file(struct editor_state *state,struct dir_entry *table,int table_num,
                     char *path_name,struct file_browse_select_state *select_state){
-    select_state->select_name[0] = NUL;
+    select_state->select_name[0] = NUL_;
     select_state->select_state = PATH_TYPE_ERROR;
-    if(path_name == NULL || path_name[0] == NUL){
+    if(path_name == NULL || path_name[0] == NUL_){
         return;
     }
 
@@ -219,20 +219,20 @@ bool editor_ensure_line_cap(struct editor_state *state, int line, int need){
     if(need <= state->str.line_cap[line]){
         return true;
     }
-    if(need > EDITOR_LINE_COL_MAX){
+    if(need > EDITOR_LINE_COL_MAX_){
         return false;
     }
 
     // 全行の本文は1本の連続バッファに詰めて持つ。1行だけ伸ばすと後続行を丸ごとずらし、
     // 各行のoffsetも更新する必要がある。倍々で伸ばすのはこの高コストな操作の回数を減らすため。
     int old_cap = state->str.line_cap[line];
-    int new_cap = (old_cap > 0) ? old_cap : EDITOR_LINE_COL_SLACK;
+    int new_cap = (old_cap > 0) ? old_cap : EDITOR_LINE_COL_SLACK_;
 
     while(new_cap < need){
         new_cap *= 2;
     }
-    if(new_cap > EDITOR_LINE_COL_MAX){
-        new_cap = EDITOR_LINE_COL_MAX;
+    if(new_cap > EDITOR_LINE_COL_MAX_){
+        new_cap = EDITOR_LINE_COL_MAX_;
     }
 
     long delta     = (long)new_cap - old_cap;//その行の拡張後と拡張前の要素数の差
@@ -327,7 +327,7 @@ bool editor_ensure_row_capacity(struct editor_state *state, int need_rows){
 // 全角文字はUTF-8で複数バイトだが、バイト数のまま数えれば実セル数(1〜2)以上になり、確保不足を起こさない。
 static size_t count_line_cells(const char *buff, int indent_range){
     size_t cells = 0;
-    for(const char *p = buff; *p != NUL; p++){
+    for(const char *p = buff; *p != NUL_; p++){
         if(*p == '\n' || *p == '\r'){
             continue;
         }
@@ -418,11 +418,11 @@ void load_all_lines(struct editor_state *state){
     if(total_cells < 0){
         total_cells = 0;
     }
-    if(line_count > (LONG_MAX - total_cells) / EDITOR_LINE_COL_SLACK){
+    if(line_count > (LONG_MAX - total_cells) / EDITOR_LINE_COL_SLACK_){
         editor_error_screen(state, "file is too large");
         return;
     }
-    long total_capacity = total_cells + line_count * EDITOR_LINE_COL_SLACK;
+    long total_capacity = total_cells + line_count * EDITOR_LINE_COL_SLACK_;
 
     if(!editor_alloc_text_buffer(state, (int)line_count, total_capacity)){
         editor_error_screen(state, "can not allocate file buffer");
@@ -442,8 +442,8 @@ void load_all_lines(struct editor_state *state){
         }
         state->str.line_offset[i] = cur;
         state->str.line[i]        = 0;
-        state->str.line_cap[i]    = (room < EDITOR_LINE_COL_SLACK)
-            ? (int)room : EDITOR_LINE_COL_SLACK;
+        state->str.line_cap[i]    = (room < EDITOR_LINE_COL_SLACK_)
+            ? (int)room : EDITOR_LINE_COL_SLACK_;
 
         fseek(state->file_data.now_open_file, state->file_data.file_line_start_num[i], SEEK_SET);
         if(fgets(buf, max_line_size, state->file_data.now_open_file) == NULL){
@@ -451,8 +451,8 @@ void load_all_lines(struct editor_state *state){
             continue;
         }
         int len = strlen(buf);
-        if(len > 0 && buf[len - 1] == '\n') buf[--len] = NUL;
-        if(len > 0 && buf[len - 1] == '\r') buf[--len] = NUL;
+        if(len > 0 && buf[len - 1] == '\n') buf[--len] = NUL_;
+        if(len > 0 && buf[len - 1] == '\r') buf[--len] = NUL_;
 
         memset(wide_buf, 0, sizeof(wide_buf));
         size_t converted = mbstowcs(wide_buf, buf, max_line_size - 1);
@@ -463,7 +463,7 @@ void load_all_lines(struct editor_state *state){
 
         wint_t *cells = &state->str.wint_line_str_data[cur];
         //この行に書ける上限。余白分を引いた残りが実データの上限になる。
-        long line_room = room - EDITOR_LINE_COL_SLACK;
+        long line_room = room - EDITOR_LINE_COL_SLACK_;
         if(line_room < 0){
             line_room = room;
         }
@@ -495,7 +495,7 @@ void load_all_lines(struct editor_state *state){
 
         state->str.line[i]     = visible_width;
         //実データ + 余白をこの行の容量とし、次の行の開始位置を決める
-        state->str.line_cap[i] = visible_width + EDITOR_LINE_COL_SLACK;
+        state->str.line_cap[i] = visible_width + EDITOR_LINE_COL_SLACK_;
         if(state->str.line_cap[i] > room){
             state->str.line_cap[i] = (int)room;
         }
@@ -511,8 +511,8 @@ void load_all_lines(struct editor_state *state){
             continue;
         }
         state->str.line_offset[i] = cur;
-        state->str.line_cap[i]    = (room < EDITOR_LINE_COL_SLACK)
-            ? (int)room : EDITOR_LINE_COL_SLACK;
+        state->str.line_cap[i]    = (room < EDITOR_LINE_COL_SLACK_)
+            ? (int)room : EDITOR_LINE_COL_SLACK_;
         cur += state->str.line_cap[i];
     }
 }
@@ -575,7 +575,7 @@ char *editor_buffer_to_utf8(struct editor_state *state)
         text[pos++] = '\n';
     }
 
-    text[pos] = NUL;
+    text[pos] = NUL_;
     return text;
 }
 
@@ -585,7 +585,7 @@ void save_file(struct editor_state *state){
     if(state == NULL)return;
 
     const char *now_open_path_name = state->file_data.now_open_path_name;
-    if(now_open_path_name[0] == NUL){
+    if(now_open_path_name[0] == NUL_){
         if(state->settings_data->ask_make_file){
             editor_set_screen_state(state, ask_make_file_mode);
             return;
@@ -697,36 +697,36 @@ void load_screen_size(struct editor_state *state){
 // エディタ設定へコンパイル時の既定値を入れる。
 // 引数: settings_data=初期化する設定構造体。 返り値: なし。
 void load_default_editor_settings(struct editor_settings *settings_data){
-    settings_data->default_load_line_size       = DEFAULT_LOAD_LINE_SIZE;
-    settings_data->load_buffer_lines            = LOAD_BUFFER_LINES;
-    settings_data->max_line_size                = MAX_LINE_SIZE;
-    settings_data->max_lines                    = MAX_LINES;
-    settings_data->line_number_space            = LINE_NUMBER_SPACE;
-    settings_data->indent_range                 = INDENT_RANGE;
-    settings_data->jmp_set_cur_pos              = JMP_SET_CUR_POS;
-    settings_data->bar_side_state               = DEFAULT_STATUS_BAR_SIDE;
-    settings_data->show_status_bar              = SHOW_STATUS_BAR;
-    settings_data->draw_split_line              = DEFAULT_DRAW_SPLIT_LINE;
-    settings_data->ask_make_file                = DEFAULT_ASK_MAKE_FILE;
-    settings_data->file_select_scene_lighting   = DEFAULT_FILE_SELECT_SCENE_LIGHTING;
-    settings_data->show_start_menu              = DEFAULT_SHOW_START_MENU;
-    settings_data->lsp.lsp_launch_startup_editor= DEFAULT_LSP_PROCESS_LAUNCH_STARTUP_EDITOR;
-    settings_data->lsp.lsp_epoll_timeout_ms     = DEFAULT_EPOLL_TIME_OUT_MS;
-    settings_data->lsp.lsp_use                  = DEFAULT_LSP_USE;
-    settings_data->use_icon                     = DEFAULT_USE_ICON;
-    settings_data->built_in_syntax              = DEFAULT_BUILT_IN_SYNTAX;
-    settings_data->editor_scroll_sensitivity    = DEFAULT_EDITOR_SCROLL_SENSITIVITY;
-    settings_data->auto_complete_settings_data.auto_complete_enabled       = DEFAULT_AUTO_COMPLETE;
-    settings_data->auto_complete_settings_data.auto_complete_window_enable = DEFAULT_AUTO_COMPLETE_WINDOW;
+    settings_data->default_load_line_size       = DEFAULT_LOAD_LINE_SIZE_;
+    settings_data->load_buffer_lines            = LOAD_BUFFER_LINES_;
+    settings_data->max_line_size                = MAX_LINE_SIZE_;
+    settings_data->max_lines                    = MAX_LINES_;
+    settings_data->line_number_space            = LINE_NUMBER_SPACE_;
+    settings_data->indent_range                 = INDENT_RANGE_;
+    settings_data->jmp_set_cur_pos              = JMP_SET_CUR_POS_;
+    settings_data->bar_side_state               = DEFAULT_STATUS_BAR_SIDE_;
+    settings_data->show_status_bar              = SHOW_STATUS_BAR_;
+    settings_data->draw_split_line              = DEFAULT_DRAW_SPLIT_LINE_;
+    settings_data->ask_make_file                = DEFAULT_ASK_MAKE_FILE_;
+    settings_data->file_select_scene_lighting   = DEFAULT_FILE_SELECT_SCENE_LIGHTING_;
+    settings_data->show_start_menu              = DEFAULT_SHOW_START_MENU_;
+    settings_data->lsp.lsp_launch_startup_editor= DEFAULT_LSP_PROCESS_LAUNCH_STARTUP_EDITOR_;
+    settings_data->lsp.lsp_epoll_timeout_ms     = DEFAULT_EPOLL_TIME_OUT_MS_;
+    settings_data->lsp.lsp_use                  = DEFAULT_LSP_USE_;
+    settings_data->use_icon                     = DEFAULT_USE_ICON_;
+    settings_data->built_in_syntax              = DEFAULT_BUILT_IN_SYNTAX_;
+    settings_data->editor_scroll_sensitivity    = DEFAULT_EDITOR_SCROLL_SENSITIVITY_;
+    settings_data->auto_complete_settings_data.auto_complete_enabled       = DEFAULT_AUTO_COMPLETE_;
+    settings_data->auto_complete_settings_data.auto_complete_window_enable = DEFAULT_AUTO_COMPLETE_WINDOW_;
     settings_data->auto_complete_settings_data.auto_complete_window_size =
-        (struct pos){DEFAULT_AUTO_COMPLETE_WINDOW_WIDTH, DEFAULT_AUTO_COMPLETE_WINDOW_HEIGHT};
-    settings_data->auto_complete_settings_data.auto_complete_position_mode = DEFAULT_AUTO_COMPLETE_POSITION_MODE;
-    settings_data->settings_lang                = DEFAULT_SETTINGS_LANGUAGE;
-    settings_data->key_log_settings.use_key_log = DEFAULT_USE_KEY_LOG;
-    settings_data->key_log_settings.key_log_buffer_size = DEFAULT_KEY_LOG_BUFFER_SIZE;
-    snprintf(settings_data->lsp.lsp_language,sizeof(settings_data->lsp.lsp_language),"%s",DEFAULT_LSP_LANGUAGE);
-    settings_data->editor_settings_program.enabled      = DEFAULT_EDITOR_SETTINGS_PROGRAM_ENABLED;
-    settings_data->editor_settings_program.language     = DEFAULT_EDITOR_SETTINGS_PROGRAM_LANGUAGE;
+        (struct pos){DEFAULT_AUTO_COMPLETE_WINDOW_WIDTH_, DEFAULT_AUTO_COMPLETE_WINDOW_HEIGHT_};
+    settings_data->auto_complete_settings_data.auto_complete_position_mode = DEFAULT_AUTO_COMPLETE_POSITION_MODE_;
+    settings_data->settings_lang                = DEFAULT_SETTINGS_LANGUAGE_;
+    settings_data->key_log_settings.use_key_log = DEFAULT_USE_KEY_LOG_;
+    settings_data->key_log_settings.key_log_buffer_size = DEFAULT_KEY_LOG_BUFFER_SIZE_;
+    snprintf(settings_data->lsp.lsp_language,sizeof(settings_data->lsp.lsp_language),"%s",DEFAULT_LSP_LANGUAGE_);
+    settings_data->editor_settings_program.enabled      = DEFAULT_EDITOR_SETTINGS_PROGRAM_ENABLED_;
+    settings_data->editor_settings_program.language     = DEFAULT_EDITOR_SETTINGS_PROGRAM_LANGUAGE_;
     settings_data->editor_settings_program.root_src_path = NULL;
 }
 
@@ -789,7 +789,7 @@ const wchar_t *now_open_path_name(struct dir_table *path,enum flags flags){
         free(now_open_path.path_name);
         now_open_path.path_name = saved_path;
         memcpy(now_open_path.d_name,name_start,name_size);
-        now_open_path.d_name[name_size] = NUL;
+        now_open_path.d_name[name_size] = NUL_;
         now_open_path.d_type = DT_UNKNOWN;
 
         struct stat st;
@@ -812,10 +812,10 @@ const wchar_t *now_open_path_name(struct dir_table *path,enum flags flags){
         ? now_open_path.path_name : "";
     size_t converted = mbstowcs(wide_path,path_name,PATH_MAX - 1);
     if(converted == (size_t)-1){
-        wide_path[0] = WNUL;
+        wide_path[0] = WNUL_;
         return NULL;
     }
-    wide_path[converted] = WNUL;
+    wide_path[converted] = WNUL_;
     return wide_path;
 }
 
@@ -830,13 +830,13 @@ int check_dir_mem(struct dir_table *dir_table,int size){
 
     
     if(path == NULL){
-        error_log("can not get now open path name");
+        error_log_("can not get now open path name");
         return -1;
     }
     char char_path[PATH_MAX];
     size_t converted = wcstombs(char_path,path,sizeof(char_path) - 1);
     if(converted == (size_t)-1)return -1;
-    char_path[converted] = NUL;
+    char_path[converted] = NUL_;
 
     char dir_name[PATH_MAX] = ".";
     char *last_slash = strrchr(char_path,'/');
@@ -847,13 +847,13 @@ int check_dir_mem(struct dir_table *dir_table,int size){
         //パスが(ルートディレクトリだったら)('/')
         if(last_slash == char_path){
             dir_name[0] = '/';
-            dir_name[1] = NUL;
+            dir_name[1] = NUL_;
         }
         else{
             size_t dir_name_size = (size_t)(last_slash - char_path);
             //最後の'/'までコピーする
             memcpy(dir_name,char_path,dir_name_size);
-            dir_name[dir_name_size] = NUL;
+            dir_name[dir_name_size] = NUL_;
         }
     }
     else{
@@ -933,7 +933,7 @@ int now_input_path_open(struct editor_state *state,syntax *syntax){
 
         }
         else{
-            *(last_slash_ptr + 1) = NUL;
+            *(last_slash_ptr + 1) = NUL_;
             load_dir_table(
                 state,
                 &state->file_browse.dir_name_table,

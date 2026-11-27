@@ -1,5 +1,5 @@
-#ifndef FTJ_H
-#define FTJ_H
+#ifndef FTJ_H_
+#define FTJ_H_
 
 #include <dirent.h>
 #include <limits.h>

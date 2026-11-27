@@ -1,5 +1,5 @@
-#ifndef KEY_MAP_H
-#define KEY_MAP_H
+#ifndef KEY_MAP_H_
+#define KEY_MAP_H_
 
 #include <wchar.h>
 #include "public_data/c_settings/c_settings_setting.h"
@@ -22,7 +22,7 @@ typedef struct{
 // 返り値: 成功0、listがNULLまたは確保失敗-1(失敗時は空・未確保の状態)。
 int key_map_list_init(key_map_list_data *list);
 // key1・key2の2キー列にmodeとactionを登録する。配列が満杯なら2倍に拡張する。
-// 返り値: 成功0、引数不正・登録上限(KEY_MAPPING_MAX_NUM)到達・拡張時の確保失敗-1(追加しない)。
+// 返り値: 成功0、引数不正・登録上限(KEY_MAPPING_MAX_NUM_)到達・拡張時の確保失敗-1(追加しない)。
 int key_map_list_add(key_map_list_data *list,wchar_t key1,wchar_t key2,
                      MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action);
 // 配列を解放して空・未確保の状態へ戻す。listがNULLなら何もしない。

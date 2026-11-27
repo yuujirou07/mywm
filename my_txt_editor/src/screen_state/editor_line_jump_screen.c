@@ -10,16 +10,16 @@ bool handle_line_jump_mode_input(syntax *syntax,struct editor_state *state, wint
     if(ch >= '0' && ch <= '9' &&
        state->jump_mode_data.jump_line_num_counter < (int)sizeof(state->jump_mode_data.jump_line_num) - 1){
         state->jump_mode_data.jump_line_num[state->jump_mode_data.jump_line_num_counter++] = (char)ch;
-        state->jump_mode_data.jump_line_num[state->jump_mode_data.jump_line_num_counter] = NUL;
+        state->jump_mode_data.jump_line_num[state->jump_mode_data.jump_line_num_counter] = NUL_;
         state->render_flags |= RENDER_LINE_JUMP;
     }
-    else if(ch == CTRL('h')){
+    else if(ch == CTRL_('h')){
         reset_jump_mode(state);
         restore_edit_screen(state);
     }
     else if(ch == KEY_BACKSPACE && state->jump_mode_data.jump_line_num_counter > 0){
         state->jump_mode_data.jump_line_num_counter--;
-        state->jump_mode_data.jump_line_num[state->jump_mode_data.jump_line_num_counter] = NUL;
+        state->jump_mode_data.jump_line_num[state->jump_mode_data.jump_line_num_counter] = NUL_;
         state->render_flags |= RENDER_LINE_JUMP;
     }
     else if(ch == KEY_ENTER || ch == '\n' || ch == '\r' || ch == ' '){
@@ -31,8 +31,8 @@ bool handle_line_jump_mode_input(syntax *syntax,struct editor_state *state, wint
         if(n < 1){
             n = 1;
         }
-        else if( n > DEFAULT_LOAD_LINE_SIZE ){
-            n = DEFAULT_LOAD_LINE_SIZE;
+        else if( n > DEFAULT_LOAD_LINE_SIZE_ ){
+            n = DEFAULT_LOAD_LINE_SIZE_;
         }
 
         move_view_to_line(state, n - 1, 0);
@@ -65,7 +65,7 @@ void draw_line_jump(struct editor_state *state){
         prompt_pos.x = state->status_bar->pos.x;
     }
     mvhline(prompt_pos.y, prompt_pos.x + 1, ' ',
-            strlen("JMP_LINE ") + JUMP_LINE_NUM_DIGITS);
+            strlen("JMP_LINE ") + JUMP_LINE_NUM_DIGITS_);
     mvaddstr(prompt_pos.y, prompt_pos.x + 1, "JMP_LINE ");
     mvaddnstr(prompt_pos.y, prompt_pos.x + 1 + (int)strlen("JMP_LINE "),
                 state->jump_mode_data.jump_line_num,

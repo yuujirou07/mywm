@@ -1,5 +1,5 @@
-#ifndef START_MENU_H
-#define START_MENU_H
+#ifndef START_MENU_H_
+#define START_MENU_H_
 #include <stdbool.h>
 #include <time.h>
 #include "ascii_art_comb.h"
@@ -20,14 +20,14 @@ struct start_menu_screen_context {
     const char *startup_log_path; // 起動時間ログのパス。文字列を所有しない。
 };
 
-#define my_txt_editor_var 0.0 // スタートメニューへ表示するエディタの版番号。
-#define new_file 0 // 新規ファイル作成を選択した返り値。
-#define quit 1 // エディタ終了を選択した返り値。
-#define select_folder 3 // フォルダ選択を選択した返り値。
-#define settings 2 // 設定画面を選択した返り値。
-#define none 4 // 操作が確定していない状態を表す値。
-#define resize_request 5 // 端末リサイズによる再描画要求を表す返り値。
-#define option_list_max 8 // プラグイン内の選択肢配列へ確保する要素数。
+#define my_txt_editor_var_ 0.0 // スタートメニューへ表示するエディタの版番号。
+#define new_file_ 0 // 新規ファイル作成を選択した返り値。
+#define quit_ 1 // エディタ終了を選択した返り値。
+#define select_folder_ 3 // フォルダ選択を選択した返り値。
+#define settings_ 2 // 設定画面を選択した返り値。
+#define none_ 4 // 操作が確定していない状態を表す値。
+#define resize_request_ 5 // 端末リサイズによる再描画要求を表す返り値。
+#define option_list_max_ 8 // プラグイン内の選択肢配列へ確保する要素数。
 
 int draw_start_menu(int screen_max_w,int screen_max_h,struct ascii_data *ascii_data_ptr,
                     const struct timespec *startup_start_time,

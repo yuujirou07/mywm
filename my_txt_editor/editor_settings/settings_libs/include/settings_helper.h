@@ -1,7 +1,7 @@
 
 
-#ifndef SETTINGS_HELPER_H
-#define SETTINGS_HELPER_H
+#ifndef SETTINGS_HELPER_H_
+#define SETTINGS_HELPER_H_
 
 
 

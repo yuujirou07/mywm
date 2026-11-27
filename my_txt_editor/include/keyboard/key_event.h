@@ -1,5 +1,5 @@
-#ifndef KEY_EVENT_H
-#define KEY_EVENT_H
+#ifndef KEY_EVENT_H_
+#define KEY_EVENT_H_
 
 #include <wchar.h>
 #include "public_data/c_settings/c_settings_setting.h"

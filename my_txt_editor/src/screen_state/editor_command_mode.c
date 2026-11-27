@@ -15,7 +15,7 @@
 // コマンドモードのデータを初期化する。コマンド文字列を空にし、
 // コマンドリストを初期容量(32件)で確保する。成功時は0を返す。
 int init_command_mode(struct editor_state *state){
-    state->command_mode_data.command_str_data.command_str[0] = WNUL;
+    state->command_mode_data.command_str_data.command_str[0] = WNUL_;
     state->command_mode_data.command_str_data.command_str_len = 0;
 
     state->command_mode_data.command_list_data.command_allocate_num = 32;
@@ -69,7 +69,7 @@ bool handle_command_mode(struct editor_state *state,wchar_t chr,int input_result
         if(tmp_cmd_str_data->command_str_len < command_str_cap - 1){
             tmp_cmd_str_data->command_str[tmp_cmd_str_data->command_str_len] = chr;
             tmp_cmd_str_data->command_str_len++;
-            tmp_cmd_str_data->command_str[tmp_cmd_str_data->command_str_len] = WNUL;
+            tmp_cmd_str_data->command_str[tmp_cmd_str_data->command_str_len] = WNUL_;
             state->render_flags |= RENDER_COMMAND_MODE;
         }
     }
@@ -106,10 +106,10 @@ int draw_command_str(struct editor_state *state){
 
     tmp_chr[0] = state->command_mode_data.command_str_data
         .command_str[state->command_mode_data.command_str_data.command_str_len - 1];
-    tmp_chr[1] = WNUL;
+    tmp_chr[1] = WNUL_;
     
     
-    short color_id = PAIR_TEXT;
+    short color_id = PAIR_TEXT_;
 
     setcchar(&tmp_cchar,tmp_chr,A_NORMAL,color_id,NULL);
     struct pos ms_pos = state->cursor.screen_pos;
@@ -145,7 +145,7 @@ int backspace_command_str(struct editor_state *state){
 
     mvhline(ms_pos.y,ms_pos.x - chr_len,L' ',chr_len);
     command_str_data->command_str_len--;
-    command_str_data->command_str[command_str_data->command_str_len] = WNUL;
+    command_str_data->command_str[command_str_data->command_str_len] = WNUL_;
     state->cursor.screen_pos.x -= chr_len;
     cur_pos_push(state->cursor.screen_pos,state);
     return 0;
@@ -166,7 +166,7 @@ int clear_command_str(struct editor_state *state){
     struct pos ms_pos = state->cursor.screen_pos;
     ms_pos.x -= command_str_len;
     mvhline(ms_pos.y,ms_pos.x,L' ',command_str_len);
-    command_str_data->command_str[0] = WNUL;
+    command_str_data->command_str[0] = WNUL_;
     command_str_data->command_str_len = 0;
     
     cur_pos_push(ms_pos,state);

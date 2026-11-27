@@ -1,5 +1,5 @@
-#ifndef FILETREE_H
-#define FILETREE_H
+#ifndef FILETREE_H_
+#define FILETREE_H_
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -8,16 +8,16 @@
 #include"editor_types.h"
 #include "editor_syntax.h"
 
-#define FILETREE_DEFAULT_SIZE_W 10 // ファイルツリーの既定幅（端末セル数）。
-#define FILETREE_MIN_W 5
+#define FILETREE_DEFAULT_SIZE_W_ 10 // ファイルツリーの既定幅（端末セル数）。
+#define FILETREE_MIN_W_ 5
 
 //ファイルツリーのダブルクリックでのリサイズ設定falseならシングルっクリックでリサイズイベントが発生する
-#define FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE false
+#define FILETREE_ENABLE_OUTLINE_DOUBLE_CLICK_RESIZE_ false
 
-#define FILE_TREE_ICON_CLOSE ">"
-#define FILE_TREE_ICON_OPEN "\u2304"
+#define FILE_TREE_ICON_CLOSE_ ">"
+#define FILE_TREE_ICON_OPEN_ "\u2304"
 
-#define FILE_TREE_SELECT_LINE_COLOR_RGB 250
+#define FILE_TREE_SELECT_LINE_COLOR_RGB_ 250
 
 
 struct ft_path_click_data;

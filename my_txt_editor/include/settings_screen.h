@@ -1,5 +1,5 @@
-#ifndef SETTINGS_SCREEN_H
-#define SETTINGS_SCREEN_H
+#ifndef SETTINGS_SCREEN_H_
+#define SETTINGS_SCREEN_H_
 
 #include <ncurses.h>
 #include <wchar.h>
@@ -8,20 +8,20 @@
 struct editor_state;
 
 // "[q]"のように囲み括弧を含めたキー表示の桁数。
-#define SETTINGS_ITEM_KEY_WIDTH 3
+#define SETTINGS_ITEM_KEY_WIDTH_ 3
 // 設定項目の1列あたりの最小幅。これ未満になるくらいなら列を増やさない。
-#define SETTINGS_ITEM_COLUMN_MIN_WIDTH 24
+#define SETTINGS_ITEM_COLUMN_MIN_WIDTH_ 24
 // 設定項目の1列あたりの最大幅。枠が広くてもキーが右端まで離れないよう、
 // 余った幅は左右の余白へ回して中央に寄せる。
-#define SETTINGS_ITEM_COLUMN_MAX_WIDTH 32
+#define SETTINGS_ITEM_COLUMN_MAX_WIDTH_ 32
 // 設定画面の枠を画面いっぱいまで広げないための余白。画面サイズをこの値で
 // 割った分を上下左右に残し、残りを枠の上限として使う。
-#define SETTINGS_SCREEN_MARGIN_DIV 5
+#define SETTINGS_SCREEN_MARGIN_DIV_ 5
 // 設定画面の枠の最小サイズ。項目が少なくてもこれ以上は確保し、見た目の
 // 大きさが項目数で極端に変わらないようにする。
-#define SETTINGS_SCREEN_MIN_W 44
-#define SETTINGS_SCREEN_MIN_H 10
-#define SETTINGS_INPUT_MAX 64 // 設定値入力欄の要素数。終端WNULを含む。
+#define SETTINGS_SCREEN_MIN_W_ 44
+#define SETTINGS_SCREEN_MIN_H_ 10
+#define SETTINGS_INPUT_MAX_ 64 // 設定値入力欄の要素数。終端WNULを含む。
 
 // 設定画面で受け付ける値の型。
 typedef enum{
@@ -48,7 +48,7 @@ typedef struct{
     int settings_item_data_allocate_num; // item_dataへ確保済みの要素数。
     int select_line; // 先頭を0とする現在の選択項目番号。
     bool value_input_mode; // 選択項目の値を入力中ならtrue。
-    wchar_t input_value[SETTINGS_INPUT_MAX]; // 入力中のNUL終端ワイド文字列。
+    wchar_t input_value[SETTINGS_INPUT_MAX_]; // 入力中のNUL終端ワイド文字列。
     int input_value_len; // input_valueに入っている終端を除く文字数。
 }settings_screen_data;
 

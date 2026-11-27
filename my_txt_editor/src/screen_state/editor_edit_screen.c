@@ -15,7 +15,7 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
     struct editor_state *state = ctx->state;
     WINDOW *win = ctx->win;
 
-    if(state->file_data.now_open_path_name[0] != NUL && state->settings_data->show_status_bar){
+    if(state->file_data.now_open_path_name[0] != NUL_ && state->settings_data->show_status_bar){
         state->render_flags |= RENDER_EDIT_SCREEN_BASE;
         state->render_flags |= RENDER_FILETREE;
     }
@@ -30,23 +30,23 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
         }
         return true;
     }
-    else if(ch == CTRL('h')){
+    else if(ch == CTRL_('h')){
         editor_set_screen_state(state, line_jump_mode);
         reset_jump_mode(state);
         state->render_flags |= RENDER_LINE_JUMP;
         return true;
     }
-    else if (ch == CTRL('f')) {
+    else if (ch == CTRL_('f')) {
         my_cur_set(state,false);
         editor_set_screen_state(state, file_browse_screen_mode);
         state->render_flags |= RENDER_FILE_BROWSE;
         return true;
     }
-    else if(ch == CTRL('s')){
+    else if(ch == CTRL_('s')){
         file_save_motion(ctx);
         return true;
     }
-    else if(ch == CTRL('n')){
+    else if(ch == CTRL_('n')){
         editor_set_screen_state(state,filetree_screen_mode);
         // 編集領域をツリーの幅だけ右へ寄せる。
         int x;
@@ -57,14 +57,14 @@ bool handle_edit_screen_input(struct editor_input_context *ctx, int input_result
         show_filetree(ctx,tmp_ft_box);
         my_cur_set(state,false);
     }
-    else if(ch == CTRL('u')){
+    else if(ch == CTRL_('u')){
         editor_set_screen_state(state,editor_command_mode);
         cursor_set_command_mode_position(state);
 
         return true;
     }
     //デバッグ用
-    else if(ch == CTRL(' ')){
+    else if(ch == CTRL_(' ')){
        struct lsp_process *lsp = lsp_get_active(ctx);
        if(lsp != NULL){
            lsp_send_completion(lsp->to_server_fd,state);

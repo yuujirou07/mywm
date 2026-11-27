@@ -1,8 +1,8 @@
 
 
 
-#ifndef EDITOR_COMMANDS_H
-#define EDITOR_COMMANDS_H
+#ifndef EDITOR_COMMANDS_H_
+#define EDITOR_COMMANDS_H_
 
 
 #include <stdbool.h>

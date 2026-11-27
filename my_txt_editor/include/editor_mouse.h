@@ -1,5 +1,5 @@
-#ifndef TXT_EDITOR_MOUSE_H
-#define TXT_EDITOR_MOUSE_H
+#ifndef TXT_EDITOR_MOUSE_H_
+#define TXT_EDITOR_MOUSE_H_
 
 #include <ncurses.h>
 #include <stdbool.h>
@@ -7,7 +7,7 @@
 #include "default_settings.h"
 
 
-#define MOUSE_DOUBLE_CLICK_INTERVAL 290.0
+#define MOUSE_DOUBLE_CLICK_INTERVAL_ 290.0
 
 
 
