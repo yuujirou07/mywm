@@ -26,10 +26,6 @@
 #endif
 
 
-static const char *const config_env_try_macro[] = {
-    "$XDG_CONFIG_HOME",
-    "$HOME"
-};
 
 
 char *editor_path_from_exe_dir(char *buf, size_t buf_size, const char *relative);
