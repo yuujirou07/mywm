@@ -328,13 +328,13 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
             return -1;
         }
         
-        size_t full_path_size = strlen(base_dir) + strlen(dl_path) + 1;
+        size_t full_path_size = strlen(base_dir) + strlen("/") + strlen(dl_path) + 1;
         char *full_path = malloc(full_path_size);
         if(full_path == NULL){
             wrp_stderr_puts_("malloc error");
             return -1;
         }
-        snprintf(full_path,full_path_size,"%s%s",base_dir,dl_path);
+        snprintf(full_path,full_path_size,"%s/%s",base_dir,dl_path);
         editor_log(full_path,NULL,NULL,NULL,0);
         if(access(full_path,F_OK) != 0){
             free(full_path);

@@ -7,7 +7,7 @@
 #define LOG_MSG_SIZE_MAX_ 1024
 
 
-#define EDITOR_LOG_DIR_ "log_data/"
+#define EDITOR_LOG_DIR_ "log_data"
 #define EDITOR_ERROR_LOG_FILE_NAME_ "editor_error_log.txt"
 
 int set_error_log_file(const char *relative_path);

@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 
     //エラーログ履歴ファイルのパス設定(my_txt_editor/直下からの相対パス)
     //エラーログが作れない場合終了する
-    if(set_error_log_file(EDITOR_LOG_DIR_ EDITOR_ERROR_LOG_FILE_NAME_) < 0){
+    if(set_error_log_file(EDITOR_LOG_DIR_ "/" EDITOR_ERROR_LOG_FILE_NAME_) < 0){
         wrp_stderr_puts_("can not set error log file");
         return EXIT_SUCCESS;
     }
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
         if(result == 0){
             if(editor_path_from_exe_dir(startuptime_log_file_path_name,sizeof(startuptime_log_file_path_name),
-                        EDITOR_LOG_DIR_ "startuptime_log.log") != NULL){
+                        EDITOR_LOG_DIR_ "/startuptime_log.log") != NULL){
                 startup_timer = 1;
             }
             else{

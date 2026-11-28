@@ -11,14 +11,14 @@
 
 #ifdef EDITOR_DEV_MODE
     // my_txt_editor/直下からの相対パス(editor_path_from_exe_dirへ渡す)
-    #define SO_DIR_ "editor_settings/so_file/"
-    #define LOG_DIR_ "log_data/"
-    #define START_MENU_SO_PATH_ SO_DIR_ "start_menu_plug.so"
-    #define SETTINGS_SO_PATH_ SO_DIR_ "settings.so"
-    #define EDITOR_SETTINGS_DIR_ "editor_settings/"
-    #define EDITOR_SETTINGS_PATH_ EDITOR_SETTINGS_DIR_ "my_txt_editor_settings.json"
-    #define SETTINGS_ITEMS_PATH_ EDITOR_SETTINGS_DIR_ "settings_items.json"
-    #define ICON_SETTINGS_PATH_ EDITOR_SETTINGS_DIR_ "editor_icon_settings.json"
+    #define SO_DIR_ "editor_settings/so_file"
+    #define LOG_DIR_ "log_data"
+    #define START_MENU_SO_PATH_ SO_DIR_ "/start_menu_plug.so"
+    #define SETTINGS_SO_PATH_ SO_DIR_ "/settings.so"
+    #define EDITOR_SETTINGS_DIR_ "editor_settings"
+    #define EDITOR_SETTINGS_PATH_ EDITOR_SETTINGS_DIR_ "/my_txt_editor_settings.json"
+    #define SETTINGS_ITEMS_PATH_ EDITOR_SETTINGS_DIR_ "/settings_items.json"
+    #define ICON_SETTINGS_PATH_ EDITOR_SETTINGS_DIR_ "/editor_icon_settings.json"
     #define ASCII_ART_PATH_ "my_txt_editor_settings_folder/ascii_art_img.txt"
     #define KEY_EVENT_LOG_PATH_ "log_data/key_event.log"
     #define EDITOR_LOG_DATA_ "log_data/editor_log.log"

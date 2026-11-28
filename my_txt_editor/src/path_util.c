@@ -146,7 +146,7 @@ int get_editor_config_home(const char **buf, size_t *buf_size){
             *buf = strdup(paswd->pw_dir);
         }
         else{
-            
+                        
 
 
 
