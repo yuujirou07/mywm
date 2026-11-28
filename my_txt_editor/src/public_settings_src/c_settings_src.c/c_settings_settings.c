@@ -651,16 +651,11 @@ int add_dl_handle_ptr(void **dl_handle_ptr,DL_handle_data *handle_data){
 
 // src_pathの設定プログラムを読込パスへ登録し、成功したら設定APIを初期化する。
 // 返り値: 引数不正なら-1、それ以外は0(登録に失敗しても0を返す)。
-int load_first_settings_program_file(struct editor_input_context *restrict ctx,char *restrict src_path){
-    if(ctx == NULL || src_path == NULL){
+int load_first_settings_program_file(struct editor_input_context *restrict ctx){
+    if(ctx == NULL){
         return -1;
     }
-    //設定プログラムのパスを読込み先へ登録する
-    //dlファイルパス設定
-    const int rt = add_dl_path(ctx,src_path);
-    if(rt == 0){
-        init_settings_src(&ctx->editor_api,ctx);
-    }
+    init_settings_src(&ctx->editor_api,ctx);
     
     return 0;
 }

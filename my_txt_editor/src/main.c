@@ -342,10 +342,7 @@ int main(int argc, char *argv[])
 
     //設定プログラムファイルロード　
     if(state.settings_data->editor_settings_program.enabled){
-        load_settings_program(
-            &input_context,
-            DEFAULT_EDITOR_SETTINGS_PROGRAM_SO_PATH_
-        );
+        load_first_settings_program_file(&input_context);
     }
     
     
