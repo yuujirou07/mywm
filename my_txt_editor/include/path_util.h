@@ -25,6 +25,8 @@
     
 #endif
 
+#define GLOBAL_CONFIG_NAME ".config/my_txt_editor"
+
 
 
 
