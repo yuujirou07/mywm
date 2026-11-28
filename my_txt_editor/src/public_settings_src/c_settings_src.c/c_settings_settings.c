@@ -191,7 +191,6 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
 
     const char *obj_path = NULL;
 
-
     //最初に読み込むファイルを名前検索する
     //なかった場合エラー
     for(size_t i = 0;i < idx;i++){
@@ -208,7 +207,10 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
         }
         
         int i = strcmp(last_slash + 1,FIRST_LOAD_SETTINGS_C_FILE_NAME);
-        
+        if(i == 0){
+            obj_path = dl_path_list[i];
+            break;
+        }
     }
 
 
