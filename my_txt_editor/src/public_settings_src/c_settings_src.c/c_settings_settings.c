@@ -183,7 +183,7 @@ int destroy_key_input_event_handle(struct editor_input_context *ctx){
 static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
     const size_t idx = ctx->dl_data.dl_handle_data.dl_handles_list_num;
     char **dl_path_list = ctx->dl_data.dl_load_path_data.loading_dl_lib; 
-    if(ctx->dl_data.dl_load_path_data.loading_dl_lib == NULL ||
+    if(dl_path_list == NULL ||
         idx >= ctx->dl_data.dl_load_path_data.now_loading_lib_num){
         error_log_("no settings library path to load");
         return NULL;
@@ -211,6 +211,11 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
             obj_path = dl_path_list[i];
             break;
         }
+    }
+    
+    if(obj_path == NULL){
+        error_log_("can not found settings obj first load file");
+        return NULL;
     }
 
 
