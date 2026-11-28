@@ -27,8 +27,7 @@
 
   "editor_settings_program":{
     "enabled":true,
-    "language":"c",
-    "root_src_path":"so_file/settings.so"
+    "language":"c"
   },
   "editor_scroll_sensitivity":2
 }

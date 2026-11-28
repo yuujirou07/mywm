@@ -43,6 +43,7 @@
 #define DEFAULT_LSP_LANGUAGE_ "" // 起動対象の言語サーバー名の既定値。空なら未指定。
 #define DEFAULT_EDITOR_SETTINGS_PROGRAM_ENABLED_ true // 設定プログラムを使う既定値。
 #define DEFAULT_EDITOR_SETTINGS_PROGRAM_LANGUAGE_ editor_settings_program_lang_UNKNOWN // 設定プログラムの言語の既定値。
+#define DEFAULT_EDITOR_SETTINGS_PROGRAM_SO_PATH_ "so_file/settings.so" // 設定プログラムの既定パス(editor_settings/からの相対)。
 
 
 
@@ -134,11 +135,10 @@ typedef enum{
 }settings_lsp_key;
 
 // 設定プログラム(共有ライブラリ)設定内キーの種類。
-// 有効可否・使用言語・ルートソースパスを指す。
+// 有効可否・使用言語を指す。
 typedef enum{
     EDITOR_SETTINGS_PROGRAM_ENABLED  = 0,
     EDITOR_SETTINGS_PROGRAM_LANGUAGE = 1,
-    EDITOR_SETTINGS_PROGRAM_ROOT_SRC_PATH = 2,
 }editor_settings_program;
 
 static const char *const SETTINGS_ROOT_KEY_STR[] = {
@@ -201,7 +201,6 @@ static const char *const SETTINGS_LSP_KEY_STR[] = {
 static const char *const EDITOR_SETTINGS_PROGRAM_KEY_STR[] = {
     [EDITOR_SETTINGS_PROGRAM_ENABLED] = "enabled",
     [EDITOR_SETTINGS_PROGRAM_LANGUAGE] = "language",
-    [EDITOR_SETTINGS_PROGRAM_ROOT_SRC_PATH] = "root_src_path",
 };
 
 
@@ -310,12 +309,10 @@ typedef struct{
 }key_log_settings;
 
 
-// 設定プログラムの有効可否・言語・ルートソースパスをまとめた設定。
-// root_src_pathの所有者は設定の読込み側で、この構造体は解放しない。
+// 設定プログラムの有効可否と言語をまとめた設定。
 typedef struct{
     bool enabled;
     editor_settings_program_lang language;
-    char *root_src_path;
 }editor_settings_program_data;
 
 // 既定値と設定JSONを統合した、実行中のエディタ設定。

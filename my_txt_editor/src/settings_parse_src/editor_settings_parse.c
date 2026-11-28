@@ -216,15 +216,6 @@ void load_custom_editor_settings(struct editor_settings *settings_data){
             settings_data->editor_settings_program.language = comb_str_to_program_lang(language->valuestring);
         }
 
-        cJSON *root_src_path = cJSON_GetObjectItemCaseSensitive(
-            settings_program,
-            SETTINGS_JSON_KEY_STR[JSON_OBJ_EDITOR_SETTINGS_PROGRAM][EDITOR_SETTINGS_PROGRAM_ROOT_SRC_PATH]
-            );
-        if(cJSON_IsString(root_src_path)){
-            
-            settings_data->editor_settings_program.root_src_path = strdup(root_src_path->valuestring);
-        }
-
     }
 
     cJSON_Delete(json_data);

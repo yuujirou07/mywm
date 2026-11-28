@@ -344,7 +344,7 @@ int main(int argc, char *argv[])
     if(state.settings_data->editor_settings_program.enabled){
         load_settings_program(
             &input_context,
-            state.settings_data->editor_settings_program.root_src_path
+            DEFAULT_EDITOR_SETTINGS_PROGRAM_SO_PATH_
         );
     }
     
@@ -493,10 +493,6 @@ int main(int argc, char *argv[])
         dlclose(handle);
     }
 
-
-    if(state.settings_data->editor_settings_program.root_src_path != NULL){
-        free(state.settings_data->editor_settings_program.root_src_path);
-    }
 
     key_map_list_destroy(&input_context.input_manager.key_maps);
     destroy_dl_path(&input_context);

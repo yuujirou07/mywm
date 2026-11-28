@@ -727,7 +727,6 @@ void load_default_editor_settings(struct editor_settings *settings_data){
     snprintf(settings_data->lsp.lsp_language,sizeof(settings_data->lsp.lsp_language),"%s",DEFAULT_LSP_LANGUAGE_);
     settings_data->editor_settings_program.enabled      = DEFAULT_EDITOR_SETTINGS_PROGRAM_ENABLED_;
     settings_data->editor_settings_program.language     = DEFAULT_EDITOR_SETTINGS_PROGRAM_LANGUAGE_;
-    settings_data->editor_settings_program.root_src_path = NULL;
 }
 
 // 現在の選択行をprevious_lineに保存し、新しい選択行を設定する。
