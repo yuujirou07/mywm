@@ -131,12 +131,34 @@ enum path_type get_path_type(const char *path){
 
 
 #ifdef EDITOR_DEV_MODE
-// 開発用: 設定ディレクトリは解決せず、何も書き込まずに0を返す。
+// 開発用: 実行ファイル(build/main)の1つ上=プロジェクト直下のパスを返す(末尾に/は付けない)。
+// 返り値: 成功時0(*bufはstrdupした文字列で呼び出し側がfree)、取得失敗・確保失敗は-1。
 static int resolve_dir(const char **buf, size_t *buf_size){
-    (void)buf;
-    (void)buf_size;
+    char exe_path[PATH_MAX];
+    ssize_t len = readlink(SELF_SIM_LINK_, exe_path, sizeof(exe_path) - 1);
+    if(len <= 0){
+        return -1;
+    }
+    exe_path[len] = NUL_;
+
+    // 実行ファイル名とbuildディレクトリ名を落とす
+    for(int i = 0;i < 2;i++){
+        char *slash = strrchr(exe_path, '/');
+        if(slash == NULL){
+            return -1;
+        }
+        *slash = NUL_;
+    }
+
+    char *dup_path = strdup(exe_path);
+    if(dup_path == NULL){
+        return -1;
+    }
+    *buf = dup_path;
+    *buf_size = strlen(dup_path);
     return 0;
 }
+
 #else
 // 通常用: $XDG_CONFIG_HOME、無ければホームディレクトリ配下の設定ディレクトリを解決する。
 static int resolve_dir(const char **buf, size_t *buf_size){
