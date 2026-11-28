@@ -226,13 +226,17 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx,c
     while((obj_dirent = readdir(so_file_DIR)) != NULL){
 
         if(strcmp(obj_dirent->d_name,FIRST_LOAD_SETTINGS_C_FILE_NAME) == 0){
-            const size_t tmp_obj_path_size =
-                strlen(so_file_dir) + 1 + strlen(obj_dirent->d_name) + 1;
+            const size_t so_file_dir_len  = strlen(so_file_dir);
+            const size_t dir_name_len     = strlen(obj_dirent->d_name);
+            const size_t tmp_obj_path_size = so_file_dir_len + 1 + dir_name_len + 1;
 
             char *tmp_obj_path = malloc(tmp_obj_path_size);
             if(tmp_obj_path != NULL){
-                snprintf(tmp_obj_path,tmp_obj_path_size,"%s/%s",
-                    so_file_dir,obj_dirent->d_name);
+                memcpy(tmp_obj_path,so_file_dir,so_file_dir_len);
+                tmp_obj_path[so_file_dir_len] = '/';
+                memcpy(tmp_obj_path + so_file_dir_len + 1,
+                    obj_dirent->d_name,dir_name_len);
+                tmp_obj_path[so_file_dir_len + 1 + dir_name_len] = '\0';
                 *current_path = tmp_obj_path;
             }
             break;
