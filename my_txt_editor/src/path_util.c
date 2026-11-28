@@ -37,8 +37,8 @@ int editor_path_from_config_home(char *buf, size_t buf_size, const char *relativ
         free((void *)base_dir);
         return (int)need_len;
     }
-    char *tmp_buff = NULL;
-    int written = snprintf(tmp_buff, buf_size, "%s/%s", base_dir, relative);
+    char tmp_buff[need_len];
+    int written = snprintf(tmp_buff,need_len, "%s/%s", base_dir, relative);
     free((void *)base_dir);
 
     if(buf_size == 0){
