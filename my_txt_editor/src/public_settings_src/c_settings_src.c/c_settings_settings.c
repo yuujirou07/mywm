@@ -191,29 +191,16 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
 
     const char *obj_path = NULL;
 
-    //最初に読み込むファイルを名前検索する
-    //なかった場合エラー
-    for(size_t i = 0;i < idx;i++){
-        const char *last_slash = strrchr(dl_path_list[i],'/');
-        if(last_slash == NULL){
-            size_t file_path = strlen(dl_path_list[i]);
-            size_t errpr_str_len = strlen( "Settings C file path error FILE NAME = ");
-            char settings_c_file_path_error[file_path + errpr_str_len + 2];
-            snprintf(
-                settings_c_file_path_error,
-                sizeof(settings_c_file_path_error),
-                "Settings C file path error FILE NAME = %s\n",
-                dl_path_list[i]);
-            error_log_write(settings_c_file_path_error);
-            continue;
-        }
     
-        int i = strcmp(last_slash + 1,FIRST_LOAD_SETTINGS_C_FILE_NAME);
-        if(i == 0){
-            obj_path = dl_path_list[i];
-            break;
-        }
+
+
+    
+    int i = strcmp(last_slash + 1,FIRST_LOAD_SETTINGS_C_FILE_NAME);
+    if(i == 0){
+        obj_path = dl_path_list[i];
+        break;
     }
+    
     
     if(obj_path == NULL){
         error_log_("can not found settings obj first load file");
