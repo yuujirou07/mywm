@@ -31,10 +31,13 @@ do{\
 
 
 // editor_logへmsgとビルド日時、呼び出し元のファイル名と行番号を渡す。set_log_file()で出力先を設定済みであること。
-#define editor_log_msg_(msg) editor_log((msg),__DATE__,__TIME__,__FILE__,__LINE__)
+#define editor_log_msg_(msg) do{editor_log((msg),__DATE__,__TIME__,__FILE__,__LINE__)}while(0);
+
 
 #define error_log_(msg) do{char fin_msg[ERROR_MSG_SIZE_MAX_];\
-    snprintf(fin_msg,sizeof(fin_msg),"ERROR:# %s FILE: %s  LINE: %d DATE: %s TIME: %s\n",#msg,__FILE__,__LINE__,__DATE__,__TIME__);\
+    snprintf(fin_msg,sizeof(fin_msg),\
+    "ERROR:# %s FILE: %s  LINE: %d DATE: %s TIME: %s\n",\
+    #msg,__FILE__,__LINE__,__DATE__,__TIME__);\
     error_log_write(fin_msg);\
 }while(0)
 
