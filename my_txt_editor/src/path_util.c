@@ -11,33 +11,26 @@
 #include "editor_log.h"
 #include "editor_types.h"
 
-// 実行ファイル(build/main)の1つ上=プロジェクト直下を基準に、relativeを連結してbuf_sizeバイトのbufへ書く。
-// 返り値: 成功時buf、引数不正・位置取得失敗・長さ超過はNULL。bufは呼び出し側所有で、プラグイン内でも本体が基準。
+static int resolve_dir(const char **buf, size_t *buf_size);
+
+// resolve_dir()が返すディレクトリを基準に、relativeを連結してbuf_sizeバイトのbufへ書く。
+// 基準は、EDITOR_DEV_MODEなら実行ファイル(build/main)の1つ上=プロジェクト直下、通常ビルドなら設定ディレクトリ。
+// 返り値: 成功時buf、引数不正・基準の取得失敗・長さ超過はNULL。bufは呼び出し側所有で、プラグイン内でも本体が基準。
 char *editor_path_from_exe_dir(char *buf, size_t buf_size, const char *relative){
     if(buf == NULL || buf_size == 0 || relative == NULL){
         return NULL;
     }
 
-    char exe_path[PATH_MAX];
-    ssize_t len = readlink(SELF_SIM_LINK_, exe_path, sizeof(exe_path) - 1);
-    if(len <= 0){
-        wrp_stderr_puts_("failed readlink");
-        error_log_("failed readlink");
+    const char *base_dir = NULL;
+    size_t base_dir_len = 0;
+    if(resolve_dir(&base_dir,&base_dir_len) != 0){
+        wrp_stderr_puts_("failed resolve dir");
+        error_log_("failed resolve dir");
         return NULL;
     }
 
-    exe_path[len] = NUL_;
-
-    // 実行ファイル名とbuildディレクトリ名を落として、プロジェクト直下(my_txt_editor/)にする
-    for(int i = 0;i < 2;i++){
-        char *slash = strrchr(exe_path, '/');
-        if(slash == NULL){
-            return NULL;
-        }
-        *slash = NUL_;
-    }
-
-    int written = snprintf(buf, buf_size, "%s/%s", exe_path, relative);
+    int written = snprintf(buf, buf_size, "%s/%s", base_dir, relative);
+    free((void *)base_dir);
     if(written < 0 || (size_t)written >= buf_size){
         return NULL;
     }
