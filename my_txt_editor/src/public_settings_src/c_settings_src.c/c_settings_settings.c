@@ -202,7 +202,9 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
                 "Settings C file path error FILE NAME = %s\n",
                 dl_path_list[i]);
             error_log_write(settings_c_file_path_error);
+            continue;
         }
+        
     }
 
 
