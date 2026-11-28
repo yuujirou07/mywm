@@ -223,8 +223,10 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
             memcpy(tmp_obj_path + so_file_dir_len + 2,obj_dirent->d_name,dir_name_len);
             tmp_obj_path[so_file_dir_len + dir_name_len + 2] = '\0';
             obj_path = strdup(tmp_obj_path);
+            
             break;
         }
+    
     }
 
     if(get_path_type(obj_path) != PATH_TYPE_FILE){
