@@ -131,6 +131,11 @@ enum path_type get_path_type(const char *path){
 
 
 int get_editor_config_home(const char **buf, size_t *buf_size){
+
+    #ifdef EDITOR_DEV_MODE
+        return 0;
+    #endif
+
     const char *tmp_config_path = NULL;
     
     tmp_config_path = getenv("XDG_CONFIG_HOME");
@@ -142,8 +147,7 @@ int get_editor_config_home(const char **buf, size_t *buf_size){
 
     struct passwd *paswd = getpwuid(getuid());
     if(paswd != NULL && paswd->pw_dir != NULL &&
-        get_path_type(paswd->pw_dir) == PATH_TYPE_DIR)
-    {
+        get_path_type(paswd->pw_dir) == PATH_TYPE_DIR){
 
         size_t pw_dir_len = strlen(paswd->pw_dir);
         size_t global_config_name_len = strlen(GLOBAL_CONFIG_NAME);
