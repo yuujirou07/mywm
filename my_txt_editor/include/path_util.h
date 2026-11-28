@@ -9,6 +9,7 @@
 #define SELF_SIM_LINK_ "/proc/self/exe"
 
 #define GLOBAL_CONFIG_NAME ".config/my_txt_editor"
+#define FIRST_LOAD_SETTINGS_C_FILE_NAME "settings.so" 
 
 
 #ifdef EDITOR_DEV_MODE

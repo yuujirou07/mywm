@@ -192,6 +192,8 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
     const char *obj_path = NULL;
 
 
+    //最初に読み込むファイルを名前検索する
+    //なかった場合エラー
     for(size_t i = 0;i < idx;i++){
         const char *last_slash = strrchr(dl_path_list[i],'/');
         if(last_slash == NULL){
@@ -204,6 +206,8 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
             error_log_write(settings_c_file_path_error);
             continue;
         }
+        
+        int i = strcmp(last_slash + 1,FIRST_LOAD_SETTINGS_C_FILE_NAME);
         
     }
 
