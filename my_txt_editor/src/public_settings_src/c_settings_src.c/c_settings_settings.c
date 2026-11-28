@@ -14,7 +14,7 @@
 #include "editor_types.h"
 
 static MY_TXT_EDITOR_RESULT api_save_file(void *userdata);
-static void *load_current_settings_obj_c_file(struct editor_input_context *ctx);
+static void *load_current_settings_obj_c_file(struct editor_input_context *ctx,char **current_path);
 static MY_TXT_EDITOR_RESULT api_key_mapping(void *userdata,wchar_t key1,wchar_t key2,MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action);
 static MY_TXT_EDITOR_RESULT add_key_input_event_handle(void *userdata,wchar_t chr,MY_TXT_EDITOR_SCREEN_MODE mode,EDITOR_ACTION action);
 static int check_input_handle(struct editor_input_context *ctx,wchar_t chr);
@@ -89,7 +89,10 @@ static MY_TXT_EDITOR_RESULT api_key_mapping(void *userdata,wchar_t key1,wchar_t 
 void init_settings_src(MY_TXT_EDITOR_API *const api,struct editor_input_context *ctx){
     connect_api_mem_data(api,ctx);
    
-    void *handle = load_current_settings_obj_c_file(ctx);
+    char *current_path = NULL;
+    void *handle = load_current_settings_obj_c_file(ctx,&current_path);
+    //パスはdlopenまでしか使わないのでここで解放する
+    free(current_path);
     if(handle == NULL){
         error_log_write("handle null error");
         return;
@@ -104,7 +107,14 @@ void init_settings_src(MY_TXT_EDITOR_API *const api,struct editor_input_context 
     }
     //ハンドル配列が満杯ならパス配列と同じ確保数まで広げる
     DL_handle_data *handle_data = &ctx->dl_data.dl_handle_data;
-    if(handle_data->dl_handles_list_allocate_num <= handle_data->dl_handles_list_num){
+    if(handle_data == NULL){
+        handle_data->dl_handles_list_allocate_num = 16;
+        handle_data->dl_handles_list_num = 0;
+        handle_data->dl_handles_list = 
+            malloc(sizeof(void *) * handle_data->dl_handles_list_allocate_num);
+
+    }
+    else if(handle_data->dl_handles_list_allocate_num <= handle_data->dl_handles_list_num){
         size_t new_allocate_num = ctx->dl_data.dl_load_path_data.now_loading_lib_allocate_num;
         if(new_allocate_num <= handle_data->dl_handles_list_num){
             new_allocate_num = handle_data->dl_handles_list_num + 1;
@@ -179,20 +189,24 @@ int destroy_key_input_event_handle(struct editor_input_context *ctx){
 
 
 // add_dl_pathで登録したパスのうち、まだハンドルを持たない次の添字(=ハンドル件数)のものをdlopenする。
-// 返り値: 読込ハンドル、未登録・パス不正・読込失敗はNULL。成功したハンドルは呼び出し側がdlcloseする。
-static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
-    const size_t idx = ctx->dl_data.dl_handle_data.dl_handles_list_num;
+// current_pathには計算した最初にロードするパスを書き戻す(NULLはエラー時に戻る)。
+// 返り値: 読込ハンドル、未登録・パス不正・読込失敗はNULL。*current_pathの所有権は呼び出し側にある。
+static void *load_current_settings_obj_c_file(struct editor_input_context *ctx,char **current_path){
+    if(ctx == NULL || current_path == NULL){
+        error_log_("argument error");
+        return NULL;
+    }
+    *current_path = NULL;
+
     char **dl_path_list = ctx->dl_data.dl_load_path_data.loading_dl_lib; 
-    if(dl_path_list == NULL || ctx == NULL){
+    if(dl_path_list == NULL){
         error_log_("no settings library path to load");
         return NULL;
     }
 
     
-    char *so_file_dir = NULL;
-    editor_path_from_config_home(so_file_dir,0,SO_DIR_);
-    
-    if(so_file_dir == NULL){
+    char so_file_dir[PATH_MAX];
+    if(editor_path_from_config_home(so_file_dir,sizeof(so_file_dir),SO_DIR_) != 0){
         error_log_("obj path error");
         return NULL;
     }
@@ -208,34 +222,31 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
         return NULL;
     } 
     
-    const char *obj_path = NULL;
-    for(size_t i = 0;i < idx;i++){
-        const struct dirent *obj_dirent = readdir(so_file_DIR);
+    const struct dirent *obj_dirent = NULL;
+    while((obj_dirent = readdir(so_file_DIR)) != NULL){
 
         if(strcmp(obj_dirent->d_name,FIRST_LOAD_SETTINGS_C_FILE_NAME) == 0){
-            const size_t so_file_dir_len = strlen(so_file_dir);
-            const size_t dir_name_len    = strlen(obj_dirent->d_name);
+            const size_t tmp_obj_path_size =
+                strlen(so_file_dir) + 1 + strlen(obj_dirent->d_name) + 1;
 
-            char tmp_obj_path[so_file_dir_len + dir_name_len + 2];
-
-            memcpy(tmp_obj_path,so_file_dir,so_file_dir_len);
-            tmp_obj_path[so_file_dir_len + 1] = '/';
-            memcpy(tmp_obj_path + so_file_dir_len + 2,obj_dirent->d_name,dir_name_len);
-            tmp_obj_path[so_file_dir_len + dir_name_len + 2] = '\0';
-            obj_path = strdup(tmp_obj_path);
-            
+            char *tmp_obj_path = malloc(tmp_obj_path_size);
+            if(tmp_obj_path != NULL){
+                snprintf(tmp_obj_path,tmp_obj_path_size,"%s/%s",
+                    so_file_dir,obj_dirent->d_name);
+                *current_path = tmp_obj_path;
+            }
             break;
         }
-    
     }
+    closedir(so_file_DIR);
 
-    if(get_path_type(obj_path) != PATH_TYPE_FILE){
+    if(*current_path == NULL || get_path_type(*current_path) != PATH_TYPE_FILE){
         error_log_("obj_path error");
         return NULL;
     }
 
 
-    void *handle = dlopen(obj_path,RTLD_NOW | RTLD_GLOBAL);
+    void *handle = dlopen(*current_path,RTLD_NOW | RTLD_GLOBAL);
     if(handle == NULL){
         error_log_("can not load settings library");
     }
@@ -663,6 +674,8 @@ int load_first_settings_program_file(struct editor_input_context *restrict ctx){
     if(ctx == NULL){
         return -1;
     }
+    
+
     init_settings_src(&ctx->editor_api,ctx);
     
     return 0;
