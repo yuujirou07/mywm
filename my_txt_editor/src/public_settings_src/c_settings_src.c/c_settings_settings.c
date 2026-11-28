@@ -190,28 +190,31 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
     }
 
     
-    char *obj_path = NULL;
-    editor_path_from_config_home(obj_path,0,SO_DIR_);
+    char *so_file_dir = NULL;
+    editor_path_from_config_home(so_file_dir,0,SO_DIR_);
     
-    if(obj_path == NULL){
+    if(so_file_dir == NULL){
         error_log_("obj path error");
         return NULL;
     }
     
-    if(get_path_type(obj_path) != PATH_TYPE_DIR){
+    if(get_path_type(so_file_dir) != PATH_TYPE_DIR){
         error_log_("caan not found settings directory");
         return NULL;
     }
     
-    DIR *obj_path_DIR = opendir(obj_path);
-    if(obj_path_DIR == NULL){
+    DIR *so_file_DIR = opendir(so_file_dir);
+    if(so_file_DIR == NULL){
         error_log_("obj path error");
         return NULL;
     } 
     
+    const char *obj_path = NULL;
     for(size_t i = 0;i < idx;i++){
-        
+        struct dirent *obj_dirent = readdir(so_file_DIR);
+        if(strcmp(obj_dirent->d_name,FIRST_LOAD_SETTINGS_C_FILE_NAME) == 0){
 
+        }
 
     }
 
