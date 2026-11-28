@@ -211,14 +211,27 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
     
     const char *obj_path = NULL;
     for(size_t i = 0;i < idx;i++){
-        struct dirent *obj_dirent = readdir(so_file_DIR);
+        const struct dirent *obj_dirent = readdir(so_file_DIR);
+
         if(strcmp(obj_dirent->d_name,FIRST_LOAD_SETTINGS_C_FILE_NAME) == 0){
+            const size_t so_file_dir_len = strlen(so_file_dir);
+            const size_t dir_name_len    = strlen(obj_dirent->d_name);
 
+            char tmp_obj_path[so_file_dir_len + dir_name_len + 2];
+
+            memcpy(tmp_obj_path,so_file_dir,so_file_dir_len);
+            tmp_obj_path[so_file_dir_len + 1] = '/';
+            memcpy(tmp_obj_path + so_file_dir_len + 2,obj_dirent->d_name,dir_name_len);
+            tmp_obj_path[so_file_dir_len + dir_name_len + 2] = '\0';
+            obj_path = strdup(tmp_obj_path);
+            break;
         }
-
     }
 
-
+    if(get_path_type(obj_path) != PATH_TYPE_FILE){
+        error_log_("obj_path error");
+        return NULL;
+    }
 
     void *handle = dlopen(obj_path,RTLD_NOW | RTLD_GLOBAL);
     if(handle == NULL){
