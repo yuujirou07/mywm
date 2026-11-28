@@ -32,11 +32,7 @@ int editor_path_from_config_home(char *buf, size_t buf_size, const char *relativ
 
     // 基準 + '/' + relative + 終端'\0' の合計を必要バイト数とする
     const size_t need_len = base_dir_len + 1 + strlen(relative) + 1;
-
-    if(need_len > buf_size){
-        free((void *)base_dir);
-        return (int)need_len;
-    }
+    
     char tmp_buff[need_len];
     int written = snprintf(tmp_buff,need_len, "%s/%s", base_dir, relative);
     free((void *)base_dir);
