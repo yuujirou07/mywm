@@ -4,6 +4,7 @@
 #include<stdlib.h>
 #include <sys/stat.h>
 #include<sys/stat.h>
+#include<pwd.h>
 
 
 #include "path_util.h"
@@ -129,13 +130,27 @@ enum path_type get_path_type(const char *path){
 
 
 
-int get_editor_config_home(char *buf, size_t *buf_size){
+int get_editor_config_home(const char **buf, size_t *buf_size){
     const char *tmp_config_path = NULL;
     
     tmp_config_path = getenv("XDG_CONFIG_HOME");
     if(tmp_config_path != NULL && get_path_type(tmp_config_path) == PATH_TYPE_DIR){
-        buf = tmp_config_path;
+        *buf = strdup(tmp_config_path);
         *buf_size = strlen(tmp_config_path);
+        return 0;
+    }
+
+    struct passwd *paswd = getpwuid(getuid());
+    if(paswd != NULL){
+        if(paswd->pw_dir != NULL){
+            *buf = strdup(paswd->pw_dir);
+        }
+        else{
+            
+
+
+
+        }
     }
 
     
