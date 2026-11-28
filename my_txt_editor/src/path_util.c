@@ -141,7 +141,10 @@ int get_editor_config_home(const char **buf, size_t *buf_size){
     }
 
     struct passwd *paswd = getpwuid(getuid());
-    if(paswd != NULL && paswd->pw_dir != NULL){
+    if(paswd != NULL && paswd->pw_dir != NULL &&
+        get_path_type(paswd->pw_dir) == PATH_TYPE_DIR)
+    {
+
         size_t pw_dir_len = strlen(paswd->pw_dir);
         size_t global_config_name_len = strlen(GLOBAL_CONFIG_NAME);
 
@@ -153,12 +156,12 @@ int get_editor_config_home(const char **buf, size_t *buf_size){
             paswd->pw_dir,GLOBAL_CONFIG_NAME
         );
 
-        if(get_path_type(tmp_config_path) == PATH_TYPE_DIR){
+        if(get_path_type(tmp_config_path) == PATH_TYPE_DIR)
+        {
             *buf = strdup(tmp_config_path);
             *buf_size = strlen(tmp_config_path);
             return 0;
         }
     }
-    
-
+    return -1;
 }

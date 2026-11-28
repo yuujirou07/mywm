@@ -38,5 +38,6 @@ enum path_type get_path_type(const char *path);
 
 enum path_type get_path_type(const char *path);
 
+int get_editor_config_home(const char **buf, size_t *buf_size);
 
 #endif
