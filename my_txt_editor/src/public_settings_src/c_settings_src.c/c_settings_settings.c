@@ -238,8 +238,6 @@ int check_user_settings_event(struct editor_input_context *ctx){
             check_input_handle(ctx,tmp_key_data_arry[tmp_key_data_arry_num - 1].key);
         }
     }
-    
-
 
     return 0;
 }
