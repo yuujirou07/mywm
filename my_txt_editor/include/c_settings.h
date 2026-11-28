@@ -5,6 +5,10 @@
 #include "public_data/c_settings/c_settings_setting.h"
 #include "editor_types.h"
 
+
+
+#define C_SETTINGS_FILE_ROOT_PATH_NAME "settings.c"
+
 struct editor_input_context;
 
 

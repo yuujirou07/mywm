@@ -181,14 +181,30 @@ int destroy_key_input_event_handle(struct editor_input_context *ctx){
 // add_dl_pathで登録したパスのうち、まだハンドルを持たない次の添字(=ハンドル件数)のものをdlopenする。
 // 返り値: 読込ハンドル、未登録・パス不正・読込失敗はNULL。成功したハンドルは呼び出し側がdlcloseする。
 static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
-    size_t idx = ctx->dl_data.dl_handle_data.dl_handles_list_num;
+    const size_t idx = ctx->dl_data.dl_handle_data.dl_handles_list_num;
+    const char **dl_path_list = ctx->dl_data.dl_load_path_data.loading_dl_lib; 
     if(ctx->dl_data.dl_load_path_data.loading_dl_lib == NULL ||
         idx >= ctx->dl_data.dl_load_path_data.now_loading_lib_num){
         error_log_("no settings library path to load");
         return NULL;
     }
 
-    const char *obj_path = ctx->dl_data.dl_load_path_data.loading_dl_lib[idx];
+    const char *obj_path = NULL;
+
+
+    for(size_t i = 0;i < idx;i++){
+        const char *last_slash = strrchr(dl_path_list[i],'/');
+        if(last_slash == NULL){
+            char settings_c_file_path_error[ERROR_MSG_SIZE_MAX_];
+            snprintf(
+                settings_c_file_path_error,
+                ERROR_MSG_SIZE_MAX_,
+                "Settings C file path error FILE NAME = %s\n",
+                dl_path_list[i]);
+            error_log_(settings_c_file_path_error);
+        }
+    }
+
 
     struct stat st;
     if(stat(obj_path, &st) != 0 || !S_ISREG(st.st_mode)){
