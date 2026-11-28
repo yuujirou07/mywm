@@ -2,6 +2,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include<sys/stat.h>
 
 
@@ -123,4 +125,53 @@ enum path_type get_path_type(const char *path){
         return PATH_TYPE_SOCK;
     }
     return PATH_TYPE_UNKOWN;
+}
+
+
+#ifndef EDITOR_DEV_MODE
+// pathが存在するディレクトリなら1、それ以外は0。
+static int is_dir(const char *path){
+    struct stat st;
+    return stat(path,&st) == 0 && S_ISDIR(st.st_mode);
+}
+#endif
+
+char *editor_config_path(char *buf, size_t buf_size, const char *relative){
+    if(buf == NULL || buf_size == 0 || relative == NULL){
+        return NULL;
+    }
+
+    char dir[PATH_MAX];
+    dir[0] = NUL_;
+
+#ifndef EDITOR_DEV_MODE
+    const char *env = getenv("MY_TXT_EDITOR_CONFIG");
+    const char *xdg = getenv("XDG_CONFIG_HOME");
+    const char *home = getenv("HOME");
+    if(env != NULL && *env != NUL_ && is_dir(env)){
+        snprintf(dir,sizeof(dir),"%s",env);
+    }
+    else if(xdg != NULL && *xdg != NUL_){
+        snprintf(dir,sizeof(dir),"%s/my_txt_editor",xdg);
+    }
+    else if(home != NULL && *home != NUL_){
+        snprintf(dir,sizeof(dir),"%s/.config/my_txt_editor",home);
+    }
+    if(dir[0] != NUL_ && !is_dir(dir)){
+        dir[0] = NUL_;
+    }
+#endif
+
+    if(dir[0] == NUL_){
+        // DEVビルド、または候補が無い場合は実行ファイル基準のeditor_settings/
+        if(editor_path_from_exe_dir(dir,sizeof(dir),"editor_settings") == NULL){
+            return NULL;
+        }
+    }
+
+    int written = snprintf(buf,buf_size,"%s/%s",dir,relative);
+    if(written < 0 || (size_t)written >= buf_size){
+        return NULL;
+    }
+    return buf;
 }
