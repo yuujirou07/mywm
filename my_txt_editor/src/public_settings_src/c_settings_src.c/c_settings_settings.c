@@ -189,23 +189,22 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
         return NULL;
     }
 
-    const char *obj_path = NULL;
-
     
-
-
-    
-    int i = strcmp(last_slash + 1,FIRST_LOAD_SETTINGS_C_FILE_NAME);
-    if(i == 0){
-        obj_path = dl_path_list[i];
-        break;
-    }
-    
+    char *obj_path = NULL;
+    editor_path_from_config_home(obj_path,0,SO_DIR_);
     
     if(obj_path == NULL){
-        error_log_("can not found settings obj first load file");
+        error_log_("obj path error");
         return NULL;
     }
+    
+    if(get_path_type(obj_path) != PATH_TYPE_DIR){
+        error_log_("caan not found settings directory");
+        return NULL;
+    }
+    
+    
+    
 
 
     struct stat st;
@@ -323,7 +322,7 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
 
         // 基準ディレクトリはPATH_MAXで必ず収まるので固定配列で取り、結合後の文字列だけ必要な長さで確保する
         char base_dir[PATH_MAX];
-        if(editor_path_from_config_home(base_dir,sizeof(base_dir),EDITOR_SETTINGS_DIR_) == NULL){
+        if(editor_path_from_config_home(base_dir,sizeof(base_dir),EDITOR_SETTINGS_DIR_) != 0){
             wrp_stderr_puts_("can not get settings dir");
             return -1;
         }

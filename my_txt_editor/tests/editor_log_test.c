@@ -42,8 +42,8 @@ int main(void){
     char log_abs_path[PATH_MAX];
     char read_buf[1024];
 
-    CHECK_(editor_path_from_config_home(error_abs_path,sizeof(error_abs_path),TEST_ERROR_LOG_PATH_) != NULL);
-    CHECK_(editor_path_from_config_home(log_abs_path,sizeof(log_abs_path),TEST_LOG_PATH_) != NULL);
+    CHECK_(editor_path_from_config_home(error_abs_path,sizeof(error_abs_path),TEST_ERROR_LOG_PATH_) == 0);
+    CHECK_(editor_path_from_config_home(log_abs_path,sizeof(log_abs_path),TEST_LOG_PATH_) == 0);
     remove(error_abs_path);
 
     // editor_log内のerror_logはerror_fileが無いとexitするので、先に設定する。

@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
         if(result == 0){
             if(editor_path_from_config_home(startuptime_log_file_path_name,sizeof(startuptime_log_file_path_name),
-                        EDITOR_LOG_DIR_ "/startuptime_log.log") != NULL){
+                        EDITOR_LOG_DIR_ "/startuptime_log.log") == 0){
                 startup_timer = 1;
             }
             else{
@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
     // スタートメニューは共有ライブラリ(プラグイン)として実行時に読み込む。
     if(state.settings_data->show_start_menu){
         char plugin_path[PATH_MAX];
-        if(editor_path_from_config_home(plugin_path, sizeof(plugin_path), START_MENU_SO_PATH_) != NULL){
+        if(editor_path_from_config_home(plugin_path, sizeof(plugin_path), START_MENU_SO_PATH_) == 0){
             handle = dlopen(plugin_path, RTLD_NOW);
         }
         //スタートメニューsoファイルが見つからないならエラーを出す

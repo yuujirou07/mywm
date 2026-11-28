@@ -27,7 +27,7 @@ int load_icon_data(const char *relative_path,icon_data *icon_data_ptr){
     if(relative_path == NULL)return -1;
 
     char path[PATH_MAX];
-    if(editor_path_from_config_home(path,sizeof(path),relative_path) == NULL){
+    if(editor_path_from_config_home(path,sizeof(path),relative_path) != 0){
         error_log_("can not resolve icon file path");
         return -1;
     }

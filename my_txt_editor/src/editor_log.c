@@ -23,7 +23,7 @@ int set_error_log_file(const char *relative_path){
     }
 
     char file_path[PATH_MAX];
-    if(editor_path_from_config_home(file_path,sizeof(file_path),relative_path) == NULL){
+    if(editor_path_from_config_home(file_path,sizeof(file_path),relative_path) != 0){
         wrp_stderr_puts_("can not resolve error_file path");
         return -1;
     }
@@ -58,7 +58,7 @@ int set_log_file(const char *relative_path){
     }
 
     char log_file_path[PATH_MAX];
-    if(editor_path_from_config_home(log_file_path,sizeof(log_file_path),relative_path) == NULL){
+    if(editor_path_from_config_home(log_file_path,sizeof(log_file_path),relative_path) != 0){
         error_log_("can not resolve log file path");
         wrp_stderr_puts_("can not resolve log file path");
         return -1;

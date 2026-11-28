@@ -78,7 +78,7 @@ const key_data *KL_GetLog(struct editor_state *state,size_t *n){
 int KL_open_key_log_file(const char *relative_path){
     if(key_log_file == NULL){
         char path[PATH_MAX];
-        if(editor_path_from_config_home(path,sizeof(path),relative_path) == NULL){
+        if(editor_path_from_config_home(path,sizeof(path),relative_path) != 0){
             error_log_("can not resolve key log file path");
             return -1;
         }

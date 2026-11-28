@@ -32,7 +32,9 @@
 
 
 
-char *editor_path_from_config_home(char *buf, size_t buf_size, const char *relative);
+// resolve_dir()の基準ディレクトリにrelativeを連結してbufへ書く。
+// 返り値: 成功0、buf_size不足なら必要バイト数(終端含む・正)、引数不正・基準の取得失敗は-1。
+int editor_path_from_config_home(char *buf, size_t buf_size, const char *relative);
 
 int get_self_path(char *path,size_t s);
 char *get_path_dirname(char *path);

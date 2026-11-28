@@ -15,10 +15,11 @@ static int resolve_dir(const char **buf, size_t *buf_size);
 
 // resolve_dir()が返すディレクトリを基準に、relativeを連結してbuf_sizeバイトのbufへ書く。
 // 基準は、EDITOR_DEV_MODEなら実行ファイル(build/main)の1つ上=プロジェクト直下、通常ビルドなら設定ディレクトリ。
-// 返り値: 成功時buf、引数不正・基準の取得失敗・長さ超過はNULL。bufは呼び出し側所有で、プラグイン内でも本体が基準。
-char *editor_path_from_config_home(char *buf, size_t buf_size, const char *relative){
+// 返り値: 成功0、buf_size不足なら必要バイト数(終端含む・正)、引数不正・基準の取得失敗は-1。
+// bufは呼び出し側所有で、プラグイン内でも本体が基準。
+int editor_path_from_config_home(char *buf, size_t buf_size, const char *relative){
     if(buf == NULL || buf_size == 0 || relative == NULL){
-        return NULL;
+        return -1;
     }
 
     const char *base_dir = NULL;
@@ -26,19 +27,28 @@ char *editor_path_from_config_home(char *buf, size_t buf_size, const char *relat
     if(resolve_dir(&base_dir,&base_dir_len) != 0){
         wrp_stderr_puts_("failed resolve dir");
         error_log_("failed resolve dir");
-        return NULL;
+        return -1;
     }
 
-    if(base_dir_len + strlen(relative) + 1 > buf_size){
-        return NULL;
-    }
+    // 基準 + '/' + relative + 終端'\0' の合計を必要バイト数とする
+    const size_t need_len = base_dir_len + 1 + strlen(relative) + 1;
 
-    int written = snprintf(buf, buf_size, "%s/%s", base_dir, relative);
+    if(need_len > buf_size){
+        free((void *)base_dir);
+        return (int)need_len;
+    }
+    char *tmp_buff = NULL;
+    int written = snprintf(tmp_buff, buf_size, "%s/%s", base_dir, relative);
     free((void *)base_dir);
-    if(written < 0 || (size_t)written >= buf_size){
-        return NULL;
+
+    if(buf_size == 0){
+        buf = strdup(tmp_buff);
+        return 0;
     }
-    return buf;
+    else if(written < 0 || (size_t)written >= buf_size){
+        return -1;
+    }
+    return 0;
 }
 
 
