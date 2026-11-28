@@ -128,7 +128,7 @@ enum path_type get_path_type(const char *path){
 
 
 
-char set_editor_config_path(char *buf, size_t buf_size){
+char set_editor_config_path(char *buf, size_t *buf_size){
     
 
 }
