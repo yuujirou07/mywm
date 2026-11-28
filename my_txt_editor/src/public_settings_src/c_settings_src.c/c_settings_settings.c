@@ -203,15 +203,19 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
         return NULL;
     }
     
-    
-    
-
-
-    struct stat st;
-    if(stat(obj_path, &st) != 0 || !S_ISREG(st.st_mode)){
-        error_log_("can not found settings obj file");
+    DIR *obj_path_DIR = opendir(obj_path);
+    if(obj_path_DIR == NULL){
+        error_log_("obj path error");
         return NULL;
+    } 
+    
+    for(size_t i = 0;i < idx;i++){
+        
+
+
     }
+
+
 
     void *handle = dlopen(obj_path,RTLD_NOW | RTLD_GLOBAL);
     if(handle == NULL){
