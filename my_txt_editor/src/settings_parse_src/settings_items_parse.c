@@ -28,7 +28,7 @@ static settinge_value_type cmb_value_str_to_enum(cJSON *value_type_item){
 // 引数: settings_screen_data=項目配列と件数を保持する設定画面データ。 返り値: 成功時0、ファイル・JSON・必須項目・メモリ確保の失敗時-1。 所有権: nameとexplanationを複製し、追加成功後はsettings_screen_dataが所有する。
 int load_settings_screen_items(settings_screen_data *settings_screen_data){
     char path[PATH_MAX];
-    if(editor_path_from_exe_dir(path,sizeof(path),SETTINGS_ITEMS_PATH_) == NULL)return -1;
+    if(editor_path_from_config_home(path,sizeof(path),SETTINGS_ITEMS_PATH_) == NULL)return -1;
 
     char *buf = read_file_all(path);
     if(buf == NULL)return -1;

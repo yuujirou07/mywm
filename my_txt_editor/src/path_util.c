@@ -16,7 +16,7 @@ static int resolve_dir(const char **buf, size_t *buf_size);
 // resolve_dir()が返すディレクトリを基準に、relativeを連結してbuf_sizeバイトのbufへ書く。
 // 基準は、EDITOR_DEV_MODEなら実行ファイル(build/main)の1つ上=プロジェクト直下、通常ビルドなら設定ディレクトリ。
 // 返り値: 成功時buf、引数不正・基準の取得失敗・長さ超過はNULL。bufは呼び出し側所有で、プラグイン内でも本体が基準。
-char *editor_path_from_exe_dir(char *buf, size_t buf_size, const char *relative){
+char *editor_path_from_config_home(char *buf, size_t buf_size, const char *relative){
     if(buf == NULL || buf_size == 0 || relative == NULL){
         return NULL;
     }

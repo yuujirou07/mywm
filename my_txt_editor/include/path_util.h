@@ -10,7 +10,7 @@
 
 
 #ifdef EDITOR_DEV_MODE
-    // my_txt_editor/直下からの相対パス(editor_path_from_exe_dirへ渡す)
+    // my_txt_editor/直下からの相対パス(editor_path_from_config_homeへ渡す)
     #define SO_DIR_ "editor_settings/so_file"
     #define LOG_DIR_ "log_data"
     #define START_MENU_SO_PATH_ SO_DIR_ "/start_menu_plug.so"
@@ -30,7 +30,7 @@
 
 
 
-char *editor_path_from_exe_dir(char *buf, size_t buf_size, const char *relative);
+char *editor_path_from_config_home(char *buf, size_t buf_size, const char *relative);
 
 int get_self_path(char *path,size_t s);
 char *get_path_dirname(char *path);

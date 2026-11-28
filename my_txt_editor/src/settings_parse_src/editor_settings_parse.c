@@ -18,7 +18,7 @@ static bool json_int_in_range(const cJSON *item, int min, int max){
 // 返り値: なし。ファイル読込・JSON解析失敗は元の設定を保持し、個別に不正な値は読み飛ばす。
 void load_custom_editor_settings(struct editor_settings *settings_data){
     char path[PATH_MAX];
-    if(editor_path_from_exe_dir(path, sizeof(path), EDITOR_SETTINGS_PATH_) == NULL){
+    if(editor_path_from_config_home(path, sizeof(path), EDITOR_SETTINGS_PATH_) == NULL){
         return;
     }
 

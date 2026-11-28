@@ -323,7 +323,7 @@ int add_dl_path(struct editor_input_context *ctx,char *dl_path){
 
         // 基準ディレクトリはPATH_MAXで必ず収まるので固定配列で取り、結合後の文字列だけ必要な長さで確保する
         char base_dir[PATH_MAX];
-        if(editor_path_from_exe_dir(base_dir,sizeof(base_dir),EDITOR_SETTINGS_DIR_) == NULL){
+        if(editor_path_from_config_home(base_dir,sizeof(base_dir),EDITOR_SETTINGS_DIR_) == NULL){
             wrp_stderr_puts_("can not get settings dir");
             return -1;
         }

@@ -109,7 +109,7 @@ void draw_ascii_logo(struct pos screen_mid_pos,struct ascii_data *ascii_data){
 
     FILE *ascii_file = NULL;
     char ascii_path[PATH_MAX];
-    if(editor_path_from_exe_dir(ascii_path, sizeof(ascii_path), ASCII_ART_PATH_) != NULL){
+    if(editor_path_from_config_home(ascii_path, sizeof(ascii_path), ASCII_ART_PATH_) != NULL){
         ascii_file = fopen(ascii_path,"r");
     }
     if(ascii_file == NULL){
