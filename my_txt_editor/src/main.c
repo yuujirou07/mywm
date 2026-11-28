@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
             editor_error_screen(&state,"can not load start menu data");
             error_log_write("sry can not open so file :(\n"); 
         }
-        if(handle != NULL){
+        else{
             start_menu = (Start_Menu)dlsym(handle,"draw_start_menu");
             if(start_menu == NULL){
                 error_log_write("dlsym failed\n");

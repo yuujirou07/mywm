@@ -79,3 +79,4 @@ bool handle_start_menu_input(struct editor_input_context *ctx, wint_t ch){
     my_cur_set(state,true);
     return true;
 }
+
