@@ -132,10 +132,10 @@ enum path_type get_path_type(const char *path){
 char set_editor_config_path(char *buf, size_t *buf_size){
     char *tmp_config_path = NULL;
     
-    tmp_config_path = getenv("$XDG_CONFIG_HOME");
+    tmp_config_path = getenv("XDG_CONFIG_HOME");
     if(tmp_config_path != NULL){
 
     }
 
-    
+
 }
