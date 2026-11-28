@@ -351,6 +351,7 @@ struct ask_make_file_mode_context {
     struct pos screen_center_pos; // 画面中央のx/y座標(画面座標)。
 };
 
+
 // 読み込んだ共有ライブラリのdlopenハンドル配列。
 // dl_handles_list_numが使用数、dl_handles_list_allocate_numが確保数。
 typedef struct{
