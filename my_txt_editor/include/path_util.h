@@ -8,6 +8,7 @@
 //自分の実行可能データのシンボリックリンク
 #define SELF_SIM_LINK_ "/proc/self/exe"
 
+
 #ifdef EDITOR_DEV_MODE
     // my_txt_editor/直下からの相対パス(editor_path_from_exe_dirへ渡す)
     #define SO_DIR_ "editor_settings/so_file/"
@@ -23,6 +24,13 @@
     #define EDITOR_LOG_DATA_ "log_data/editor_log.log"
     
 #endif
+
+
+static const char *const config_env_try_macro[] = {
+    "$XDG_CONFIG_HOME",
+    "$HOME"
+};
+
 
 char *editor_path_from_exe_dir(char *buf, size_t buf_size, const char *relative);
 
