@@ -233,6 +233,7 @@ static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
         return NULL;
     }
 
+
     void *handle = dlopen(obj_path,RTLD_NOW | RTLD_GLOBAL);
     if(handle == NULL){
         error_log_("can not load settings library");
