@@ -29,6 +29,10 @@ char *editor_path_from_config_home(char *buf, size_t buf_size, const char *relat
         return NULL;
     }
 
+    if(base_dir_len + strlen(relative) + 1 > buf_size){
+        return NULL;
+    }
+
     int written = snprintf(buf, buf_size, "%s/%s", base_dir, relative);
     free((void *)base_dir);
     if(written < 0 || (size_t)written >= buf_size){
