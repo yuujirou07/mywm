@@ -131,13 +131,13 @@ int load_icon_data(const char *relative_path,icon_data *icon_data_ptr){
 
 // file_extの実在パスを調べ、ディレクトリまたはシンボリックリンクならフォルダ用、それ以外はicon_data_ptrの拡張子対応・既定の順でアイコンを返す。
 // 返値は借用文字列で解放不可。対応表内の返値は表の解放で無効になる。stat失敗時は拡張子対応・既定へ進む。
-const char *get_file_ext_code(char *file_ext,icon_data *icon_data_ptr){
+const char *get_file_ext_code(const char *file_ext,icon_data *icon_data_ptr){
 
     struct stat state;
     // "\uf07b" = フォルダのアイコン(Nerd Font: nf-fa-folder)
     if(stat(file_ext,&state) == 0 && ((S_ISDIR(state.st_mode) != 0 || S_ISLNK(state.st_mode) != 0)))return "\uf07b";
 
-    char *lastslash = strrchr(file_ext,'/');
+    const char *lastslash = strrchr(file_ext,'/');
     //パスの途中の.を拾う可能性があるため、最後の/以降の.から拡張子を判断する
     if(lastslash != NULL){
         file_ext = lastslash;
@@ -146,7 +146,7 @@ const char *get_file_ext_code(char *file_ext,icon_data *icon_data_ptr){
     // "\uef4c" = 横線が並んだアイコン(Nerd Font: nf-fa-grip_lines)。拡張子が不明なときの既定アイコン
     const char *return_code = "\u2630";
     for(int i = 0;i < icon_data_ptr->icon_lib_num;i++){
-        char *ext_dot_ptr = strrchr(file_ext,'.');
+        const char *ext_dot_ptr = strrchr(file_ext,'.');
         if(ext_dot_ptr == NULL){
             
             return return_code;
