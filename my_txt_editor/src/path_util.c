@@ -130,13 +130,16 @@ enum path_type get_path_type(const char *path){
 
 
 
-int get_editor_config_home(const char **buf, size_t *buf_size){
-
-    #ifdef EDITOR_DEV_MODE
-    
-        return 0;
-    #endif
-
+#ifdef EDITOR_DEV_MODE
+// 開発用: 設定ディレクトリは解決せず、何も書き込まずに0を返す。
+static int resolve_dir(const char **buf, size_t *buf_size){
+    (void)buf;
+    (void)buf_size;
+    return 0;
+}
+#else
+// 通常用: $XDG_CONFIG_HOME、無ければホームディレクトリ配下の設定ディレクトリを解決する。
+static int resolve_dir(const char **buf, size_t *buf_size){
     const char *tmp_config_path = NULL;
     
     tmp_config_path = getenv("XDG_CONFIG_HOME");
@@ -169,4 +172,10 @@ int get_editor_config_home(const char **buf, size_t *buf_size){
         }
     }
     return -1;
+}
+#endif
+
+
+int get_editor_config_home(const char **buf, size_t *buf_size){
+    return resolve_dir(buf, buf_size);
 }
