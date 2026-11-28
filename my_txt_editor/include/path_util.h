@@ -8,6 +8,8 @@
 //自分の実行可能データのシンボリックリンク
 #define SELF_SIM_LINK_ "/proc/self/exe"
 
+#define GLOBAL_CONFIG_NAME ".config/my_txt_editor"
+
 
 #ifdef EDITOR_DEV_MODE
     // my_txt_editor/直下からの相対パス(editor_path_from_config_homeへ渡す)
@@ -25,7 +27,6 @@
     
 #endif
 
-#define GLOBAL_CONFIG_NAME ".config/my_txt_editor"
 
 
 
