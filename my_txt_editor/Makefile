@@ -4,7 +4,7 @@ CFLAGS ?= -Wall -Wextra -g3 -O0
 # gdb用: 環境変数CFLAGSで上書きされても必ず付くよう += で足す
 CFLAGS += -ggdb3 -O0 -fno-inline -fno-omit-frame-pointer
 CFLAGS += -fsanitize=address
-CFLAGS += -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600 -I./include -I./include/lsp_src
+CFLAGS += -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600 -DEDITOR_DEV_MODE -I./include -I./include/lsp_src
 
 LDLIBS := -lcjson -lncursesw -ldl -lm
 
