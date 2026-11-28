@@ -182,7 +182,7 @@ int destroy_key_input_event_handle(struct editor_input_context *ctx){
 // 返り値: 読込ハンドル、未登録・パス不正・読込失敗はNULL。成功したハンドルは呼び出し側がdlcloseする。
 static void *load_current_settings_obj_c_file(struct editor_input_context *ctx){
     const size_t idx = ctx->dl_data.dl_handle_data.dl_handles_list_num;
-    const char **dl_path_list = ctx->dl_data.dl_load_path_data.loading_dl_lib; 
+    char **dl_path_list = ctx->dl_data.dl_load_path_data.loading_dl_lib; 
     if(ctx->dl_data.dl_load_path_data.loading_dl_lib == NULL ||
         idx >= ctx->dl_data.dl_load_path_data.now_loading_lib_num){
         error_log_("no settings library path to load");
